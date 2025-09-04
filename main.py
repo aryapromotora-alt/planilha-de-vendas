@@ -41,6 +41,18 @@ def serve(path):
         else:
             return "index.html not found", 404
 
+from flask import render_template
+
+@app.route('/tv')
+def tv_page():
+    # Aqui você busca os dados reais do sistema
+    # Exemplo fictício — substitua com sua lógica real
+    dados = [
+        {"nome": "João", "seg": 500, "ter": 300, "qua": 400, "qui": 250, "sex": 600, "total": 2050},
+        {"nome": "Maria", "seg": 600, "ter": 450, "qua": 500, "qui": 300, "sex": 700, "total": 2550},
+        # ... mais vendedores
+    ]
+    return render_template('tv.html', dados=dados)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
