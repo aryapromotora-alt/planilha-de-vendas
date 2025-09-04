@@ -41,28 +41,27 @@ def serve(path):
         else:
             return "index.html not found", 404
 
-from flask import render_template
-from flask import request, session, redirect
+from flask import render_template, request, session, redirect
+from src.routes.data import load_data  # importa a função que carrega os dados reais
 
-@app.before_request
-def verificar_login():
-    # Liberar rota /tv sem login
-    rotas_livres = ['tv_page', 'static', 'serve']  # 'serve' é sua rota de arquivos estáticos
-
-    if request.endpoint in rotas_livres:
-        return
-
-    if 'user' not in session:
-        return redirect('/login')
 @app.route('/tv')
 def tv_page():
-    # Aqui você busca os dados reais do sistema
-    # Exemplo fictício — substitua com sua lógica real
-    dados = [
-        {"nome": "João", "seg": 500, "ter": 300, "qua": 400, "qui": 250, "sex": 600, "total": 2050},
-        {"nome": "Maria", "seg": 600, "ter": 450, "qua": 500, "qui": 300, "sex": 700, "total": 2550},
-        # ... mais vendedores
-    ]
+    data = load_data()
+    spreadsheet = data.get("spreadsheetData", {})
+    
+    dados = []
+    for nome, valores in spreadsheet.items():
+        total = sum(valores.values())
+        dados.append({
+            "nome": nome,
+            "seg": valores.get("monday", 0),
+            "ter": valores.get("tuesday", 0),
+            "qua": valores.get("wednesday", 0),
+            "qui": valores.get("thursday", 0),
+            "sex": valores.get("friday", 0),
+            "total": total
+        })
+    
     return render_template('tv.html', dados=dados)
 
 if __name__ == '__main__':
