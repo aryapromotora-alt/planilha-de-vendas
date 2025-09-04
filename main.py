@@ -42,7 +42,18 @@ def serve(path):
             return "index.html not found", 404
 
 from flask import render_template
+from flask import request, session, redirect
 
+@app.before_request
+def verificar_login():
+    # Liberar rota /tv sem login
+    rotas_livres = ['tv_page', 'static', 'serve']  # 'serve' é sua rota de arquivos estáticos
+
+    if request.endpoint in rotas_livres:
+        return
+
+    if 'user' not in session:
+        return redirect('/login')
 @app.route('/tv')
 def tv_page():
     # Aqui você busca os dados reais do sistema
