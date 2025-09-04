@@ -48,21 +48,41 @@ from src.routes.data import load_data  # importa a função que carrega os dados
 def tv_page():
     data = load_data()
     spreadsheet = data.get("spreadsheetData", {})
-    
+
     dados = []
+    totais_diarios = {
+        "seg": 0,
+        "ter": 0,
+        "qua": 0,
+        "qui": 0,
+        "sex": 0
+    }
+
     for nome, valores in spreadsheet.items():
-        total = sum(valores.values())
+        seg = valores.get("monday", 0)
+        ter = valores.get("tuesday", 0)
+        qua = valores.get("wednesday", 0)
+        qui = valores.get("thursday", 0)
+        sex = valores.get("friday", 0)
+        total = seg + ter + qua + qui + sex
+
         dados.append({
             "nome": nome,
-            "seg": valores.get("monday", 0),
-            "ter": valores.get("tuesday", 0),
-            "qua": valores.get("wednesday", 0),
-            "qui": valores.get("thursday", 0),
-            "sex": valores.get("friday", 0),
+            "seg": seg,
+            "ter": ter,
+            "qua": qua,
+            "qui": qui,
+            "sex": sex,
             "total": total
         })
-    
-    return render_template('tv.html', dados=dados)
+
+        totais_diarios["seg"] += seg
+        totais_diarios["ter"] += ter
+        totais_diarios["qua"] += qua
+        totais_diarios["qui"] += qui
+        totais_diarios["sex"] += sex
+
+    return render_template('tv.html', dados=dados, totais_diarios=totais_diarios)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
