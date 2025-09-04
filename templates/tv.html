@@ -2,36 +2,45 @@
 <html>
 <head>
   <title>Visão TV</title>
-  <meta http-equiv="refresh" content="60"> <!-- Atualiza a cada 60 segundos -->
-  <style>
-    body { font-family: Arial; font-size: 24px; background: #000; color: #fff; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 10px; }
-  </style>
+  <meta http-equiv="refresh" content="60">
+  <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body>
-  <h1>Resumo de Vendas</h1>
-  <table>
-    <tr>
-      <th>Vendedor</th>
-      <th>Segunda</th>
-      <th>Terça</th>
-      <th>Quarta</th>
-      <th>Quinta</th>
-      <th>Sexta</th>
-      <th>Total</th>
-    </tr>
-    {% for linha in dados %}
-    <tr>
-      <td>{{ linha.nome }}</td>
-      <td>{{ linha.seg }}</td>
-      <td>{{ linha.ter }}</td>
-      <td>{{ linha.qua }}</td>
-      <td>{{ linha.qui }}</td>
-      <td>{{ linha.sex }}</td>
-      <td>{{ linha.total }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+<body class="main-container">
+  <div class="header">
+    <h1>Resumo de Vendas</h1>
+  </div>
+
+  <div class="spreadsheet-container">
+    <table class="spreadsheet-table">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Segunda</th>
+          <th>Terça</th>
+          <th>Quarta</th>
+          <th>Quinta</th>
+          <th>Sexta</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for linha in dados %}
+        <tr>
+          <td class="employee-name">{{ linha.nome }}</td>
+          <td>{{ linha.seg }}</td>
+          <td>{{ linha.ter }}</td>
+          <td>{{ linha.qua }}</td>
+          <td>{{ linha.qui }}</td>
+          <td>{{ linha.sex }}</td>
+          <td class="total-cell">{{ linha.total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <span>Atualizado automaticamente a cada 60 segundos</span>
+  </div>
 </body>
 </html>
