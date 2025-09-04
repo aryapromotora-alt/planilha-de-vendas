@@ -37,6 +37,17 @@
           <td class="total-cell">{{ linha.total }}</td>
         </tr>
         {% endfor %}
+
+        <!-- Linha de Total Diário -->
+        <tr class="daily-totals">
+          <td><strong>Total Diário</strong></td>
+          <td>{{ totais_diarios.seg }}</td>
+          <td>{{ totais_diarios.ter }}</td>
+          <td>{{ totais_diarios.qua }}</td>
+          <td>{{ totais_diarios.qui }}</td>
+          <td>{{ totais_diarios.sex }}</td>
+          <td>{{ totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex }}</td>
+        </tr>
       </tbody>
     </table>
   </div>
