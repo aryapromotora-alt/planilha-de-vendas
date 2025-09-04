@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilha de Vendas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Seção de Login -->
+    <div id="login-section" class="login-container">
+        <div class="login-form">
+            <h2>Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Usuário:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Seção Principal -->
+    <div id="main-section" class="main-container" style="display: none;">
+        <header class="header">
+            <h1>Planilha de Vendas</h1>
+            <div class="header-buttons">
+                <button id="logout-btn">Sair</button>
+                <button id="admin-panel-btn" style="display: none;">Painel Admin</button>
+            </div>
+        </header>
+
+        <!-- Tabela da Planilha -->
+        <div class="spreadsheet-container">
+            <table id="spreadsheet" class="spreadsheet-table">
+                <thead>
+                    <tr>
+                        <th>VENDEDOR</th>
+                        <th>SEGUNDA</th>
+                        <th>TERÇA</th>
+                        <th>QUARTA</th>
+                        <th>QUINTA</th>
+                        <th>SEXTA</th>
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody id="employee-rows">
+                    <!-- Linhas dos funcionários serão inseridas aqui via JavaScript -->
+                </tbody>
+                <tfoot>
+                    <tr class="daily-totals">
+                        <td><strong>TOTAL DIÁRIO</strong></td>
+                        <td id="monday-total">R$ 0,00</td>
+                        <td id="tuesday-total">R$ 0,00</td>
+                        <td id="wednesday-total">R$ 0,00</td>
+                        <td id="thursday-total">R$ 0,00</td>
+                        <td id="friday-total">R$ 0,00</td>
+                        <td id="week-total">R$ 0,00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <!-- Rodapé com informação do usuário -->
+        <footer class="footer">
+            <span id="logged-user"></span>
+        </footer>
+    </div>
+
+    <!-- Painel de Administração -->
+    <div id="admin-section" class="admin-container" style="display: none;">
+        <div class="admin-panel">
+            <h2>Painel de Administração</h2>
+            
+            <!-- Aba de Gerenciar Funcionários -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="manage-employees">Gerenciar Vendedores</button>
+                <button class="tab-btn" data-tab="add-employee">Adicionar Vendedor</button>
+            </div>
+
+            <!-- Conteúdo da aba Gerenciar Vendedores -->
+            <div id="manage-employees" class="tab-content active">
+                <h3>Vendedores Cadastrados</h3>
+                <div class="employee-list">
+                    <ul id="employee-management-list">
+                        <!-- Lista de vendedores será inserida aqui -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Conteúdo da aba Adicionar Vendedor -->
+            <div id="add-employee" class="tab-content">
+                <h3>Adicionar Novo Vendedor</h3>
+                <form id="add-employee-form">
+                    <div class="form-group">
+                        <label for="new-employee-name">Nome do Vendedor:</label>
+                        <input type="text" id="new-employee-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-employee-password">Senha:</label>
+                        <input type="password" id="new-employee-password" name="password" required>
+                    </div>
+                    <button type="submit">Adicionar Vendedor</button>
+                </form>
+            </div>
+
+            <div class="admin-actions">
+                <button id="back-to-main">Voltar à Planilha</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

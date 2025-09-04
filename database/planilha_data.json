@@ -1,0 +1,83 @@
+{
+  "employees": [
+    {
+      "name": "Anderson",
+      "password": "123"
+    },
+    {
+      "name": "Vitoria",
+      "password": "123"
+    },
+    {
+      "name": "Jemima",
+      "password": "123"
+    },
+    {
+      "name": "Maiany",
+      "password": "123"
+    },
+    {
+      "name": "Fernanda",
+      "password": "123"
+    },
+    {
+      "name": "Nadia",
+      "password": "123"
+    },
+    {
+      "name": "Giovana",
+      "password": "123"
+    }
+  ],
+  "spreadsheetData": {
+    "Anderson": {
+      "friday": 0,
+      "monday": 150.5,
+      "thursday": 0,
+      "tuesday": 0,
+      "wednesday": 0
+    },
+    "Fernanda": {
+      "friday": 0,
+      "monday": 0,
+      "thursday": 0,
+      "tuesday": 0,
+      "wednesday": 0
+    },
+    "Giovana": {
+      "friday": 0,
+      "monday": 0,
+      "thursday": 0,
+      "tuesday": 0,
+      "wednesday": 0
+    },
+    "Jemima": {
+      "friday": 0,
+      "monday": 0,
+      "thursday": 0,
+      "tuesday": 0,
+      "wednesday": 0
+    },
+    "Maiany": {
+      "friday": 0,
+      "monday": 0,
+      "thursday": 0,
+      "tuesday": 0,
+      "wednesday": 0
+    },
+    "Nadia": {
+      "friday": 0,
+      "monday": 0,
+      "thursday": 0,
+      "tuesday": 0,
+      "wednesday": 0
+    },
+    "Vitoria": {
+      "friday": 0,
+      "monday": 0,
+      "thursday": 0,
+      "tuesday": 0,
+      "wednesday": 0
+    }
+  }
+}
