@@ -65,6 +65,7 @@ def tv_page():
         qui = valores.get("thursday", 0)
         sex = valores.get("friday", 0)
         total = seg + ter + qua + qui + sex
+        ordem = valores.get("ordem", 999)  # se não tiver ordem definida, vai pro final
 
         dados.append({
             "nome": nome,
@@ -73,7 +74,8 @@ def tv_page():
             "qua": qua,
             "qui": qui,
             "sex": sex,
-            "total": total
+            "total": total,
+            "ordem": ordem
         })
 
         totais_diarios["seg"] += seg
@@ -81,6 +83,9 @@ def tv_page():
         totais_diarios["qua"] += qua
         totais_diarios["qui"] += qui
         totais_diarios["sex"] += sex
+
+    # ordena dinamicamente pela ordem definida no painel
+    dados = sorted(dados, key=lambda x: x["ordem"])
 
     return render_template('tv.html', dados=dados, totais_diarios=totais_diarios)
 
