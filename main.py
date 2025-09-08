@@ -57,8 +57,7 @@ def tv_page():
         "qui": 0,
         "sex": 0
     }
-
-    for nome, valores in spreadsheet.items():
+for nome, valores in spreadsheet.items():
     seg = valores.get("monday", 0)
     ter = valores.get("tuesday", 0)
     qua = valores.get("wednesday", 0)
