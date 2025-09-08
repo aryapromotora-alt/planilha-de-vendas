@@ -59,30 +59,34 @@ def tv_page():
     }
 
     for nome, valores in spreadsheet.items():
-        seg = valores.get("monday", 0)
-        ter = valores.get("tuesday", 0)
-        qua = valores.get("wednesday", 0)
-        qui = valores.get("thursday", 0)
-        sex = valores.get("friday", 0)
-        total = seg + ter + qua + qui + sex
-        ordem = valores.get("ordem", 999)  # se não tiver ordem definida, vai pro final
+    seg = valores.get("monday", 0)
+    ter = valores.get("tuesday", 0)
+    qua = valores.get("wednesday", 0)
+    qui = valores.get("thursday", 0)
+    sex = valores.get("friday", 0)
+    total = seg + ter + qua + qui + sex
 
-        dados.append({
-            "nome": nome,
-            "seg": seg,
-            "ter": ter,
-            "qua": qua,
-            "qui": qui,
-            "sex": sex,
-            "total": total,
-            "ordem": ordem
-        })
+    try:
+        ordem = int(valores.get("ordem", 999))
+    except (ValueError, TypeError):
+        ordem = 999
 
-        totais_diarios["seg"] += seg
-        totais_diarios["ter"] += ter
-        totais_diarios["qua"] += qua
-        totais_diarios["qui"] += qui
-        totais_diarios["sex"] += sex
+    dados.append({
+        "nome": nome,
+        "seg": seg,
+        "ter": ter,
+        "qua": qua,
+        "qui": qui,
+        "sex": sex,
+        "total": total,
+        "ordem": ordem
+    })
+
+    totais_diarios["seg"] += seg
+    totais_diarios["ter"] += ter
+    totais_diarios["qua"] += qua
+    totais_diarios["qui"] += qui
+    totais_diarios["sex"] += sex
 
     # ordena dinamicamente pela ordem definida no painel
     dados = sorted(dados, key=lambda x: x["ordem"])
