@@ -46,9 +46,7 @@
           <td>R$ {{ "%.2f"|format(totais_diarios.qua).replace('.', ',') }}</td>
           <td>R$ {{ "%.2f"|format(totais_diarios.qui).replace('.', ',') }}</td>
           <td>R$ {{ "%.2f"|format(totais_diarios.sex).replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(
-            totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex
-          ).replace('.', ',') }}</td>
+          <td>R$ {{ "%.2f"|format(totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex).replace('.', ',') }}</td>
         </tr>
       </tbody>
     </table>
