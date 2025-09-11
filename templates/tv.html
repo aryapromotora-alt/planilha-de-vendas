@@ -29,26 +29,26 @@
         {% for linha in dados %}
         <tr>
           <td class="employee-name">{{ linha.nome }}</td>
-          <td>R$ {{ "%.2f"|format(linha.seg) }}</td>
-          <td>R$ {{ "%.2f"|format(linha.ter) }}</td>
-          <td>R$ {{ "%.2f"|format(linha.qua) }}</td>
-          <td>R$ {{ "%.2f"|format(linha.qui) }}</td>
-          <td>R$ {{ "%.2f"|format(linha.sex) }}</td>
-          <td class="total-cell">R$ {{ "%.2f"|format(linha.total) }}</td>
+          <td>R$ {{ "%.2f"|format(linha.seg).replace('.', ',') }}</td>
+          <td>R$ {{ "%.2f"|format(linha.ter).replace('.', ',') }}</td>
+          <td>R$ {{ "%.2f"|format(linha.qua).replace('.', ',') }}</td>
+          <td>R$ {{ "%.2f"|format(linha.qui).replace('.', ',') }}</td>
+          <td>R$ {{ "%.2f"|format(linha.sex).replace('.', ',') }}</td>
+          <td class="total-cell">R$ {{ "%.2f"|format(linha.total).replace('.', ',') }}</td>
         </tr>
         {% endfor %}
 
         <!-- Linha de Total Diário -->
         <tr class="daily-totals">
           <td><strong>Total Diário</strong></td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.seg) }}</td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.ter) }}</td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.qua) }}</td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.qui) }}</td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.sex) }}</td>
+          <td>R$ {{ "%.2f"|format(totais_diarios.seg).replace('.', ',') }}</td>
+          <td>R$ {{ "%.2f"|format(totais_diarios.ter).replace('.', ',') }}</td>
+          <td>R$ {{ "%.2f"|format(totais_diarios.qua).replace('.', ',') }}</td>
+          <td>R$ {{ "%.2f"|format(totais_diarios.qui).replace('.', ',') }}</td>
+          <td>R$ {{ "%.2f"|format(totais_diarios.sex).replace('.', ',') }}</td>
           <td>R$ {{ "%.2f"|format(
             totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex
-          ) }}</td>
+          ).replace('.', ',') }}</td>
         </tr>
       </tbody>
     </table>
