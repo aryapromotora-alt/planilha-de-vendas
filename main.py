@@ -22,14 +22,27 @@ app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(data_bp, url_prefix='/api')
 app.register_blueprint(archive_bp, url_prefix='/api')
 
-# Configuração do banco de dados
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# ==========================
+# Configuração do banco
+# ==========================
+db_url = os.getenv("DATABASE_URL")  # Render cria essa variável automaticamente
+if db_url:
+    # Render usa postgres://, mas SQLAlchemy espera postgresql://
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+else:
+    # fallback para SQLite em desenvolvimento local
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
+
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 with app.app_context():
     db.create_all()
 
+# ==========================
 # Rotas
+# ==========================
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
