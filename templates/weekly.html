@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Histórico Semanal</title>
+</head>
+<body>
+  <h1>Histórico Semanal</h1>
+
+  {% if history %}
+    <table border="1" cellpadding="6" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Semana</th>
+          <th>Total da Semana</th>
+          <th>Detalhes por Vendedor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in history %}
+          <tr>
+            <td>{{ week.week_label }}</td>
+            <td>R$ {{ week.total }}</td>
+            <td>
+              <ul>
+                {% for s in week.breakdown %}
+                  <li>{{ s.seller }}: R$ {{ s.total }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Nenhum histórico encontrado.</p>
+  {% endif %}
+
+</body>
+</html>
