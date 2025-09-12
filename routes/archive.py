@@ -6,11 +6,15 @@ from .data import load_data, save_data
 
 archive_bp = Blueprint('archive', __name__)
 
+# Arquivo onde fica salvo o histórico
 HISTORY_FILE = os.path.join(os.path.dirname(__file__), '..', 'database', 'weekly_history.json')
 
 
+# ---------------------------
 # Funções auxiliares
+# ---------------------------
 def load_history():
+    """Carrega histórico do arquivo JSON"""
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
@@ -21,6 +25,7 @@ def load_history():
 
 
 def save_history(history):
+    """Salva histórico no arquivo JSON"""
     try:
         os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
@@ -30,10 +35,17 @@ def save_history(history):
         return False
 
 
-# Rota para arquivar a semana
+# ---------------------------
+# Rota para arquivar semana
+# ---------------------------
 @archive_bp.route('/api/weekly-archive', methods=['POST'])
 def weekly_archive():
-    # segurança com secret key (opcional)
+    """
+    Fecha a semana:
+    - Salva totais no histórico
+    - Zera a planilha
+    """
+    # segurança opcional com secret key
     secret = current_app.config.get('WEEKLY_ARCHIVE_SECRET')
     header = request.headers.get('X-SECRET-KEY')
     if secret and header != secret:
@@ -46,21 +58,23 @@ def weekly_archive():
     per_seller = []
     total = 0
     for nome, valores in spreadsheet.items():
-        seg = valores.get("monday", 0)
-        ter = valores.get("tuesday", 0)
-        qua = valores.get("wednesday", 0)
-        qui = valores.get("thursday", 0)
-        sex = valores.get("friday", 0)
-        soma = seg + ter + qua + qui + sex
+        soma = sum([
+            valores.get("monday", 0),
+            valores.get("tuesday", 0),
+            valores.get("wednesday", 0),
+            valores.get("thursday", 0),
+            valores.get("friday", 0),
+        ])
         total += soma
         per_seller.append({"seller": nome, "total": soma})
 
-    # semana (seg a sex)
+    # intervalo da semana (seg a sex)
     now = datetime.utcnow()
     start = now - timedelta(days=now.weekday())   # segunda
     end = start + timedelta(days=4)               # sexta
     week_label = f"{start.date()} a {end.date()}"
 
+    # salva histórico
     history = load_history()
     history.append({
         "week_label": week_label,
@@ -72,7 +86,7 @@ def weekly_archive():
     })
     save_history(history)
 
-    # zerar planilha
+    # zera planilha
     for nome, valores in spreadsheet.items():
         valores["monday"] = 0
         valores["tuesday"] = 0
@@ -84,10 +98,15 @@ def weekly_archive():
     return jsonify({"status": "ok", "week": week_label, "total": total})
 
 
-# Rota para visualizar o histórico semanal em uma página
+# ---------------------------
+# Rota para visualizar histórico no navegador
+# ---------------------------
 @archive_bp.route('/weekly', methods=['GET'])
 def weekly_page():
+    """
+    Mostra o histórico semanal em uma página HTML
+    """
     history = load_history()
-    # ordena por data mais recente primeiro
+    # ordena do mais recente para o mais antigo
     history = sorted(history, key=lambda x: x.get("created_at", ""), reverse=True)
     return render_template("weekly.html", history=history)
