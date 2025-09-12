@@ -67,8 +67,8 @@
                     <tbody>
                         {% for item in week.breakdown %}
                             <tr>
-                                <td>{{ item.seller }}</td>
-                                <td>R$ {{ item.total }}</td>
+                                <td>{{ item['seller'] }}</td>
+                                <td>R$ {{ item['total'] }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
