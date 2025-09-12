@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Blueprint, jsonify, current_app, request
+from flask import Blueprint, jsonify, current_app, request, render_template
 from datetime import datetime, timedelta
 from .data import load_data, save_data
 
@@ -8,6 +8,8 @@ archive_bp = Blueprint('archive', __name__)
 
 HISTORY_FILE = os.path.join(os.path.dirname(__file__), '..', 'database', 'weekly_history.json')
 
+
+# Funções auxiliares
 def load_history():
     if os.path.exists(HISTORY_FILE):
         try:
@@ -16,6 +18,7 @@ def load_history():
         except (json.JSONDecodeError, IOError):
             return []
     return []
+
 
 def save_history(history):
     try:
@@ -26,6 +29,8 @@ def save_history(history):
     except IOError:
         return False
 
+
+# Rota para arquivar a semana
 @archive_bp.route('/api/weekly-archive', methods=['POST'])
 def weekly_archive():
     # segurança com secret key (opcional)
@@ -77,3 +82,12 @@ def weekly_archive():
     save_data(data)
 
     return jsonify({"status": "ok", "week": week_label, "total": total})
+
+
+# Rota para visualizar o histórico semanal em uma página
+@archive_bp.route('/weekly', methods=['GET'])
+def weekly_page():
+    history = load_history()
+    # ordena por data mais recente primeiro
+    history = sorted(history, key=lambda x: x.get("created_at", ""), reverse=True)
+    return render_template("weekly.html", history=history)
