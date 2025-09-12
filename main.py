@@ -7,8 +7,8 @@ from flask import Flask, send_from_directory, render_template, request, session,
 from flask_cors import CORS
 from src.models.user import db
 from src.routes.user import user_bp
-from src.routes.data import data_bp
-from src.routes.data import load_data  # importa a função que carrega os dados reais
+from src.routes.data import data_bp, load_data  # importa a função que carrega os dados reais
+from src.routes.archive import archive_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
@@ -16,8 +16,10 @@ app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 # Configurar CORS
 CORS(app)
 
+# Registrar blueprints
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(data_bp, url_prefix='/api')
+app.register_blueprint(archive_bp, url_prefix='/api')
 
 # Configuração do banco de dados
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
