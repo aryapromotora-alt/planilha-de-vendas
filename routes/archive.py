@@ -1,38 +1,10 @@
-import os
-import json
 from flask import Blueprint, jsonify, current_app, request, render_template
 from datetime import datetime, timedelta
+from src.models.user import db  # já temos o db inicializado
+from src.models.archive import WeeklyHistory  # model do histórico semanal
 from .data import load_data, save_data
 
 archive_bp = Blueprint('archive', __name__)
-
-# Arquivo onde fica salvo o histórico
-HISTORY_FILE = os.path.join(os.path.dirname(__file__), '..', 'database', 'weekly_history.json')
-
-
-# ---------------------------
-# Funções auxiliares
-# ---------------------------
-def load_history():
-    """Carrega histórico do arquivo JSON"""
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except (json.JSONDecodeError, IOError):
-            return []
-    return []
-
-
-def save_history(history):
-    """Salva histórico no arquivo JSON"""
-    try:
-        os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
-        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
-        return True
-    except IOError:
-        return False
 
 
 # ---------------------------
@@ -42,7 +14,7 @@ def save_history(history):
 def weekly_archive():
     """
     Fecha a semana:
-    - Salva totais no histórico
+    - Salva totais no banco
     - Zera a planilha
     """
     # segurança opcional com secret key
@@ -74,17 +46,16 @@ def weekly_archive():
     end = start + timedelta(days=4)               # sexta
     week_label = f"{start.date()} a {end.date()}"
 
-    # salva histórico
-    history = load_history()
-    history.append({
-        "week_label": week_label,
-        "started_at": str(start.date()),
-        "ended_at": str(end.date()),
-        "total": total,
-        "breakdown": per_seller,
-        "created_at": datetime.utcnow().isoformat()
-    })
-    save_history(history)
+    # salva no banco
+    history = WeeklyHistory(
+        week_label=week_label,
+        started_at=start.date(),
+        ended_at=end.date(),
+        total=total,
+        breakdown=per_seller
+    )
+    db.session.add(history)
+    db.session.commit()
 
     # zera planilha
     for nome, valores in spreadsheet.items():
@@ -99,14 +70,24 @@ def weekly_archive():
 
 
 # ---------------------------
-# Rota para visualizar histórico no navegador
+# Rota para visualizar histórico no navegador (HTML)
 # ---------------------------
 @archive_bp.route('/weekly', methods=['GET'])
 def weekly_page():
     """
     Mostra o histórico semanal em uma página HTML
     """
-    history = load_history()
-    # ordena do mais recente para o mais antigo
-    history = sorted(history, key=lambda x: x.get("created_at", ""), reverse=True)
+    history = WeeklyHistory.query.order_by(WeeklyHistory.created_at.desc()).all()
     return render_template("weekly.html", history=history)
+
+
+# ---------------------------
+# Rota para retornar histórico em JSON (API)
+# ---------------------------
+@archive_bp.route('/api/weekly-history', methods=['GET'])
+def get_weekly_history():
+    """
+    Retorna o histórico semanal em formato JSON
+    """
+    history = WeeklyHistory.query.order_by(WeeklyHistory.created_at.desc()).all()
+    return jsonify([h.to_dict() for h in history])
