@@ -10,6 +10,7 @@ from src.routes.user import user_bp
 from src.routes.data import data_bp, load_data  # importa a função que carrega os dados reais
 from src.routes.archive import archive_bp
 
+# Inicializa o app
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 
@@ -28,6 +29,7 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+# Rotas
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
@@ -92,6 +94,7 @@ def tv_page():
     dados = sorted(dados, key=lambda x: x["ordem"])
 
     return render_template('tv.html', dados=dados, totais_diarios=totais_diarios)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
