@@ -1,40 +1,83 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Histórico Semanal</title>
+    <meta charset="UTF-8">
+    <title>Histórico Semanal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .week-card {
+            background: #fff;
+            padding: 15px 20px;
+            margin: 15px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            max-width: 700px;
+        }
+        .week-header {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            color: #444;
+        }
+        .total {
+            margin-top: 8px;
+            font-size: 1.1em;
+            color: #006600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+        th {
+            background: #eee;
+        }
+    </style>
 </head>
 <body>
-  <h1>Histórico Semanal</h1>
+    <h1>📊 Histórico Semanal</h1>
 
-  {% if history %}
-    <table border="1" cellpadding="6" cellspacing="0">
-      <thead>
-        <tr>
-          <th>Semana</th>
-          <th>Total da Semana</th>
-          <th>Detalhes por Vendedor</th>
-        </tr>
-      </thead>
-      <tbody>
+    {% if history %}
         {% for week in history %}
-          <tr>
-            <td>{{ week.week_label }}</td>
-            <td>R$ {{ week.total }}</td>
-            <td>
-              <ul>
-                {% for s in week.breakdown %}
-                  <li>{{ s.seller }}: R$ {{ s.total }}</li>
-                {% endfor %}
-              </ul>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>Nenhum histórico encontrado.</p>
-  {% endif %}
+            <div class="week-card">
+                <div class="week-header">Semana: {{ week.week_label }}</div>
+                <div>De: {{ week.started_at }} até {{ week.ended_at }}</div>
+                <div class="total">Total: R$ {{ week.total }}</div>
 
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vendedor</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in week.breakdown %}
+                            <tr>
+                                <td>{{ item.seller }}</td>
+                                <td>R$ {{ item.total }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <small><i>Criado em: {{ week.created_at }}</i></small>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align:center; color:#777;">Nenhum histórico registrado ainda.</p>
+    {% endif %}
 </body>
 </html>
