@@ -117,6 +117,34 @@ def tv_page():
 
 
 # ==========================
+# Rota pública /weekly
+# ==========================
+@app.route('/weekly')
+def weekly_page():
+    try:
+        from src.models.archive import WeeklyHistory  # importa dentro da função
+
+        records = WeeklyHistory.query.order_by(WeeklyHistory.created_at.desc()).all()
+
+        history = []
+        for r in records:
+            history.append({
+                "week_label": r.week_label,
+                "started_at": r.started_at.isoformat() if r.started_at else "",
+                "ended_at": r.ended_at.isoformat() if r.ended_at else "",
+                "total": r.total,
+                "breakdown": r.breakdown,
+                "created_at": r.created_at.isoformat() if r.created_at else ""
+            })
+
+        return render_template("weekly.html", history=history)
+
+    except Exception:
+        import traceback
+        return f"<h2>Erro ao renderizar /weekly</h2><pre>{traceback.format_exc()}</pre>", 500
+
+
+# ==========================
 # Main
 # ==========================
 if __name__ == '__main__':
