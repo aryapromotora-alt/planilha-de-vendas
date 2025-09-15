@@ -1,0 +1,69 @@
+<div class="dashboard">
+    <h2>📊 Resumo de Vendas</h2>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Total Diário</h3>
+            <p class="valor">R$ {{ total_dia }}</p>
+            <small>Atualizado em: {{ hoje }}</small>
+        </div>
+
+        <div class="card">
+            <h3>Total Semanal</h3>
+            <p class="valor">R$ {{ total_semana }}</p>
+            <small>Período: {{ semana_label }}</small>
+        </div>
+
+        <div class="card">
+            <h3>Total Mensal</h3>
+            <p class="valor">R$ {{ total_mes }}</p>
+            <small>Mês: {{ mes_atual }}</small>
+        </div>
+    </div>
+</div>
+
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f8fafc;
+    margin: 0;
+    padding: 20px;
+}
+.dashboard {
+    max-width: 1000px;
+    margin: auto;
+}
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1e293b;
+}
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+.card {
+    background: linear-gradient(180deg, #1e293b, #0f172a);
+    color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.card h3 {
+    margin: 0 0 10px;
+    font-weight: 500;
+    font-size: 20px;
+}
+.card .valor {
+    font-size: 28px;
+    font-weight: bold;
+    color: #22c55e;
+}
+.card small {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #cbd5e1;
+}
+</style>
