@@ -28,7 +28,9 @@ db_url = os.getenv("DATABASE_URL")  # Render cria essa variável automaticamente
 if db_url:
     # Render usa postgres://, mas SQLAlchemy espera postgresql://
     if db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql://", 1)
+        db_url = db_url.replace("postgres://", "postgresql+pg8000://", 1)
+    elif db_url.startswith("postgresql://"):
+        db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 else:
     # fallback para SQLite em desenvolvimento local
