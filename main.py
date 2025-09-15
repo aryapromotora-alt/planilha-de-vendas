@@ -1,5 +1,7 @@
 import os
 import sys
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 
 # Adiciona o diretório raiz ao path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -10,6 +12,7 @@ from src.models.user import db
 from src.routes.user import user_bp
 from src.routes.data import data_bp, load_data
 from src.routes.archive import archive_bp
+from src.models.archive import WeeklyHistory
 
 # ==========================
 # Inicializa o app Flask
@@ -43,6 +46,54 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 with app.app_context():
     db.create_all()
+
+# ==========================
+# Função automática para salvar resumo diário
+# ==========================
+def salvar_resumo_diario():
+    """Calcula totais da planilha e salva no banco"""
+    with app.app_context():
+        try:
+            data = load_data()
+            spreadsheet = data.get("spreadsheetData", {})
+
+            total_dia = 0
+            breakdown = {}
+
+            for nome, valores in spreadsheet.items():
+                vendedor_total = sum([
+                    valores.get("monday", 0) or 0,
+                    valores.get("tuesday", 0) or 0,
+                    valores.get("wednesday", 0) or 0,
+                    valores.get("thursday", 0) or 0,
+                    valores.get("friday", 0) or 0,
+                ])
+                breakdown[nome] = vendedor_total
+                total_dia += vendedor_total
+
+            # Cria o registro semanal (ou diário consolidado)
+            registro = WeeklyHistory(
+                week_label=f"Semana {datetime.now().isocalendar()[1]}",
+                started_at=datetime.now(),
+                ended_at=datetime.now(),
+                total=total_dia,
+                breakdown=breakdown,
+                created_at=datetime.now()
+            )
+
+            db.session.add(registro)
+            db.session.commit()
+            print(f"[OK] Resumo diário salvo em {datetime.now()}")
+
+        except Exception as e:
+            print("[ERRO] salvar_resumo_diario:", e)
+
+# ==========================
+# Agendador
+# ==========================
+scheduler = BackgroundScheduler()
+scheduler.add_job(salvar_resumo_diario, "cron", hour=23, minute=59)  # executa diariamente
+scheduler.start()
 
 # ==========================
 # Registrar Blueprints
@@ -122,8 +173,6 @@ def tv_page():
 @app.route('/weekly')
 def weekly_page():
     try:
-        from src.models.archive import WeeklyHistory  # importa dentro da função
-
         records = WeeklyHistory.query.order_by(WeeklyHistory.created_at.desc()).all()
 
         history = []
