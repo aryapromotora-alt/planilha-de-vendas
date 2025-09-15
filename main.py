@@ -137,7 +137,22 @@ def weekly_page():
                 "created_at": r.created_at.isoformat() if r.created_at else ""
             })
 
-        return render_template("weekly.html", history=history)
+        # Dados padrão para não quebrar os gráficos
+        vendedores = []
+        totais_semana = []
+        semanas_mes = ["Semana 1", "Semana 2", "Semana 3", "Semana 4"]
+        totais_mes = [0, 0, 0, 0]
+        total_dia = 0
+
+        return render_template(
+            "weekly.html",
+            history=history,
+            vendedores=vendedores,
+            totais_semana=totais_semana,
+            semanas_mes=semanas_mes,
+            totais_mes=totais_mes,
+            total_dia=total_dia
+        )
 
     except Exception:
         import traceback
