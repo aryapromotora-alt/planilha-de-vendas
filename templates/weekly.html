@@ -1,79 +1,112 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Histórico Semanal</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f9f9f9;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .chart-container {
-            max-width: 900px;
-            margin: 30px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Resumo Semanal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f6f9;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    canvas {
+      width: 100% !important;
+      height: 300px !important;
+    }
+    .total-highlight {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #006600;
+    }
+  </style>
 </head>
 <body>
-    <h1>📊 Histórico Semanal</h1>
+  <h1>📊 Resumo de Vendas</h1>
 
-    <div class="chart-container">
-        <canvas id="weeklyChart"></canvas>
+  <div class="dashboard">
+    <!-- Card Resumo do Dia -->
+    <div class="card">
+      <h2>Total do Dia</h2>
+      <p class="total-highlight">R$ {{ total_dia }}</p>
     </div>
 
-    {% if history %}
-        {% for week in history %}
-            <div class="chart-container">
-                <h2>Semana {{ week.week_label }}</h2>
-                <canvas id="chart-{{ loop.index }}"></canvas>
-                <script>
-                    const ctx{{ loop.index }} = document.getElementById('chart-{{ loop.index }}').getContext('2d');
-                    new Chart(ctx{{ loop.index }}, {
-                        type: 'bar',
-                        data: {
-                            labels: {{ week.breakdown | map(attribute='seller') | list | tojson }},
-                            datasets: [{
-                                label: 'Vendas (R$)',
-                                data: {{ week.breakdown | map(attribute='total') | list | tojson }},
-                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: { responsive: true, scales: { y: { beginAtZero: true } } }
-                    });
-                </script>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p style="text-align:center; color:#777;">Nenhum histórico registrado ainda.</p>
-        <script>
-            const ctx = document.getElementById('weeklyChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
-                    datasets: [{
-                        label: 'Vendas (sem dados)',
-                        data: [0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(200,200,200,0.6)',
-                        borderColor: 'rgba(200,200,200,1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: { responsive: true, scales: { y: { beginAtZero: true } } }
-            });
-        </script>
-    {% endif %}
+    <!-- Gráfico semanal -->
+    <div class="card">
+      <h2>Totais por Vendedor (Semana)</h2>
+      <canvas id="chartSemana"></canvas>
+    </div>
+
+    <!-- Gráfico mensal -->
+    <div class="card">
+      <h2>Resumo Mensal</h2>
+      <canvas id="chartMes"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // Dados passados do backend
+    const vendedores = {{ vendedores|tojson }};
+    const totaisSemana = {{ totais_semana|tojson }};
+    const semanasMes = {{ semanas_mes|tojson }};
+    const totaisMes = {{ totais_mes|tojson }};
+
+    // Gráfico por vendedor na semana
+    new Chart(document.getElementById('chartSemana'), {
+      type: 'bar',
+      data: {
+        labels: vendedores,
+        datasets: [{
+          label: 'Total (R$)',
+          data: totaisSemana,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Gráfico por semana no mês
+    new Chart(document.getElementById('chartMes'), {
+      type: 'line',
+      data: {
+        labels: semanasMes,
+        datasets: [{
+          label: 'Total da Semana (R$)',
+          data: totaisMes,
+          fill: true,
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          tension: 0.3
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+  </script>
 </body>
 </html>
