@@ -9,6 +9,11 @@ from models.user import db
 scheduler = BackgroundScheduler()
 
 def salvar_resumo_diario(app):
+    """
+    Salva um resumo diário das vendas:
+      - Tenta salvar no modelo DailySales (se existir)
+      - Se não existir, salva no ResumoHistory como fallback
+    """
     with app.app_context():
         try:
             data = load_data()
@@ -29,7 +34,7 @@ def salvar_resumo_diario(app):
                 breakdown[nome] = vendedor_total
                 total_dia += vendedor_total
 
-            # tenta usar DailySales se existir, senão salva um registro único em WeeklyHistory como fallback
+            # tenta usar DailySales se existir, senão salva em ResumoHistory
             try:
                 from models.archive import DailySales
                 today = datetime.utcnow().date()
@@ -53,9 +58,9 @@ def salvar_resumo_diario(app):
                     )
                     db.session.add(record)
             except Exception:
-                # fallback: salva um registro único em WeeklyHistory (usado apenas para garantir persistência)
-                from models.archive import WeeklyHistory
-                registro = WeeklyHistory(
+                # fallback: salva um registro único em ResumoHistory
+                from models.archive import ResumoHistory
+                registro = ResumoHistory(
                     week_label=f"Auto {datetime.utcnow().date()}",
                     started_at=datetime.utcnow(),
                     ended_at=datetime.utcnow(),

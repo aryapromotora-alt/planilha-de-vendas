@@ -1,4 +1,4 @@
-# app.py
+# app.py 
 import os
 import logging
 from flask import Flask, send_from_directory, render_template
@@ -109,9 +109,9 @@ def create_app():
         dados = sorted(dados, key=lambda x: x["ordem"])
         return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
 
-    @app.route("/weekly")
-    def weekly_page():
-        # importa aqui para evitar import circular
+    # 🔹 Alterado de /weekly para /resumo
+    @app.route("/resumo")
+    def resumo_page():
         from models.archive import WeeklyHistory
 
         try:
@@ -135,7 +135,7 @@ def create_app():
             total_dia = 0
 
             return render_template(
-                "weekly.html",
+                "resumo.html",   # 🔹 Agora usa o template resumo.html
                 history=history,
                 vendedores=vendedores,
                 totais_semana=totais_semana,
@@ -145,6 +145,6 @@ def create_app():
             )
         except Exception:
             import traceback
-            return f"<h2>Erro ao renderizar /weekly</h2><pre>{traceback.format_exc()}</pre>", 500
+            return f"<h2>Erro ao renderizar /resumo</h2><pre>{traceback.format_exc()}</pre>", 500
 
     return app
