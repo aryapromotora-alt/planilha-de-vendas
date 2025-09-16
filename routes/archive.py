@@ -1,11 +1,10 @@
 from flask import Blueprint, jsonify, current_app, request, render_template
 from datetime import datetime, timedelta, date
-from src.models.user import db
-from src.models.archive import WeeklyHistory, DailySales
-from .data import load_data, save_data
+from models.user import db
+from models.archive import WeeklyHistory, DailySales
+from routes.data import load_data, save_data
 
 archive_bp = Blueprint('archive', __name__)
-
 
 # ---------------------------
 # Rota para arquivar semana
