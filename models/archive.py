@@ -5,8 +5,8 @@ from sqlalchemy.dialects.sqlite import JSON
 from .user import db  # usa o mesmo db inicializado
 
 
-class WeeklyHistory(db.Model):
-    __tablename__ = "weekly_history"
+class ResumoHistory(db.Model):
+    __tablename__ = "resumo_history"
 
     id = db.Column(db.Integer, primary_key=True)
     week_label = db.Column(db.String(50), nullable=False)  # ex: "2025-09-08 a 2025-09-12"
@@ -17,7 +17,7 @@ class WeeklyHistory(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<WeeklyHistory {self.week_label} - Total {self.total}>"
+        return f"<ResumoHistory {self.week_label} - Total {self.total}>"
 
     def to_dict(self):
         return {
