@@ -1,5 +1,6 @@
 # app.py
 import os
+import logging
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
 
@@ -9,12 +10,13 @@ from routes.user import user_bp
 from routes.data import data_bp
 from routes.archive import archive_bp
 
+
 def create_app():
     app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
     app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "asdf#FGSgvasgf$5$WGT")
 
     # Configuração do banco de dados
-    db_url = os.getenv("DATABASE_URL")  # render coloca isso automaticamente quando usa DB gerenciado
+    db_url = os.getenv("DATABASE_URL")  # Render coloca isso automaticamente quando usa DB gerenciado
     if db_url:
         if db_url.startswith("postgres://"):
             db_url = db_url.replace("postgres://", "postgresql+pg8000://", 1)
@@ -22,10 +24,14 @@ def create_app():
             db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
         app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     else:
-        db_path = os.path.join(os.path.dirname(__file__), 'database', 'app.db')
-        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
+        # Em produção, não deixe cair em SQLite sem querer
+        raise RuntimeError("DATABASE_URL não configurado — verifique variáveis de ambiente no Render.")
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    # Ativar logs SQL (para debug no Render → Logs)
+    logging.basicConfig()
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
     # Inicializa banco
     db.init_app(app)
@@ -34,13 +40,18 @@ def create_app():
     CORS(app)
 
     # Registrar blueprints
-    app.register_blueprint(user_bp, url_prefix='/api')
-    app.register_blueprint(data_bp, url_prefix='/api')
-    app.register_blueprint(archive_bp, url_prefix='/api')
+    app.register_blueprint(user_bp, url_prefix="/api")
+    app.register_blueprint(data_bp, url_prefix="/api")
+    app.register_blueprint(archive_bp, url_prefix="/api")
+
+    # Rota para verificar banco usado
+    @app.route("/db-check")
+    def db_check():
+        return f"Banco em uso: {app.config['SQLALCHEMY_DATABASE_URI']}"
 
     # Rotas de páginas
-    @app.route('/', defaults={'path': ''})
-    @app.route('/<path:path>')
+    @app.route("/", defaults={"path": ""})
+    @app.route("/<path:path>")
     def serve(path):
         static_folder_path = app.static_folder
         if not static_folder_path:
@@ -49,12 +60,12 @@ def create_app():
         if path and os.path.exists(os.path.join(static_folder_path, path)):
             return send_from_directory(static_folder_path, path)
 
-        index_path = os.path.join(static_folder_path, 'index.html')
+        index_path = os.path.join(static_folder_path, "index.html")
         if os.path.exists(index_path):
-            return send_from_directory(static_folder_path, 'index.html')
+            return send_from_directory(static_folder_path, "index.html")
         return "index.html not found", 404
 
-    @app.route('/tv')
+    @app.route("/tv")
     def tv_page():
         # importa aqui para evitar qualquer circular import
         from routes.data import load_data
@@ -86,7 +97,7 @@ def create_app():
                 "qui": qui,
                 "sex": sex,
                 "total": total,
-                "ordem": ordem
+                "ordem": ordem,
             })
 
             totais_diarios["seg"] += seg
@@ -96,12 +107,13 @@ def create_app():
             totais_diarios["sex"] += sex
 
         dados = sorted(dados, key=lambda x: x["ordem"])
-        return render_template('tv.html', dados=dados, totais_diarios=totais_diarios)
+        return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
 
-    @app.route('/weekly')
+    @app.route("/weekly")
     def weekly_page():
         # importa aqui para evitar import circular
         from models.archive import WeeklyHistory
+
         try:
             records = WeeklyHistory.query.order_by(WeeklyHistory.created_at.desc()).all()
 
@@ -113,7 +125,7 @@ def create_app():
                     "ended_at": r.ended_at.isoformat() if r.ended_at else "",
                     "total": r.total,
                     "breakdown": r.breakdown,
-                    "created_at": r.created_at.isoformat() if r.created_at else ""
+                    "created_at": r.created_at.isoformat() if r.created_at else "",
                 })
 
             vendedores = []
@@ -129,7 +141,7 @@ def create_app():
                 totais_semana=totais_semana,
                 semanas_mes=semanas_mes,
                 totais_mes=totais_mes,
-                total_dia=total_dia
+                total_dia=total_dia,
             )
         except Exception:
             import traceback
