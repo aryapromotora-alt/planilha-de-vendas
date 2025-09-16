@@ -4,7 +4,7 @@ import logging
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
 
-# Imports adaptados para sua estrutura (sem "src.")
+# Imports adaptados para sua estrutura
 from models.user import db
 from routes.user import user_bp
 from routes.data import data_bp
@@ -16,7 +16,7 @@ def create_app():
     app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "asdf#FGSgvasgf$5$WGT")
 
     # Configuração do banco de dados
-    db_url = os.getenv("DATABASE_URL")  # Render coloca isso automaticamente quando usa DB gerenciado
+    db_url = os.getenv("DATABASE_URL")  
     if db_url:
         if db_url.startswith("postgres://"):
             db_url = db_url.replace("postgres://", "postgresql+pg8000://", 1)
@@ -24,12 +24,11 @@ def create_app():
             db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
         app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     else:
-        # Em produção, não deixe cair em SQLite sem querer
         raise RuntimeError("DATABASE_URL não configurado — verifique variáveis de ambiente no Render.")
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # Ativar logs SQL (para debug no Render → Logs)
+    # Ativar logs SQL
     logging.basicConfig()
     logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
@@ -67,7 +66,6 @@ def create_app():
 
     @app.route("/tv")
     def tv_page():
-        # importa aqui para evitar qualquer circular import
         from routes.data import load_data
 
         data = load_data()
@@ -109,33 +107,37 @@ def create_app():
         dados = sorted(dados, key=lambda x: x["ordem"])
         return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
 
-    # 🔹 Alterado de /weekly para /resumo
+    # 🔹 Página de resumo
     @app.route("/resumo")
     def resumo_page():
-        from models.archive import WeeklyHistory
+        from models.models_archive import DailySales  # ✅ usa vendas diárias
 
         try:
-            records = WeeklyHistory.query.order_by(WeeklyHistory.created_at.desc()).all()
+            # pega últimos registros diários
+            records = DailySales.query.order_by(DailySales.created_at.desc()).all()
 
             history = []
             for r in records:
                 history.append({
-                    "week_label": r.week_label,
-                    "started_at": r.started_at.isoformat() if r.started_at else "",
-                    "ended_at": r.ended_at.isoformat() if r.ended_at else "",
+                    "vendedor": r.vendedor,
+                    "dia": r.dia.isoformat(),
+                    "segunda": r.segunda,
+                    "terca": r.terca,
+                    "quarta": r.quarta,
+                    "quinta": r.quinta,
+                    "sexta": r.sexta,
                     "total": r.total,
-                    "breakdown": r.breakdown,
                     "created_at": r.created_at.isoformat() if r.created_at else "",
                 })
 
-            vendedores = []
-            totais_semana = []
+            vendedores = sorted(list(set([r.vendedor for r in records])))
+            totais_semana = [r.total for r in records]
             semanas_mes = ["Semana 1", "Semana 2", "Semana 3", "Semana 4"]
             totais_mes = [0, 0, 0, 0]
-            total_dia = 0
+            total_dia = sum([r.total for r in records])
 
             return render_template(
-                "resumo.html",   # 🔹 Agora usa o template resumo.html
+                "resumo.html",   
                 history=history,
                 vendedores=vendedores,
                 totais_semana=totais_semana,
