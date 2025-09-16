@@ -223,17 +223,18 @@ button:hover {
 }
 
 .editable-cell input {
-    width: 100%;
     border: none;
     background: transparent;
+    width: 70px;
     text-align: center;
-    font-size: inherit;
-    padding: 0.5rem;
+    padding: 0.2rem;
 }
 
 .editable-cell input:focus {
     outline: 2px solid #3498db;
-    background-color: white;
+    background: white;
+    border: 1px solid #3498db;
+    border-radius: 4px;
 }
 
 .total-cell {
