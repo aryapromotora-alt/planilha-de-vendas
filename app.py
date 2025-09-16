@@ -4,7 +4,7 @@ import logging
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
 
-# Imports adaptados para sua estrutura
+# Imports diretos (sem src/)
 from models.user import db
 from routes.user import user_bp
 from routes.data import data_bp
@@ -110,7 +110,7 @@ def create_app():
     # 🔹 Página de resumo
     @app.route("/resumo")
     def resumo_page():
-        from models.models_archive import DailySales  # ✅ usa vendas diárias
+        from models.archive import DailySales  # ✅ usa vendas diárias
 
         try:
             # pega últimos registros diários
