@@ -222,13 +222,13 @@ button:hover {
     background-color: #e8f4f8 !important;
 }
 
-.editable-cell input {
-    border: none;
-    background: transparent;
-    width: 70px;
+.editable-cell input[type="number"] {
+    width: 80px;          /* largura fixa */
+    min-width: 60px;
+    max-width: 100px;
     text-align: center;
-    padding: 0.2rem;
 }
+
 
 .editable-cell input:focus {
     outline: 2px solid #3498db;
