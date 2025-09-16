@@ -1,22 +1,23 @@
+# routes/archive.py
 from flask import Blueprint, jsonify, current_app, request, render_template
 from datetime import datetime, timedelta, date
 from models.user import db
-from models.archive import WeeklyHistory, DailySales
+from models.archive import ResumoHistory, DailySales
 from routes.data import load_data, save_data
 
 archive_bp = Blueprint('archive', __name__)
 
 # ---------------------------
-# Rota para arquivar semana
+# Rota para arquivar semana (Resumo)
 # ---------------------------
-@archive_bp.route('/api/weekly-archive', methods=['POST'])
-def weekly_archive():
+@archive_bp.route('/api/resumo-archive', methods=['POST'])
+def resumo_archive():
     """
-    Fecha a semana:
+    Fecha a semana (Resumo):
     - Salva totais no banco
     - Zera a planilha
     """
-    secret = current_app.config.get('WEEKLY_ARCHIVE_SECRET')
+    secret = current_app.config.get('RESUMO_ARCHIVE_SECRET')
     header = request.headers.get('X-SECRET-KEY')
     if secret and header != secret:
         return jsonify({"error": "unauthorized"}), 401
@@ -45,7 +46,7 @@ def weekly_archive():
     week_label = f"{start.date()} a {end.date()}"
 
     # salva no banco
-    history = WeeklyHistory(
+    history = ResumoHistory(
         week_label=week_label,
         started_at=start.date(),
         ended_at=end.date(),
@@ -64,7 +65,7 @@ def weekly_archive():
         valores["friday"] = 0
     save_data(data)
 
-    return jsonify({"status": "ok", "week": week_label, "total": total})
+    return jsonify({"status": "ok", "resumo": week_label, "total": total})
 
 
 # ---------------------------
@@ -114,18 +115,18 @@ def get_daily_history():
 
 
 # ---------------------------
-# Página HTML com histórico semanal
+# Página HTML com histórico (Resumo)
 # ---------------------------
-@archive_bp.route('/weekly', methods=['GET'])
-def weekly_page():
-    history = WeeklyHistory.query.order_by(WeeklyHistory.created_at.desc()).all()
-    return render_template("weekly.html", history=history)
+@archive_bp.route('/resumo', methods=['GET'])
+def resumo_page():
+    history = ResumoHistory.query.order_by(ResumoHistory.created_at.desc()).all()
+    return render_template("resumo.html", history=history)
 
 
 # ---------------------------
-# Rota JSON do histórico semanal
+# Rota JSON do histórico (Resumo)
 # ---------------------------
-@archive_bp.route('/api/weekly-history', methods=['GET'])
-def get_weekly_history():
-    history = WeeklyHistory.query.order_by(WeeklyHistory.created_at.desc()).all()
+@archive_bp.route('/api/resumo-history', methods=['GET'])
+def get_resumo_history():
+    history = ResumoHistory.query.order_by(ResumoHistory.created_at.desc()).all()
     return jsonify([h.to_dict() for h in history])
