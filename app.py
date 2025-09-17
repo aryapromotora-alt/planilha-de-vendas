@@ -9,6 +9,7 @@ from models.user import db
 from routes.user import user_bp
 from routes.data import data_bp
 from routes.archive import archive_bp
+from routes.resumo import resumo_bp   # ✅ novo import
 
 
 def create_app():
@@ -42,6 +43,7 @@ def create_app():
     app.register_blueprint(user_bp, url_prefix="/api")
     app.register_blueprint(data_bp, url_prefix="/api")
     app.register_blueprint(archive_bp, url_prefix="/api")
+    app.register_blueprint(resumo_bp)   # ✅ rota /resumo agora vem daqui
 
     # Rota para verificar banco usado
     @app.route("/db-check")
@@ -106,47 +108,5 @@ def create_app():
 
         dados = sorted(dados, key=lambda x: x["ordem"])
         return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
-
-    # 🔹 Página de resumo
-    @app.route("/resumo")
-    def resumo_page():
-        from models.archive import DailySales  # ✅ usa vendas diárias
-
-        try:
-            # pega últimos registros diários
-            records = DailySales.query.order_by(DailySales.created_at.desc()).all()
-
-            history = []
-            for r in records:
-                history.append({
-                    "vendedor": r.vendedor,
-                    "dia": r.dia.isoformat(),
-                    "segunda": r.segunda,
-                    "terca": r.terca,
-                    "quarta": r.quarta,
-                    "quinta": r.quinta,
-                    "sexta": r.sexta,
-                    "total": r.total,
-                    "created_at": r.created_at.isoformat() if r.created_at else "",
-                })
-
-            vendedores = sorted(list(set([r.vendedor for r in records])))
-            totais_semana = [r.total for r in records]
-            semanas_mes = ["Semana 1", "Semana 2", "Semana 3", "Semana 4"]
-            totais_mes = [0, 0, 0, 0]
-            total_dia = sum([r.total for r in records])
-
-            return render_template(
-                "resumo.html",   
-                history=history,
-                vendedores=vendedores,
-                totais_semana=totais_semana,
-                semanas_mes=semanas_mes,
-                totais_mes=totais_mes,
-                total_dia=total_dia,
-            )
-        except Exception:
-            import traceback
-            return f"<h2>Erro ao renderizar /resumo</h2><pre>{traceback.format_exc()}</pre>", 500
 
     return app
