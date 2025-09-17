@@ -45,18 +45,20 @@
         }
 
         .card {
-            background: #2e2e2e;
+            background: #3a3a3a;
             color: #fff;
             padding: 18px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.25);
             text-align: center;
             transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
 
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+            border: 2px solid #FFD700;
         }
 
         .card h4 {
@@ -125,18 +127,18 @@
         <!-- Resumo Diário -->
         <h3 class="section-title">Resumo Diário</h3>
         <div class="cards small-cards">
-            <div class="card dark"><h4>Segunda</h4><p class="valor">R$ {{ total_seg | format_brl }}</p></div>
-            <div class="card dark"><h4>Terça</h4><p class="valor">R$ {{ total_ter | format_brl }}</p></div>
-            <div class="card dark"><h4>Quarta</h4><p class="valor">R$ {{ total_qua | format_brl }}</p></div>
-            <div class="card dark"><h4>Quinta</h4><p class="valor">R$ {{ total_qui | format_brl }}</p></div>
-            <div class="card dark"><h4>Sexta</h4><p class="valor">R$ {{ total_sex | format_brl }}</p></div>
+            <div class="card"><h4>Segunda</h4><p class="valor">R$ {{ total_seg | format_brl }}</p></div>
+            <div class="card"><h4>Terça</h4><p class="valor">R$ {{ total_ter | format_brl }}</p></div>
+            <div class="card"><h4>Quarta</h4><p class="valor">R$ {{ total_qua | format_brl }}</p></div>
+            <div class="card"><h4>Quinta</h4><p class="valor">R$ {{ total_qui | format_brl }}</p></div>
+            <div class="card"><h4>Sexta</h4><p class="valor">R$ {{ total_sex | format_brl }}</p></div>
         </div>
 
         <!-- Resumo Semanal -->
         <h3 class="section-title">Resumo Semanal</h3>
         <div class="cards medium-cards">
             {% for i in range(num_semanas) %}
-                <div class="card dark">
+                <div class="card">
                     <h4>Semana {{ i + 1 }}</h4>
                     <p class="valor">R$ {{ totais_mes[i] | format_brl }}</p>
                 </div>
@@ -146,7 +148,7 @@
         <!-- Resumo Mensal -->
         <h3 class="section-title">Resumo Mensal</h3>
         <div class="cards">
-            <div class="card dark large-card">
+            <div class="card large-card">
                 <h4>Total Mensal</h4>
                 <p class="valor {% if historico_mensal.get(mes_atual, 0) >= 2000 %}high{% else %}low{% endif %}" id="valor-mensal">
                     R$ {{ historico_mensal.get(mes_atual, 0) | format_brl }}
