@@ -61,8 +61,14 @@ def resumo_page():
     for r in DailySales.query.all():
         chave = f"{r.dia.year}-{r.dia.month:02d}"  # Ex: "2025-09"
         historico_mensal[chave] += r.total
-
     historico_mensal = dict(sorted(historico_mensal.items()))
+
+    # --- Lista de anos e meses por nome ---
+    anos_disponiveis = list(range(2025, 2031))
+    meses_nomes = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ]
 
     return render_template(
         "resumo.html",
@@ -79,5 +85,7 @@ def resumo_page():
         num_semanas=num_semanas,
         mes_nome=mes_nome,
         mes_atual=mes_atual,
-        historico_mensal=historico_mensal
+        historico_mensal=historico_mensal,
+        anos_disponiveis=anos_disponiveis,
+        meses_nomes=meses_nomes
     )
