@@ -78,6 +78,22 @@
             font-size: 18px;
         }
 
+        .large-card select {
+            margin-top: 12px;
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #f1f5f9;
+            font-size: 14px;
+        }
+
+        .large-card select:focus {
+            outline: none;
+            border-color: #22c55e;
+        }
+
         @media (max-width: 600px) {
             .cards {
                 grid-template-columns: 1fr;
@@ -118,10 +134,37 @@
         <div class="cards">
             <div class="card dark large-card">
                 <h4>Total Mensal</h4>
-                <p class="valor {% if total_mes >= 2000 %}high{% else %}low{% endif %}">R$ {{ total_mes }}</p>
-                <p><strong>Mês:</strong> {{ mes_nome }}</p>
+                <p class="valor {% if historico_mensal.get(mes_atual, 0) >= 2000 %}high{% else %}low{% endif %}" id="valor-mensal">
+                    R$ {{ historico_mensal.get(mes_atual, 0) }}
+                </p>
+                <label for="mes-selector"><strong>Mês:</strong></label>
+                <select id="mes-selector">
+                    {% for chave, valor in historico_mensal.items() %}
+                        <option value="{{ chave }}" {% if chave == mes_atual %}selected{% endif %}>
+                            {{ chave }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
     </div>
+
+    <script>
+        const mesSelector = document.getElementById('mes-selector');
+        const valorMensal = document.getElementById('valor-mensal');
+        const dadosMensais = {{ historico_mensal | tojson }};
+
+        mesSelector.addEventListener('change', () => {
+            const mes = mesSelector.value;
+            const valor = dadosMensais[mes] || 0;
+            valorMensal.textContent = "R$ " + valor.toLocaleString('pt-BR');
+            valorMensal.classList.remove("high", "low");
+            if (valor >= 2000) {
+                valorMensal.classList.add("high");
+            } else {
+                valorMensal.classList.add("low");
+            }
+        });
+    </script>
 </body>
 </html>
