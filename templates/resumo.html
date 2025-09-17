@@ -6,9 +6,10 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: #f8fafc;
             margin: 0;
             padding: 20px;
+            background: linear-gradient(to bottom, #1e1e1e, #2e2e2e, #3e3e3e, #4e4e4e, #5e5e5e);
+            color: #ffffff;
         }
 
         .dashboard {
@@ -16,16 +17,16 @@
             margin: auto;
         }
 
-        h2 {
+        h2, .section-title {
             text-align: center;
             margin-bottom: 30px;
-            color: #1e293b;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px #1e1e1e;
         }
 
         .section-title {
-            margin: 20px 0 10px;
             font-size: 18px;
-            color: #1e293b;
+            margin: 20px 0 10px;
         }
 
         .cards {
@@ -44,7 +45,7 @@
         }
 
         .card {
-            background: linear-gradient(180deg, #0f172a, #1e293b);
+            background: #2e2e2e;
             color: #fff;
             padding: 18px;
             border-radius: 12px;
@@ -119,48 +120,47 @@
 </head>
 <body>
     <div class="dashboard">
-        <h2>📊 Resumo de Vendas</h2>
+        <h2>Resumo de Vendas</h2>
 
         <!-- Resumo Diário -->
-        <h3 class="section-title">📅 Resumo Diário</h3>
+        <h3 class="section-title">Resumo Diário</h3>
         <div class="cards small-cards">
-            <div class="card dark"><h4>Segunda</h4><p class="valor">R$ {{ total_seg }}</p></div>
-            <div class="card dark"><h4>Terça</h4><p class="valor">R$ {{ total_ter }}</p></div>
-            <div class="card dark"><h4>Quarta</h4><p class="valor">R$ {{ total_qua }}</p></div>
-            <div class="card dark"><h4>Quinta</h4><p class="valor">R$ {{ total_qui }}</p></div>
-            <div class="card dark"><h4>Sexta</h4><p class="valor">R$ {{ total_sex }}</p></div>
+            <div class="card dark"><h4>Segunda</h4><p class="valor">R$ {{ total_seg | format_brl }}</p></div>
+            <div class="card dark"><h4>Terça</h4><p class="valor">R$ {{ total_ter | format_brl }}</p></div>
+            <div class="card dark"><h4>Quarta</h4><p class="valor">R$ {{ total_qua | format_brl }}</p></div>
+            <div class="card dark"><h4>Quinta</h4><p class="valor">R$ {{ total_qui | format_brl }}</p></div>
+            <div class="card dark"><h4>Sexta</h4><p class="valor">R$ {{ total_sex | format_brl }}</p></div>
         </div>
 
         <!-- Resumo Semanal -->
-        <h3 class="section-title">📈 Resumo Semanal</h3>
+        <h3 class="section-title">Resumo Semanal</h3>
         <div class="cards medium-cards">
             {% for i in range(num_semanas) %}
                 <div class="card dark">
                     <h4>Semana {{ i + 1 }}</h4>
-                    <p class="valor">R$ {{ totais_mes[i] }}</p>
+                    <p class="valor">R$ {{ totais_mes[i] | format_brl }}</p>
                 </div>
             {% endfor %}
         </div>
 
         <!-- Resumo Mensal -->
-        <h3 class="section-title">📊 Resumo Mensal</h3>
+        <h3 class="section-title">Resumo Mensal</h3>
         <div class="cards">
             <div class="card dark large-card">
                 <h4>Total Mensal</h4>
                 <p class="valor {% if historico_mensal.get(mes_atual, 0) >= 2000 %}high{% else %}low{% endif %}" id="valor-mensal">
-                    R$ {{ historico_mensal.get(mes_atual, 0) }}
+                    R$ {{ historico_mensal.get(mes_atual, 0) | format_brl }}
                 </p>
 
                 <div class="selectors">
                     <select id="mes-selector">
-                        {% set meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"] %}
                         {% for i in range(1, 13) %}
-                            <option value="{{ i }}" {% if i == hoje.month %}selected{% endif %}>{{ meses[i - 1] }}</option>
+                            <option value="{{ i }}" {% if i == hoje.month %}selected{% endif %}>{{ meses_nomes[i - 1] }}</option>
                         {% endfor %}
                     </select>
 
                     <select id="ano-selector">
-                        {% for a in range(2025, 2031) %}
+                        {% for a in anos_disponiveis %}
                             <option value="{{ a }}" {% if a == hoje.year %}selected{% endif %}>{{ a }}</option>
                         {% endfor %}
                     </select>
@@ -181,15 +181,13 @@
             const chave = `${ano}-${mes}`;
             const valor = historico[chave] || 0;
 
-            valorMensal.textContent = "R$ " + valor.toLocaleString('pt-BR');
+            valorMensal.textContent = "R$ " + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             valorMensal.classList.remove("high", "low");
             if (valor >= 2000) {
                 valorMensal.classList.add("high");
             } else {
                 valorMensal.classList.add("low");
             }
-
-            // Aqui você pode adicionar chamadas AJAX para atualizar os blocos diário e semanal
         }
 
         mesSelector.addEventListener('change', atualizarResumo);
