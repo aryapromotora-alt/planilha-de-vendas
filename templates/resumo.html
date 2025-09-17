@@ -94,12 +94,25 @@
             border-color: #22c55e;
         }
 
+        .selectors {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .selectors select {
+            flex: 1;
+        }
+
         @media (max-width: 600px) {
             .cards {
                 grid-template-columns: 1fr;
             }
             .large-card {
                 font-size: 16px;
+            }
+            .selectors {
+                flex-direction: column;
             }
         }
     </style>
@@ -137,26 +150,37 @@
                 <p class="valor {% if historico_mensal.get(mes_atual, 0) >= 2000 %}high{% else %}low{% endif %}" id="valor-mensal">
                     R$ {{ historico_mensal.get(mes_atual, 0) }}
                 </p>
-                <label for="mes-selector"><strong>Mês:</strong></label>
-                <select id="mes-selector">
-                    {% for chave, valor in historico_mensal.items() %}
-                        <option value="{{ chave }}" {% if chave == mes_atual %}selected{% endif %}>
-                            {{ chave }}
-                        </option>
-                    {% endfor %}
-                </select>
+
+                <div class="selectors">
+                    <select id="mes-selector">
+                        {% set meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"] %}
+                        {% for i in range(1, 13) %}
+                            <option value="{{ i }}" {% if i == hoje.month %}selected{% endif %}>{{ meses[i - 1] }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select id="ano-selector">
+                        {% for a in range(2025, 2031) %}
+                            <option value="{{ a }}" {% if a == hoje.year %}selected{% endif %}>{{ a }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         const mesSelector = document.getElementById('mes-selector');
+        const anoSelector = document.getElementById('ano-selector');
         const valorMensal = document.getElementById('valor-mensal');
-        const dadosMensais = {{ historico_mensal | tojson }};
+        const historico = {{ historico_mensal | tojson }};
 
-        mesSelector.addEventListener('change', () => {
-            const mes = mesSelector.value;
-            const valor = dadosMensais[mes] || 0;
+        function atualizarResumo() {
+            const mes = String(mesSelector.value).padStart(2, '0');
+            const ano = anoSelector.value;
+            const chave = `${ano}-${mes}`;
+            const valor = historico[chave] || 0;
+
             valorMensal.textContent = "R$ " + valor.toLocaleString('pt-BR');
             valorMensal.classList.remove("high", "low");
             if (valor >= 2000) {
@@ -164,7 +188,13 @@
             } else {
                 valorMensal.classList.add("low");
             }
-        });
+
+            // Aqui você pode adicionar chamadas AJAX para atualizar os blocos diário e semanal
+        }
+
+        mesSelector.addEventListener('change', atualizarResumo);
+        anoSelector.addEventListener('change', atualizarResumo);
+        atualizarResumo();
     </script>
 </body>
 </html>
