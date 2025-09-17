@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, date
 from models.archive import DailySales
 from sqlalchemy import extract
 from calendar import monthrange
+from collections import defaultdict
 
 resumo_bp = Blueprint("resumo", __name__)
 
@@ -25,7 +26,7 @@ def resumo_page():
     ).all()
     total_semana = sum(r.total for r in registros_semana)
 
-    # --- Totais do mês ---
+    # --- Totais do mês atual ---
     registros_mes = DailySales.query.filter(
         extract("month", DailySales.dia) == mes,
         extract("year", DailySales.dia) == ano
@@ -40,7 +41,7 @@ def resumo_page():
         registros_dia = DailySales.query.filter_by(dia=dia_atual).all()
         historico_diario[label] = sum(r.total for r in registros_dia)
 
-    # --- Totais semanais do mês (dinâmico) ---
+    # --- Totais semanais do mês atual (dinâmico) ---
     primeiro_dia = date(ano, mes, 1)
     ultimo_dia = date(ano, mes, monthrange(ano, mes)[1])
     dias_no_mes = (ultimo_dia - primeiro_dia).days + 1
@@ -53,6 +54,15 @@ def resumo_page():
             totais_mes[semana_index] += r.total
 
     mes_nome = hoje.strftime("%B").capitalize()
+    mes_atual = f"{ano}-{mes:02d}"
+
+    # --- Histórico mensal completo para o <select> ---
+    historico_mensal = defaultdict(float)
+    for r in DailySales.query.all():
+        chave = f"{r.dia.year}-{r.dia.month:02d}"  # Ex: "2025-09"
+        historico_mensal[chave] += r.total
+
+    historico_mensal = dict(sorted(historico_mensal.items()))
 
     return render_template(
         "resumo.html",
@@ -67,5 +77,7 @@ def resumo_page():
         total_sex=historico_diario.get("Sexta", 0),
         totais_mes=totais_mes,
         num_semanas=num_semanas,
-        mes_nome=mes_nome
+        mes_nome=mes_nome,
+        mes_atual=mes_atual,
+        historico_mensal=historico_mensal
     )
