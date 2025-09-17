@@ -1,4 +1,3 @@
-# app.py 
 import os
 import logging
 from flask import Flask, send_from_directory, render_template
@@ -9,15 +8,14 @@ from models.user import db
 from routes.user import user_bp
 from routes.data import data_bp
 from routes.archive import archive_bp
-from routes.resumo import resumo_bp   # ✅ novo import
-
+from routes.resumo import resumo_bp  # ✅ novo import
 
 def create_app():
     app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
     app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "asdf#FGSgvasgf$5$WGT")
 
     # Configuração do banco de dados
-    db_url = os.getenv("DATABASE_URL")  
+    db_url = os.getenv("DATABASE_URL")
     if db_url:
         if db_url.startswith("postgres://"):
             db_url = db_url.replace("postgres://", "postgresql+pg8000://", 1)
@@ -43,7 +41,12 @@ def create_app():
     app.register_blueprint(user_bp, url_prefix="/api")
     app.register_blueprint(data_bp, url_prefix="/api")
     app.register_blueprint(archive_bp, url_prefix="/api")
-    app.register_blueprint(resumo_bp)   # ✅ rota /resumo agora vem daqui
+    app.register_blueprint(resumo_bp)  # ✅ rota /resumo agora vem daqui
+
+    # Filtro Jinja para moeda brasileira
+    @app.template_filter('format_brl')
+    def format_brl(value):
+        return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
     # Rota para verificar banco usado
     @app.route("/db-check")
