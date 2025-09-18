@@ -9,7 +9,8 @@
 <body>
     <!-- Seção de Login -->
     <div id="login-section" class="login-container">
-        <div class="login-form">
+        <div class="login-form binance-style">
+            <img src="/static/logo.png" alt="Logo da Empresa" class="login-logo">
             <h2>Login</h2>
             <form id="login-form">
                 <div class="form-group">
@@ -20,7 +21,11 @@
                     <label for="password">Senha:</label>
                     <input type="password" id="password" name="password" required>
                 </div>
-                <button type="submit">Entrar</button>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">Concordo com os termos de uso</label>
+                </div>
+                <button type="submit" class="binance-button">Entrar</button>
             </form>
         </div>
     </div>
@@ -53,7 +58,7 @@
                     <!-- Linhas dos funcionários serão inseridas aqui via JavaScript -->
                 </tbody>
                 <tfoot>
-                    <tr class="daily-totals">
+                    <tr class="daily-totals highlight">
                         <td><strong>TOTAL DIÁRIO</strong></td>
                         <td id="monday-total">R$ 0,00</td>
                         <td id="tuesday-total">R$ 0,00</td>
@@ -118,4 +123,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
