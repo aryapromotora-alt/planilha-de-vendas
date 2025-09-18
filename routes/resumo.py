@@ -17,9 +17,9 @@ def resumo_page():
     registros_hoje = DailySales.query.filter_by(dia=hoje).all()
     total_dia = sum(r.total for r in registros_hoje)
 
-    # --- Totais da semana ---
-    inicio_semana = hoje - timedelta(days=hoje.weekday())  # segunda
-    fim_semana = inicio_semana + timedelta(days=4)         # sexta
+    # --- Totais da semana (segunda a sexta) ---
+    inicio_semana = hoje - timedelta(days=hoje.weekday())
+    fim_semana = inicio_semana + timedelta(days=4)
     registros_semana = DailySales.query.filter(
         DailySales.dia >= inicio_semana,
         DailySales.dia <= fim_semana
@@ -50,7 +50,7 @@ def resumo_page():
     totais_mes = [0 for _ in range(num_semanas)]
     for r in registros_mes:
         semana_index = ((r.dia.day + primeiro_dia.weekday() - 1) // 7)
-        if semana_index < num_semanas:
+        if 0 <= semana_index < num_semanas:
             totais_mes[semana_index] += r.total
 
     mes_nome = hoje.strftime("%B").capitalize()
@@ -59,7 +59,7 @@ def resumo_page():
     # --- Histórico mensal completo para o <select> ---
     historico_mensal = defaultdict(float)
     for r in DailySales.query.all():
-        chave = f"{r.dia.year}-{r.dia.month:02d}"  # Ex: "2025-09"
+        chave = f"{r.dia.year}-{r.dia.month:02d}"
         historico_mensal[chave] += r.total
     historico_mensal = dict(sorted(historico_mensal.items()))
 
