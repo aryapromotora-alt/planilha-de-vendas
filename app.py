@@ -18,12 +18,13 @@ def create_app():
     db_url = os.getenv("DATABASE_URL")
     if db_url:
         if db_url.startswith("postgres://"):
-            db_url = db_url.replace("postgres://", "postgresql+pg8000://", 1)
+            db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
         elif db_url.startswith("postgresql://"):
-            db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
+            db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
         app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+        print(f"🔗 Conectando ao banco: {app.config['SQLALCHEMY_DATABASE_URI']}")
     else:
-        raise RuntimeError("DATABASE_URL não configurado — verifique variáveis de ambiente no Render.")
+        raise RuntimeError("DATABASE_URL não configurado — verifique variáveis de ambiente no Northflank.")
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
