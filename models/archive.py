@@ -1,23 +1,23 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date
-from sqlalchemy.dialects.sqlite import JSON
+from sqlalchemy.dialects.postgresql import JSON  # ✅ Use PostgreSQL JSON se estiver usando PostgreSQL
 
-from .user import db  # usa o mesmo db inicializado
+from .user import db  # Usa o mesmo db inicializado em app.py
 
-
+# Histórico semanal consolidado
 class ResumoHistory(db.Model):
     __tablename__ = "resumo_history"
 
     id = db.Column(db.Integer, primary_key=True)
-    week_label = db.Column(db.String(50), nullable=False)  # ex: "2025-09-08 a 2025-09-12"
+    week_label = db.Column(db.String(50), nullable=False)  # Ex: "2025-09-08 a 2025-09-12"
     started_at = db.Column(db.Date, nullable=False)
     ended_at = db.Column(db.Date, nullable=False)
     total = db.Column(db.Float, nullable=False)
-    breakdown = db.Column(JSON, nullable=False)  # [{seller: "João", total: 123}, ...]
+    breakdown = db.Column(JSON, nullable=False)  # Ex: [{"seller": "João", "total": 123.45}]
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<ResumoHistory {self.week_label} - Total {self.total}>"
+        return f"<ResumoHistory {self.week_label} - Total {self.total:.2f}>"
 
     def to_dict(self):
         return {
@@ -30,7 +30,7 @@ class ResumoHistory(db.Model):
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
-
+# Vendas diárias por vendedor
 class DailySales(db.Model):
     __tablename__ = "daily_sales"
 
@@ -48,7 +48,7 @@ class DailySales(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<DailySales {self.vendedor} - {self.dia} - Total {self.total}>"
+        return f"<DailySales {self.vendedor} - {self.dia} - Total {self.total:.2f}>"
 
     def to_dict(self):
         return {
