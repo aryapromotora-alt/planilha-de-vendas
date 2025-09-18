@@ -13,8 +13,11 @@ with app.app_context():
 # Inicia o agendador de tarefas
 start_scheduler(app)
 
-# Executa o servidor
+# Executa o servidor local (útil para testes)
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     debug = os.getenv("FLASK_DEBUG", "False").lower() == "true"
     app.run(host="0.0.0.0", port=port, debug=debug)
+
+# Exporta a aplicação para uso com Gunicorn
+application = app
