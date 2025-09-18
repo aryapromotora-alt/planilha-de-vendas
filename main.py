@@ -1,3 +1,4 @@
+import os
 from app import create_app
 from scheduler import start_scheduler
 from models.user import db
@@ -12,7 +13,8 @@ with app.app_context():
 # Inicia o agendador de tarefas
 start_scheduler(app)
 
-if __name__ == '__main__':
-    import os
-    app.run(host='0.0.0.0', port=int(os.getenv("PORT", 5000)), debug=True)
-
+# Executa o servidor
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 5000))
+    debug = os.getenv("FLASK_DEBUG", "False").lower() == "true"
+    app.run(host="0.0.0.0", port=port, debug=debug)
