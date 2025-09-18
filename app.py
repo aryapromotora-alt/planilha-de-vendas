@@ -1,5 +1,6 @@
 import os
 import logging
+import urllib.parse
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
 
@@ -17,10 +18,11 @@ def create_app():
     # Configuração do banco de dados
     db_url = os.getenv("DATABASE_URL")
     if db_url:
-        if db_url.startswith("postgres://"):
-            db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
-        elif db_url.startswith("postgresql://"):
-            db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+        parsed = urllib.parse.urlparse(db_url)
+        safe_password = urllib.parse.quote_plus(parsed.password or "")
+        db_url = f"{parsed.scheme}://{parsed.username}:{safe_password}@{parsed.hostname}:{parsed.port}{parsed.path}"
+        db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+        db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
         app.config["SQLALCHEMY_DATABASE_URI"] = db_url
         print(f"🔗 Conectando ao banco: {app.config['SQLALCHEMY_DATABASE_URI']}")
     else:

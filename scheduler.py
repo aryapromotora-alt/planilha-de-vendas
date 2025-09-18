@@ -1,6 +1,6 @@
-# scheduler.py
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+from pytz import timezone
 
 # imports sem src/
 from routes.data import load_data
@@ -19,7 +19,6 @@ def salvar_resumo_diario(app):
             data = load_data()
             spreadsheet = data.get("spreadsheetData", {})
 
-            # Total do dia e breakdown por vendedor
             total_dia = 0
             breakdown = {}
 
@@ -34,18 +33,11 @@ def salvar_resumo_diario(app):
                 breakdown[nome] = vendedor_total
                 total_dia += vendedor_total
 
-            # tenta usar DailySales se existir, senão salva em ResumoHistory
+            today = datetime.utcnow().date()
+
             try:
                 from models.archive import DailySales
-                today = datetime.utcnow().date()
                 for nome, valores in spreadsheet.items():
-                    vendedor_total = sum([
-                        valores.get("monday", 0) or 0,
-                        valores.get("tuesday", 0) or 0,
-                        valores.get("wednesday", 0) or 0,
-                        valores.get("thursday", 0) or 0,
-                        valores.get("friday", 0) or 0,
-                    ])
                     record = DailySales(
                         vendedor=nome,
                         dia=today,
@@ -54,14 +46,14 @@ def salvar_resumo_diario(app):
                         quarta=valores.get("wednesday", 0) or 0,
                         quinta=valores.get("thursday", 0) or 0,
                         sexta=valores.get("friday", 0) or 0,
-                        total=vendedor_total
+                        total=breakdown[nome]
                     )
                     db.session.add(record)
-            except Exception:
-                # fallback: salva um registro único em ResumoHistory
+            except Exception as e:
+                print(f"[FALLBACK] Erro ao usar DailySales: {e}")
                 from models.archive import ResumoHistory
                 registro = ResumoHistory(
-                    week_label=f"Auto {datetime.utcnow().date()}",
+                    week_label=f"Auto {today}",
                     started_at=datetime.utcnow(),
                     ended_at=datetime.utcnow(),
                     total=total_dia,
@@ -74,10 +66,15 @@ def salvar_resumo_diario(app):
             print(f"[OK] Resumo diário salvo em {datetime.utcnow()}")
 
         except Exception as e:
-            print("[ERRO] salvar_resumo_diario:", e)
-
+            print(f"[ERRO] salvar_resumo_diario: {e}")
 
 def start_scheduler(app):
-    # agenda diária às 23:59 UTC (ajuste conforme sua necessidade)
-    scheduler.add_job(lambda: salvar_resumo_diario(app), "cron", hour=23, minute=59)
+    # agenda diária às 23:59 no horário de Brasília
+    scheduler.add_job(
+        lambda: salvar_resumo_diario(app),
+        "cron",
+        hour=23,
+        minute=59,
+        timezone=timezone("America/Sao_Paulo")
+    )
     scheduler.start()
