@@ -16,39 +16,37 @@
     <table class="spreadsheet-table">
       <thead>
         <tr>
-          <th>Vendedor</th>
-          <th>Segunda</th>
-          <th>Terça</th>
-          <th>Quarta</th>
-          <th>Quinta</th>
-          <th>Sexta</th>
-          <th>Total</th>
+          <th scope="col">Vendedor</th>
+          <th scope="col">Segunda</th>
+          <th scope="col">Terça</th>
+          <th scope="col">Quarta</th>
+          <th scope="col">Quinta</th>
+          <th scope="col">Sexta</th>
+          <th scope="col">Total</th>
         </tr>
       </thead>
       <tbody>
         {% for linha in dados %}
         <tr>
           <td class="employee-name">{{ linha.nome }}</td>
-          <td>R$ {{ "%.2f"|format(linha.seg)|replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(linha.ter)|replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(linha.qua)|replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(linha.qui)|replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(linha.sex)|replace('.', ',') }}</td>
-          <td class="total-cell">R$ {{ "%.2f"|format(linha.total)|replace('.', ',') }}</td>
+          <td>R$ {{ linha.seg|format_brl }}</td>
+          <td>R$ {{ linha.ter|format_brl }}</td>
+          <td>R$ {{ linha.qua|format_brl }}</td>
+          <td>R$ {{ linha.qui|format_brl }}</td>
+          <td>R$ {{ linha.sex|format_brl }}</td>
+          <td class="total-cell">R$ {{ linha.total|format_brl }}</td>
         </tr>
         {% endfor %}
 
         <!-- Linha de Total Diário -->
-        <tr class="daily-totals">
+        <tr class="daily-totals highlight">
           <td><strong>Total Diário</strong></td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.seg)|replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.ter)|replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.qua)|replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.qui)|replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(totais_diarios.sex)|replace('.', ',') }}</td>
-          <td>R$ {{ "%.2f"|format(
-            totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex
-          )|replace('.', ',') }}</td>
+          <td>R$ {{ totais_diarios.seg|format_brl }}</td>
+          <td>R$ {{ totais_diarios.ter|format_brl }}</td>
+          <td>R$ {{ totais_diarios.qua|format_brl }}</td>
+          <td>R$ {{ totais_diarios.qui|format_brl }}</td>
+          <td>R$ {{ totais_diarios.sex|format_brl }}</td>
+          <td>R$ {{ (totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex)|format_brl }}</td>
         </tr>
       </tbody>
     </table>
