@@ -8,6 +8,13 @@ from models.user import db
 
 scheduler = BackgroundScheduler()
 
+# ✅ Filtro para formato brasileiro
+def format_brl(value):
+    try:
+        return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    except (ValueError, TypeError):
+        return "0,00"
+
 def salvar_resumo_diario(app):
     """
     Salva um resumo diário das vendas:
@@ -63,7 +70,7 @@ def salvar_resumo_diario(app):
                 db.session.add(registro)
 
             db.session.commit()
-            print(f"[OK] Resumo diário salvo em {datetime.utcnow()}")
+            print(f"[OK] Resumo diário salvo em {datetime.utcnow()} — Total: R$ {format_brl(total_dia)}")
 
         except Exception as e:
             print(f"[ERRO] salvar_resumo_diario: {e}")

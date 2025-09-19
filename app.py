@@ -1,10 +1,10 @@
 import os
 import logging
 import urllib.parse
-from flask import Flask, send_from_directory, render_template
+from flask import Flask, send_from_directory, render_template, request
 from flask_cors import CORS
 
-# Imports diretos (sem src/)
+# Imports diretos
 from models.user import db
 from routes.user import user_bp
 from routes.data import data_bp
@@ -44,19 +44,22 @@ def create_app():
     app.register_blueprint(user_bp, url_prefix="/api")
     app.register_blueprint(data_bp, url_prefix="/api")
     app.register_blueprint(archive_bp, url_prefix="/api")
-    app.register_blueprint(resumo_bp)  # ✅ rota /resumo agora vem daqui
+    app.register_blueprint(resumo_bp)
 
     # Filtro Jinja para moeda brasileira
     @app.template_filter('format_brl')
     def format_brl(value):
-        return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        try:
+            return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        except (ValueError, TypeError):
+            return "0,00"
 
     # Rota para verificar banco usado
     @app.route("/db-check")
     def db_check():
         return f"Banco em uso: {app.config['SQLALCHEMY_DATABASE_URI']}"
 
-    # Rotas de páginas
+    # Rotas de páginas estáticas
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def serve(path):
@@ -64,7 +67,8 @@ def create_app():
         if not static_folder_path:
             return "Static folder not configured", 404
 
-        if path and os.path.exists(os.path.join(static_folder_path, path)):
+        full_path = os.path.join(static_folder_path, path)
+        if path and os.path.exists(full_path):
             return send_from_directory(static_folder_path, path)
 
         index_path = os.path.join(static_folder_path, "index.html")
@@ -72,6 +76,7 @@ def create_app():
             return send_from_directory(static_folder_path, "index.html")
         return "index.html not found", 404
 
+    # Rota para visão TV
     @app.route("/tv")
     def tv_page():
         from routes.data import load_data
