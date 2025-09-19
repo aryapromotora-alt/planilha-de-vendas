@@ -11,12 +11,13 @@ from routes.data import data_bp
 from routes.archive import archive_bp
 from routes.resumo import resumo_bp  # dashboard
 
+
 def create_app():
     app = Flask(
         __name__,
-        static_folder=os.path.join(os.path.dirname(__file__), 'static')
+        static_folder=os.path.join(os.path.dirname(__file__), "static"),
     )
-    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "asdf#FGSgvasgf$5$WGT")
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "asdf#FGSgvasgf$5$WGT")
 
     # ---------------------------
     # Configuração do banco de dados
@@ -31,7 +32,9 @@ def create_app():
         app.config["SQLALCHEMY_DATABASE_URI"] = db_url
         print(f"🔗 Conectando ao banco: {app.config['SQLALCHEMY_DATABASE_URI']}")
     else:
-        raise RuntimeError("DATABASE_URL não configurado — verifique variáveis de ambiente.")
+        raise RuntimeError(
+            "DATABASE_URL não configurado — verifique variáveis de ambiente."
+        )
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -58,10 +61,12 @@ def create_app():
     # ---------------------------
     # Filtro Jinja moeda brasileira
     # ---------------------------
-    @app.template_filter('format_brl')
+    @app.template_filter("format_brl")
     def format_brl(value):
         try:
-            return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace(
+                "X", "."
+            )
         except (ValueError, TypeError):
             return "0,00"
 
@@ -85,3 +90,11 @@ def create_app():
         full_path = os.path.join(static_folder_path, path)
         if path and os.path.exists(full_path):
             return send_from_directory(static_folder_path, path)
+        else:
+            # sempre renderiza o index.html da SPA
+            return send_from_directory(static_folder_path, "index.html")
+
+    # ---------------------------
+    # FINAL: retorna a aplicação
+    # ---------------------------
+    return app
