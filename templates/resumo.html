@@ -8,8 +8,8 @@
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 20px;
-            background: #1f2937; /* fundo escuro uniforme */
-            color: #f9fafb;
+            background: #0b0e11;
+            color: #f0f0f0;
         }
 
         .dashboard {
@@ -19,20 +19,33 @@
         }
 
         header.dashboard-header {
-            text-align: center;
             margin-bottom: 30px;
         }
 
-        h2 {
-            color: #f9fafb;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-top img {
+            height: 50px;
+        }
+
+        .header-top h2 {
+            flex: 1;
+            text-align: center;
+            margin: 0;
+            font-size: 24px;
+            color: #fcd535;
+            text-shadow: 1px 1px 2px #000;
         }
 
         .section-title {
             font-size: 18px;
             margin: 20px 0 10px;
             text-align: center;
-            color: #f9fafb;
+            color: #f0f0f0;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
         }
 
@@ -55,31 +68,27 @@
         }
 
         .card {
-            background: #111827;
-            color: #f9fafb;
+            background: #1e1e1e;
+            color: #f0f0f0;
             padding: 18px;
             border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-            text-align: center;
+            border: 1px solid #fcd535;
+            box-shadow: 0 0 10px rgba(252, 213, 53, 0.2);
             transition: all 0.3s ease;
-            border: 1px solid #374151;
+            text-align: center;
         }
-
-        #resumo-diario .card { background: #1e3a8a; }
-        #resumo-semanal .card { background: #065f46; }
-        #resumo-mensal .card { background: #6b21a8; }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
-            border: 2px solid #FFD700;
+            box-shadow: 0 0 15px rgba(252, 213, 53, 0.4);
+            border: 2px solid #fcd535;
         }
 
         .card h4 {
             margin: 0 0 8px;
             font-weight: 500;
             font-size: 16px;
-            color: #f3f4f6;
+            color: #fcd535;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
@@ -102,9 +111,9 @@
             width: 100%;
             padding: 8px;
             border-radius: 6px;
-            border: 1px solid #334155;
-            background: #1e293b;
-            color: #f1f5f9;
+            border: 1px solid #fcd535;
+            background: #0b0e11;
+            color: #fcd535;
             font-size: 14px;
         }
 
@@ -139,7 +148,11 @@
 <body>
     <div class="dashboard">
         <header class="dashboard-header">
-            <h2>Resumo de Vendas</h2>
+            <div class="header-top">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+                <h2>Resumo de Vendas</h2>
+                <div style="width: 50px;"></div>
+            </div>
         </header>
 
         <section id="resumo-diario">
@@ -229,3 +242,4 @@
     </script>
 </body>
 </html>
+
