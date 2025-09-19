@@ -2,24 +2,30 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import timezone
 
-# imports sem src/
+# imports diretos sem src/
 from routes.data import load_data
 from models.user import db
 
+# Scheduler global
 scheduler = BackgroundScheduler()
 
-# ✅ Filtro para formato brasileiro
+# ---------------------------
+# Filtro para moeda brasileira
+# ---------------------------
 def format_brl(value):
     try:
         return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     except (ValueError, TypeError):
         return "0,00"
 
+# ---------------------------
+# Função que salva resumo diário
+# ---------------------------
 def salvar_resumo_diario(app):
     """
     Salva um resumo diário das vendas:
-      - Tenta salvar no modelo DailySales (se existir)
-      - Se não existir, salva no ResumoHistory como fallback
+    - Prioriza DailySales
+    - Se não existir, usa ResumoHistory como fallback
     """
     with app.app_context():
         try:
@@ -29,6 +35,7 @@ def salvar_resumo_diario(app):
             total_dia = 0
             breakdown = {}
 
+            # Soma por vendedor
             for nome, valores in spreadsheet.items():
                 vendedor_total = sum([
                     valores.get("monday", 0) or 0,
@@ -43,6 +50,7 @@ def salvar_resumo_diario(app):
             today = datetime.utcnow().date()
 
             try:
+                # Tenta usar DailySales
                 from models.archive import DailySales
                 for nome, valores in spreadsheet.items():
                     record = DailySales(
@@ -57,6 +65,7 @@ def salvar_resumo_diario(app):
                     )
                     db.session.add(record)
             except Exception as e:
+                # Fallback para ResumoHistory
                 print(f"[FALLBACK] Erro ao usar DailySales: {e}")
                 from models.archive import ResumoHistory
                 registro = ResumoHistory(
@@ -75,13 +84,21 @@ def salvar_resumo_diario(app):
         except Exception as e:
             print(f"[ERRO] salvar_resumo_diario: {e}")
 
+# ---------------------------
+# Inicializa o scheduler
+# ---------------------------
 def start_scheduler(app):
-    # agenda diária às 23:59 no horário de Brasília
-    scheduler.add_job(
-        lambda: salvar_resumo_diario(app),
-        "cron",
-        hour=23,
-        minute=59,
-        timezone=timezone("America/Sao_Paulo")
-    )
-    scheduler.start()
+    """
+    Agenda diária às 23:59 no horário de Brasília
+    """
+    # Evita múltiplas instâncias do scheduler
+    if not scheduler.get_jobs():
+        scheduler.add_job(
+            func=lambda: salvar_resumo_diario(app),
+            trigger="cron",
+            hour=23,
+            minute=59,
+            timezone=timezone("America/Sao_Paulo")
+        )
+        scheduler.start()
+        print("[INFO] Scheduler iniciado para resumo diário às 23:59 (Horário de Brasília)")
