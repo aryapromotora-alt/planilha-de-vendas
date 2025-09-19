@@ -7,6 +7,13 @@ from collections import defaultdict
 
 resumo_bp = Blueprint("resumo", __name__)
 
+# ✅ Filtro local para formato brasileiro
+def format_brl(value):
+    try:
+        return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    except (ValueError, TypeError):
+        return "0,00"
+
 @resumo_bp.route("/resumo")
 def resumo_page():
     hoje = datetime.utcnow().date()
@@ -73,19 +80,19 @@ def resumo_page():
     return render_template(
         "resumo.html",
         hoje=hoje,
-        total_dia=total_dia,
-        total_semana=total_semana,
-        total_mes=total_mes,
-        total_seg=historico_diario.get("Segunda", 0),
-        total_ter=historico_diario.get("Terça", 0),
-        total_qua=historico_diario.get("Quarta", 0),
-        total_qui=historico_diario.get("Quinta", 0),
-        total_sex=historico_diario.get("Sexta", 0),
-        totais_mes=totais_mes,
+        total_dia=format_brl(total_dia),
+        total_semana=format_brl(total_semana),
+        total_mes=format_brl(total_mes),
+        total_seg=format_brl(historico_diario.get("Segunda", 0)),
+        total_ter=format_brl(historico_diario.get("Terça", 0)),
+        total_qua=format_brl(historico_diario.get("Quarta", 0)),
+        total_qui=format_brl(historico_diario.get("Quinta", 0)),
+        total_sex=format_brl(historico_diario.get("Sexta", 0)),
+        totais_mes=[format_brl(v) for v in totais_mes],
         num_semanas=num_semanas,
         mes_nome=mes_nome,
         mes_atual=mes_atual,
-        historico_mensal=historico_mensal,
+        historico_mensal={k: format_brl(v) for k, v in historico_mensal.items()},
         anos_disponiveis=anos_disponiveis,
         meses_nomes=meses_nomes
     )

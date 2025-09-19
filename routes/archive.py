@@ -1,4 +1,3 @@
-# routes/archive.py
 from flask import Blueprint, jsonify, current_app, request, render_template
 from datetime import datetime, timedelta, date
 from models.user import db
@@ -6,6 +5,13 @@ from models.archive import ResumoHistory, DailySales
 from routes.data import load_data, save_data
 
 archive_bp = Blueprint('archive', __name__)
+
+# ✅ Filtro local para formato brasileiro
+def format_brl(value):
+    try:
+        return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    except (ValueError, TypeError):
+        return "0,00"
 
 # ---------------------------
 # Rota para arquivar semana (Resumo)
@@ -65,8 +71,11 @@ def resumo_archive():
         valores["friday"] = 0
     save_data(data)
 
-    return jsonify({"status": "ok", "resumo": week_label, "total": total})
-
+    return jsonify({
+        "status": "ok",
+        "resumo": week_label,
+        "total": format_brl(total)  # ✅ formato brasileiro aplicado
+    })
 
 # ---------------------------
 # Rota para salvar vendas diárias no banco
@@ -101,7 +110,6 @@ def daily_save():
     db.session.commit()
     return jsonify({"status": "ok", "date": today.isoformat()})
 
-
 # ---------------------------
 # Rota para consultar histórico diário em JSON
 # ---------------------------
@@ -113,7 +121,6 @@ def get_daily_history():
     records = DailySales.query.order_by(DailySales.created_at.desc()).all()
     return jsonify([r.to_dict() for r in records])
 
-
 # ---------------------------
 # Página HTML com histórico (Resumo)
 # ---------------------------
@@ -121,7 +128,6 @@ def get_daily_history():
 def resumo_page():
     history = ResumoHistory.query.order_by(ResumoHistory.created_at.desc()).all()
     return render_template("resumo.html", history=history)
-
 
 # ---------------------------
 # Rota JSON do histórico (Resumo)
