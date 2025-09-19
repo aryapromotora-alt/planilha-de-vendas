@@ -5,100 +5,7 @@
   <title>Visão TV</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="refresh" content="60">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f3f4f6;
-      color: #111827;
-    }
-
-    .main-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .header {
-      background: #000;
-      width: 100%;
-      padding: 20px 0;
-      text-align: center;
-    }
-
-    .header h1 {
-      color: #fcd535;
-      font-size: 32px;
-      margin: 0;
-      text-shadow: 1px 1px 2px #000;
-    }
-
-    .spreadsheet-container {
-      width: 100%;
-      max-width: 1200px;
-      margin-top: 20px;
-      overflow-x: auto;
-    }
-
-    .spreadsheet-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
-
-    .spreadsheet-table th,
-    .spreadsheet-table td {
-      padding: 12px 16px;
-      text-align: center;
-      border: 1px solid #d1d5db;
-      font-size: 18px;
-    }
-
-    .spreadsheet-table th {
-      background: #1f2937;
-      color: #f9fafb;
-    }
-
-    .employee-name {
-      font-weight: bold;
-      color: #111827;
-    }
-
-    .total-cell {
-      font-weight: bold;
-      color: #22c55e;
-    }
-
-    .daily-totals {
-      background: #f9fafb;
-      font-weight: bold;
-    }
-
-    .highlight td {
-      background: #e5e7eb;
-    }
-
-    .footer {
-      margin-top: 20px;
-      font-size: 16px;
-      color: #6b7280;
-    }
-
-    @media (max-width: 768px) {
-      .spreadsheet-table th,
-      .spreadsheet-table td {
-        font-size: 14px;
-        padding: 8px;
-      }
-
-      .header h1 {
-        font-size: 24px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body class="main-container">
   <div class="header">
@@ -131,6 +38,7 @@
         </tr>
         {% endfor %}
 
+        <!-- Linha de Total Diário -->
         <tr class="daily-totals highlight">
           <td><strong>Total Diário</strong></td>
           <td>R$ {{ totais_diarios.seg | format_brl }}</td>
