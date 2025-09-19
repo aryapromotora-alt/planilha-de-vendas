@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resumo de Vendas</title>
     <style>
         body {
@@ -78,7 +79,8 @@
 
         .card:hover {
             border: 1px solid #fcd535;
-            transform: translateY(-3px);
+            box-shadow: 0 0 8px rgba(252, 213, 53, 0.3);
+            transform: translateY(-2px);
         }
 
         .card h4 {
@@ -128,6 +130,12 @@
             flex: 1;
         }
 
+        @media (max-width: 1024px) {
+            .cards {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+
         @media (max-width: 600px) {
             .cards {
                 grid-template-columns: 1fr;
@@ -143,7 +151,7 @@
 </head>
 <body>
     <div class="top-bar">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo da empresa Arya">
         <h2>Resumo de Vendas</h2>
         <div style="width: 40px;"></div>
     </div>
@@ -152,11 +160,11 @@
         <section id="resumo-diario">
             <h3 class="section-title">Resumo Diário</h3>
             <div class="cards small-cards">
-                <div class="card"><h4>Segunda</h4><p class="valor">R$ {{ total_seg | format_brl }}</p></div>
-                <div class="card"><h4>Terça</h4><p class="valor">R$ {{ total_ter | format_brl }}</p></div>
-                <div class="card"><h4>Quarta</h4><p class="valor">R$ {{ total_qua | format_brl }}</p></div>
-                <div class="card"><h4>Quinta</h4><p class="valor">R$ {{ total_qui | format_brl }}</p></div>
-                <div class="card"><h4>Sexta</h4><p class="valor">R$ {{ total_sex | format_brl }}</p></div>
+                <article class="card"><h4>Segunda</h4><p class="valor">R$ {{ total_seg | format_brl }}</p></article>
+                <article class="card"><h4>Terça</h4><p class="valor">R$ {{ total_ter | format_brl }}</p></article>
+                <article class="card"><h4>Quarta</h4><p class="valor">R$ {{ total_qua | format_brl }}</p></article>
+                <article class="card"><h4>Quinta</h4><p class="valor">R$ {{ total_qui | format_brl }}</p></article>
+                <article class="card"><h4>Sexta</h4><p class="valor">R$ {{ total_sex | format_brl }}</p></article>
             </div>
         </section>
 
@@ -164,10 +172,10 @@
             <h3 class="section-title">Resumo Semanal</h3>
             <div class="cards medium-cards">
                 {% for i in range(num_semanas) %}
-                    <div class="card">
+                    <article class="card">
                         <h4>Semana {{ i + 1 }}</h4>
                         <p class="valor">R$ {{ totais_mes[i] | format_brl }}</p>
-                    </div>
+                    </article>
                 {% endfor %}
             </div>
         </section>
@@ -175,7 +183,7 @@
         <section id="resumo-mensal">
             <h3 class="section-title">Resumo Mensal</h3>
             <div class="cards">
-                <div class="card large-card">
+                <article class="card large-card">
                     <h4>Total Mensal</h4>
                     <p class="valor {% if historico_mensal.get(mes_atual, 0) >= 2000 %}high{% else %}low{% endif %}" id="valor-mensal">
                         R$ {{ historico_mensal.get(mes_atual, 0) | format_brl }}
@@ -194,7 +202,7 @@
                             {% endfor %}
                         </select>
                     </form>
-                </div>
+                </article>
             </div>
         </section>
     </div>
@@ -222,7 +230,7 @@
                     container.innerHTML = '';
 
                     semanas.forEach((valor, i) => {
-                        const card = document.createElement('div');
+                        const card = document.createElement('article');
                         card.className = 'card';
                         card.innerHTML = `<h4>Semana ${i + 1}</h4><p class="valor">R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>`;
                         container.appendChild(card);
