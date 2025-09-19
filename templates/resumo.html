@@ -72,16 +72,17 @@
             color: #f0f0f0;
             padding: 18px;
             border-radius: 12px;
-            border: 1px solid #fcd535;
-            box-shadow: 0 0 10px rgba(252, 213, 53, 0.2);
+            border: 1px solid #2c2c2c; /* cinza apagado */
+            box-shadow: none;
             transition: all 0.3s ease;
             text-align: center;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 15px rgba(252, 213, 53, 0.4);
-            border: 2px solid #fcd535;
+            border: 1px solid #fcd535;
+            box-shadow: 0 0 10px rgba(252, 213, 53, 0.3); 0.4);
+            transform: translateY(-3px);
+
         }
 
         .card h4 {
@@ -149,7 +150,7 @@
     <div class="dashboard">
         <header class="dashboard-header">
             <div class="header-top">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 50px; background: transparent;">
                 <h2>Resumo de Vendas</h2>
                 <div style="width: 50px;"></div>
             </div>
