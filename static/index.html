@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planilha de Vendas</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <!-- Seção de Login -->
@@ -67,7 +67,6 @@
             </table>
         </div>
 
-        <!-- Rodapé com informação do usuário -->
         <footer class="footer">
             <span id="logged-user"></span>
         </footer>
@@ -87,11 +86,9 @@
             <!-- Conteúdo da aba Gerenciar Vendedores -->
             <div id="manage-employees" class="tab-content active">
                 <h3>Vendedores Cadastrados</h3>
-                <div class="employee-list">
-                    <ul id="employee-management-list">
-                        <!-- Lista de vendedores será inserida aqui -->
-                    </ul>
-                </div>
+                <ul id="employee-management-list">
+                    <!-- Lista de vendedores será preenchida via JS -->
+                </ul>
             </div>
 
             <!-- Conteúdo da aba Adicionar Vendedor -->
@@ -116,9 +113,9 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="/static/script.js"></script>
     <script>
-        // ✅ Função para formatar valores no padrão brasileiro
+        // Função utilitária para formatar valores em BRL
         function formatBRL(value) {
             return "R$ " + parseFloat(value).toLocaleString("pt-BR", {
                 minimumFractionDigits: 2,
@@ -126,7 +123,7 @@
             });
         }
 
-        // Exemplo de uso: atualizar totais
+        // Exemplo de preenchimento manual (pode ser substituído por fetch da API)
         document.getElementById("monday-total").innerText = formatBRL(21575.53);
         document.getElementById("tuesday-total").innerText = formatBRL(0);
         document.getElementById("wednesday-total").innerText = formatBRL(36221.71);
@@ -134,7 +131,11 @@
         document.getElementById("friday-total").innerText = formatBRL(47360.97);
         document.getElementById("week-total").innerText = formatBRL(126198.21);
 
-        // Para aplicar nas linhas de vendedores, use formatBRL(valor) ao preencher cada célula
+        // Para popular linhas de vendedores via JS:
+        // const employeeRows = document.getElementById("employee-rows");
+        // employeeRows.innerHTML = `<tr>
+        //   <td>João</td><td>${formatBRL(1000)}</td>...
+        // </tr>`;
     </script>
 </body>
 </html>
