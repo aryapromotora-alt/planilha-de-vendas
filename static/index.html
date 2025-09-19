@@ -8,23 +8,24 @@
 </head>
 <body>
     <!-- Seção de Login -->
-<div id="login-section" class="login-container">
-    <div class="login-form binance-style">
-        <img src="/static/logo.png" alt="Logo da Empresa" class="login-logo">
-        <h2>Login</h2>
-        <form id="login-form">
-            <div class="form-group">
-                <label for="username">Usuário:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Senha:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" class="binance-button">Entrar</button>
-        </form>
+    <div id="login-section" class="login-container">
+        <div class="login-form binance-style">
+            <img src="/static/logo.png" alt="Logo da Empresa" class="login-logo">
+            <h2>Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Usuário:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="binance-button">Entrar</button>
+            </form>
+        </div>
     </div>
-</div>
+
     <!-- Seção Principal -->
     <div id="main-section" class="main-container" style="display: none;">
         <header class="header">
@@ -65,7 +66,7 @@
                 </tfoot>
             </table>
         </div>
-        
+
         <!-- Rodapé com informação do usuário -->
         <footer class="footer">
             <span id="logged-user"></span>
@@ -76,7 +77,7 @@
     <div id="admin-section" class="admin-container" style="display: none;">
         <div class="admin-panel">
             <h2>Painel de Administração</h2>
-            
+
             <!-- Aba de Gerenciar Funcionários -->
             <div class="admin-tabs">
                 <button class="tab-btn active" data-tab="manage-employees">Gerenciar Vendedores</button>
@@ -116,5 +117,24 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // ✅ Função para formatar valores no padrão brasileiro
+        function formatBRL(value) {
+            return "R$ " + parseFloat(value).toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Exemplo de uso: atualizar totais
+        document.getElementById("monday-total").innerText = formatBRL(21575.53);
+        document.getElementById("tuesday-total").innerText = formatBRL(0);
+        document.getElementById("wednesday-total").innerText = formatBRL(36221.71);
+        document.getElementById("thursday-total").innerText = formatBRL(21040.00);
+        document.getElementById("friday-total").innerText = formatBRL(47360.97);
+        document.getElementById("week-total").innerText = formatBRL(126198.21);
+
+        // Para aplicar nas linhas de vendedores, use formatBRL(valor) ao preencher cada célula
+    </script>
 </body>
 </html>
