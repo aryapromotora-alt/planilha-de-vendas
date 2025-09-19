@@ -1,246 +1,253 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resumo de Vendas</title>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f3f4f6;
-            color: #111827;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resumo de Vendas</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f3f4f6;
+      color: #111827;
+    }
 
-        .top-bar {
-            background: #000;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+    .top-bar {
+      background: #000;
+      padding: 15px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        .top-bar img {
-            height: 40px;
-            background-color: transparent;
-        }
+    .top-bar img {
+      height: 40px;
+      background-color: transparent;
+    }
 
-        .top-bar h2 {
-            flex: 1;
-            text-align: center;
-            margin: 0;
-            font-size: 22px;
-            color: #fcd535;
-            text-shadow: 1px 1px 2px #000;
-        }
+    .top-bar h2 {
+      flex: 1;
+      text-align: center;
+      margin: 0;
+      font-size: 22px;
+      color: #fcd535;
+      text-shadow: 1px 1px 2px #000;
+    }
 
-        .dashboard {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px 20px;
-        }
+    .dashboard {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px 20px;
+    }
 
-        .section-title {
-            font-size: 20px;
-            margin: 16px 0 8px;
-            text-align: center;
-            color: #000;
-        }
+    .section-title {
+      font-size: 20px;
+      margin: 16px 0 8px;
+      text-align: center;
+      color: #000;
+    }
 
-        section {
-            margin-bottom: 24px;
-        }
+    section {
+      margin-bottom: 24px;
+    }
 
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
 
-        .small-cards {
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        }
+    .small-cards {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
 
-        .medium-cards {
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        }
+    .medium-cards {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
 
-        .card {
-            background: #1f2937;
-            color: #f9fafb;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #2c2c2c;
-            transition: border 0.3s ease, transform 0.3s ease;
-            text-align: center;
-            min-height: 100px;
-        }
+    .card {
+      background: #1f2937;
+      color: #f9fafb;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #2c2c2c;
+      transition: border 0.3s ease, transform 0.3s ease;
+      text-align: center;
+      min-height: 100px;
+    }
 
-        .card:hover {
-            border: 1px solid #fcd535;
-            box-shadow: 0 0 8px rgba(252, 213, 53, 0.3);
-            transform: translateY(-2px);
-        }
+    .card:hover {
+      border: 1px solid #fcd535;
+      box-shadow: 0 0 8px rgba(252, 213, 53, 0.3);
+      transform: translateY(-2px);
+    }
 
-        .card h4 {
-            margin: 0 0 8px;
-            font-weight: 500;
-            font-size: 16px;
-            color: #fcd535;
-        }
+    .card h4 {
+      margin: 0 0 8px;
+      font-weight: 500;
+      font-size: 16px;
+      color: #fcd535;
+    }
 
-        .card .valor {
-            font-size: 24px;
-            font-weight: bold;
-            color: #f9fafb;
-        }
+    .card .valor {
+      font-size: 24px;
+      font-weight: bold;
+      color: #f9fafb;
+    }
 
-        .card .valor.high { color: #22c55e; }
-        .card .valor.low { color: #ef4444; }
+    .card .valor.high { color: #22c55e; }
+    .card .valor.low { color: #ef4444; }
 
-        .large-card {
-            padding: 25px;
-            font-size: 18px;
-        }
+    .large-card {
+      padding: 25px;
+      font-size: 18px;
+    }
 
-        .large-card select {
-            margin-top: 12px;
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #fcd535;
-            background: #1f2937;
-            color: #fcd535;
-            font-size: 14px;
-        }
+    .large-card select {
+      margin-top: 12px;
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #fcd535;
+      background: #1f2937;
+      color: #fcd535;
+      font-size: 14px;
+    }
 
-        .large-card select:focus {
-            outline: none;
-            border-color: #22c55e;
-        }
+    .large-card select:focus {
+      outline: none;
+      border-color: #22c55e;
+    }
 
-        .selectors {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
+    .selectors {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
 
-        .selectors select {
-            flex: 1;
-        }
+    .selectors select {
+      flex: 1;
+    }
 
-        @media (max-width: 1024px) {
-            .cards {
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            }
-        }
+    @media (max-width: 1024px) {
+      .cards {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+    }
 
-        @media (max-width: 600px) {
-            .cards {
-                grid-template-columns: 1fr;
-            }
-            .large-card {
-                font-size: 16px;
-            }
-            .selectors {
-                flex-direction: column;
-            }
-        }
-    </style>
+    @media (max-width: 600px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+      .large-card {
+        font-size: 16px;
+      }
+      .selectors {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="top-bar">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo da empresa Arya">
-        <h2>Resumo de Vendas</h2>
-        <div style="width: 40px;"></div>
-    </div>
+  <div class="top-bar">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo da empresa Arya">
+    <h2>Resumo de Vendas</h2>
+    <div style="width: 40px;"></div>
+  </div>
 
-    <div class="dashboard">
-        <section id="resumo-diario">
-            <h3 class="section-title">Resumo Diário</h3>
-            <div class="cards small-cards">
-                <article class="card"><h4>Segunda</h4><p class="valor">R$ {{ total_seg | format_brl }}</p></article>
-                <article class="card"><h4>Terça</h4><p class="valor">R$ {{ total_ter | format_brl }}</p></article>
-                <article class="card"><h4>Quarta</h4><p class="valor">R$ {{ total_qua | format_brl }}</p></article>
-                <article class="card"><h4>Quinta</h4><p class="valor">R$ {{ total_qui | format_brl }}</p></article>
-                <article class="card"><h4>Sexta</h4><p class="valor">R$ {{ total_sex | format_brl }}</p></article>
-            </div>
-        </section>
+  <div class="dashboard">
+    <section id="resumo-diario">
+      <h3 class="section-title">Resumo Diário</h3>
+      <div class="cards small-cards">
+        <article class="card"><h4>Segunda</h4><p class="valor">R$ {{ total_seg | format_brl }}</p></article>
+        <article class="card"><h4>Terça</h4><p class="valor">R$ {{ total_ter | format_brl }}</p></article>
+        <article class="card"><h4>Quarta</h4><p class="valor">R$ {{ total_qua | format_brl }}</p></article>
+        <article class="card"><h4>Quinta</h4><p class="valor">R$ {{ total_qui | format_brl }}</p></article>
+        <article class="card"><h4>Sexta</h4><p class="valor">R$ {{ total_sex | format_brl }}</p></article>
+      </div>
+    </section>
 
-        <section id="resumo-semanal">
-            <h3 class="section-title">Resumo Semanal</h3>
-            <div class="cards medium-cards">
-                {% for i in range(num_semanas) %}
-                    <article class="card">
-                        <h4>Semana {{ i + 1 }}</h4>
-                        <p class="valor">R$ {{ totais_mes[i] | format_brl }}</p>
-                    </article>
-                {% endfor %}
-            </div>
-        </section>
+    <section id="resumo-semanal">
+      <h3 class="section-title">Resumo Semanal</h3>
+      <div class="cards medium-cards">
+        {% for i in range(num_semanas) %}
+        <article class="card">
+          <h4>Semana {{ i + 1 }}</h4>
+          <p class="valor">R$ {{ totais_mes[i] | format_brl }}</p>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
 
-        <section id="resumo-mensal">
-            <h3 class="section-title">Resumo Mensal</h3>
-            <div class="cards">
-                <article class="card large-card">
-                    <h4>Total Mensal</h4>
-                    <p class="valor {% if historico_mensal.get(mes_atual, 0) >= 2000 %}high{% else %}low{% endif %}" id="valor-mensal">
-                        R$ {{ historico_mensal.get(mes_atual, 0) | format_brl }}
-                    </p>
+    <section id="resumo-mensal">
+      <h3 class="section-title">Resumo Mensal</h3>
+      <div class="cards">
+        <article class="card large-card">
+          <h4>Total Mensal</h4>
+          <p class="valor {% if historico_mensal.get(mes_atual, 0) >= 2000 %}high{% else %}low{% endif %}" id="valor-mensal">
+            R$ {{ historico_mensal.get(mes_atual, 0) | format_brl }}
+          </p>
 
-                    <form class="selectors">
-                        <select id="mes-selector">
-                            {% for i in range(1, 13) %}
-                                <option value="{{ i }}" {% if i == hoje.month %}selected{% endif %}>{{ meses_nomes[i - 1] }}</option>
-                            {% endfor %}
-                        </select>
+          <form class="selectors">
+            <select id="mes-selector">
+              {% for i in range(1, 13) %}
+              <option value="{{ i }}" {% if i == hoje.month %}selected{% endif %}>{{ meses_nomes[i - 1] }}</option>
+              {% endfor %}
+            </select>
 
-                        <select id="ano-selector">
-                            {% for a in anos_disponiveis %}
-                                <option value="{{ a }}" {% if a == hoje.year %}selected{% endif %}>{{ a }}</option>
-                            {% endfor %}
-                        </select>
-                    </form>
-                </article>
-            </div>
-        </section>
-    </div>
+            <select id="ano-selector">
+              {% for a in anos_disponiveis %}
+              <option value="{{ a }}" {% if a == hoje.year %}selected{% endif %}>{{ a }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </article>
+      </div>
+    </section>
+  </div>
 
-    <script>
-        const mesSelector = document.getElementById('mes-selector');
-        const anoSelector = document.getElementById('ano-selector');
-        const valorMensal = document.getElementById('valor-mensal');
-        const historico = {{ historico_mensal | tojson }};
+  <script>
+    const mesSelector = document.getElementById('mes-selector');
+    const anoSelector = document.getElementById('ano-selector');
+    const valorMensal = document.getElementById('valor-mensal');
 
-        function atualizarResumo() {
-            const mes = String(mesSelector.value).padStart(2, '0');
-            const ano = anoSelector.value;
-            const chave = `${ano}-${mes}`;
-            const valor = historico[chave] || 0;
+    // ✅ Correção: JSON seguro para evitar erro de sintaxe
+    const historico = {{ historico_mensal | tojson | safe }};
 
-            valorMensal.textContent = "R$ " + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            valorMensal.classList.remove("high", "low");
-            valorMensal.classList.add(valor >= 2000 ? "high" : "low");
+    function atualizarResumo() {
+      const mes = String(mesSelector.value).padStart(2, '0');
+      const ano = anoSelector.value;
+      const chave = `${ano}-${mes}`;
+      const valor = historico[chave] || 0;
 
-            fetch(`/api/semanas/${ano}/${mes}`)
-                .then(res => res.json())
-                .then(semanas => {
-                    const container = document.querySelector('.medium-cards');
-                    container.innerHTML = '';
+      valorMensal.textContent = "R$ " + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+      valorMensal.classList.remove("high", "low");
+      valorMensal.classList.add(valor >= 2000 ? "high" : "low");
 
-                    semanas.forEach((valor, i) => {
-                        const card = document.createElement('article');
-                        card.className = 'card';
-                        card.innerHTML = `<h4>Semana ${i + 1}</h4><p class="valor">R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>`;
-                        container.appendChild(card);
-                    });
-                });
-        }
+      fetch(`/api/semanas/${ano}/${mes}`)
+        .then(res => res.json())
+        .then(semanas => {
+          const container = document.querySelector('.medium-cards');
+          container.innerHTML = '';
 
-        mesSelector.addEventListener('change', atualizarResumo);
-        anoSelector.addEventListener('change', atualizarResumo);
-        atualizarResumo();
-    </script>
+          semanas.forEach((valor, i) => {
+            const card = document.createElement('article');
+            card.className = 'card';
+            card.innerHTML = `<h4>Semana ${i + 1}</h4><p class="valor">R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>`;
+            container.appendChild(card);
+            semanas.forEach((valor, i) => {
+              const card = document.createElement('article');
+              card.className = 'card';
+              card.innerHTML = `<h4>Semana ${i + 1}</h4><p class="valor">R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>`;
+              container.appendChild(card);
+            });
+          });
+    }
+
+    mesSelector.addEventListener('change', atualizarResumo);
+    anoSelector.addEventListener('change', atualizarResumo);
+    atualizarResumo();
+  </script>
 </body>
 </html>
