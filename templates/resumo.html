@@ -221,10 +221,12 @@
       const chave = `${ano}-${mes}`;
       const valor = historico[chave] || 0;
 
+      // Atualiza total mensal
       valorMensal.textContent = "R$ " + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
       valorMensal.classList.remove("high", "low");
       valorMensal.classList.add(valor >= 2000 ? "high" : "low");
 
+      // Atualiza resumo semanal
       fetch(`/api/semanas/${ano}/${mes}`)
         .then(res => res.json())
         .then(semanas => {
@@ -234,19 +236,20 @@
           semanas.forEach((valor, i) => {
             const card = document.createElement('article');
             card.className = 'card';
-            card.innerHTML = `<h4>Semana ${i + 1}</h4><p class="valor">R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>`;
+            card.innerHTML = `
+              <h4>Semana ${i + 1}</h4>
+              <p class="valor">R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            `;
             container.appendChild(card);
-            semanas.forEach((valor, i) => {
-              const card = document.createElement('article');
-              card.className = 'card';
-              card.innerHTML = `<h4>Semana ${i + 1}</h4><p class="valor">R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>`;
-              container.appendChild(card);
-            });
           });
+        })
+        .catch(err => console.error("Erro ao carregar semanas:", err));
     }
 
     mesSelector.addEventListener('change', atualizarResumo);
     anoSelector.addEventListener('change', atualizarResumo);
+
+    // Inicializa ao carregar
     atualizarResumo();
   </script>
 </body>
