@@ -2,12 +2,65 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Visão TV</title>
+  <title>Visão TV - Resumo de Vendas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="60">
+  <meta http-equiv="refresh" content="60"> <!-- Atualiza a cada 60 segundos -->
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+      margin: 0;
+      padding: 0;
+    }
+    .header, .footer {
+      text-align: center;
+      background: #1f2937;
+      color: #fcd535;
+      padding: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .footer {
+      position: sticky;
+      bottom: 0;
+    }
+    .spreadsheet-container {
+      overflow-x: auto;
+      padding: 20px;
+    }
+    table.spreadsheet-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table.spreadsheet-table th, table.spreadsheet-table td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    table.spreadsheet-table th {
+      background: #1f2937;
+      color: #fcd535;
+      position: sticky;
+      top: 0;
+    }
+    .highlight {
+      background-color: #fde68a;
+      font-weight: bold;
+    }
+    .employee-name {
+      text-align: left;
+      padding-left: 12px;
+    }
+    .total-cell {
+      font-weight: bold;
+      color: #1f2937;
+    }
+  </style>
 </head>
-<body class="main-container">
+<body>
   <div class="header">
     <h1>Resumo de Vendas</h1>
   </div>
@@ -16,13 +69,13 @@
     <table class="spreadsheet-table">
       <thead>
         <tr>
-          <th scope="col">Vendedor</th>
-          <th scope="col">Segunda</th>
-          <th scope="col">Terça</th>
-          <th scope="col">Quarta</th>
-          <th scope="col">Quinta</th>
-          <th scope="col">Sexta</th>
-          <th scope="col">Total</th>
+          <th>Vendedor</th>
+          <th>Segunda</th>
+          <th>Terça</th>
+          <th>Quarta</th>
+          <th>Quinta</th>
+          <th>Sexta</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tbody>
@@ -40,20 +93,22 @@
 
         <!-- Linha de Total Diário -->
         <tr class="daily-totals highlight">
-          <td><strong>Total Diário</strong></td>
+          <td>Total Diário</td>
           <td>R$ {{ totais_diarios.seg | format_brl }}</td>
           <td>R$ {{ totais_diarios.ter | format_brl }}</td>
           <td>R$ {{ totais_diarios.qua | format_brl }}</td>
           <td>R$ {{ totais_diarios.qui | format_brl }}</td>
           <td>R$ {{ totais_diarios.sex | format_brl }}</td>
-          <td>R$ {{ (totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex) | format_brl }}</td>
+          <td>R$ {{
+            (totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex) | format_brl
+          }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <div class="footer">
-    <span>Atualizado automaticamente a cada 60 segundos</span>
+    Atualizado automaticamente a cada 60 segundos
   </div>
 </body>
 </html>
