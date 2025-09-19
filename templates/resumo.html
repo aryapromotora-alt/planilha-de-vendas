@@ -7,46 +7,44 @@
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
-            padding: 20px;
-            background: #0b0e11;
-            color: #f0f0f0;
+            padding: 0;
+            background: #f3f4f6; /* fundo cinza claro */
+            color: #111827;
         }
 
-        .dashboard {
-            max-width: 1200px;
-            margin: auto;
-            padding: 0 1rem;
-        }
-
-        header.dashboard-header {
-            margin-bottom: 30px;
-        }
-
-        .header-top {
+        .top-bar {
+            background: #000;
+            padding: 15px 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .header-top img {
-            height: 50px;
+        .top-bar img {
+            height: 40px;
+            background-color: transparent;
         }
 
-        .header-top h2 {
+        .top-bar h2 {
             flex: 1;
             text-align: center;
             margin: 0;
-            font-size: 24px;
+            font-size: 22px;
             color: #fcd535;
             text-shadow: 1px 1px 2px #000;
         }
 
+        .dashboard {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px 20px;
+        }
+
         .section-title {
-            font-size: 18px;
+            font-size: 20px;
             margin: 20px 0 10px;
             text-align: center;
-            color: #f0f0f0;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+            color: #000; /* título em preto */
         }
 
         section {
@@ -68,21 +66,18 @@
         }
 
         .card {
-            background: #1e1e1e;
-            color: #f0f0f0;
+            background: #1f2937; /* cinza escuro */
+            color: #f9fafb;
             padding: 18px;
             border-radius: 12px;
-            border: 1px solid #2c2c2c; /* cinza apagado */
-            box-shadow: none;
-            transition: all 0.3s ease;
+            border: 1px solid #2c2c2c; /* borda cinza apagada */
+            transition: border 0.3s ease, transform 0.3s ease;
             text-align: center;
         }
 
         .card:hover {
-            border: 1px solid #fcd535;
-            box-shadow: 0 0 10px rgba(252, 213, 53, 0.3); 0.4);
+            border: 1px solid #fcd535; /* dourado no hover */
             transform: translateY(-3px);
-
         }
 
         .card h4 {
@@ -90,13 +85,12 @@
             font-weight: 500;
             font-size: 16px;
             color: #fcd535;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         .card .valor {
             font-size: 24px;
             font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            color: #f9fafb;
         }
 
         .card .valor.high { color: #22c55e; }
@@ -113,7 +107,7 @@
             padding: 8px;
             border-radius: 6px;
             border: 1px solid #fcd535;
-            background: #0b0e11;
+            background: #1f2937;
             color: #fcd535;
             font-size: 14px;
         }
@@ -147,15 +141,13 @@
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <header class="dashboard-header">
-            <div class="header-top">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 50px; background: transparent;">
-                <h2>Resumo de Vendas</h2>
-                <div style="width: 50px;"></div>
-            </div>
-        </header>
+    <div class="top-bar">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <h2>Resumo de Vendas</h2>
+        <div style="width: 40px;"></div>
+    </div>
 
+    <div class="dashboard">
         <section id="resumo-diario">
             <h3 class="section-title">Resumo Diário</h3>
             <div class="cards small-cards">
@@ -243,4 +235,3 @@
     </script>
 </body>
 </html>
-
