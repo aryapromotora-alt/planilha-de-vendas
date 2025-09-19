@@ -77,6 +77,7 @@ def resumo_page():
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ]
 
+    # --- Renderiza template com todos os valores ---
     return render_template(
         "resumo.html",
         hoje=hoje,
