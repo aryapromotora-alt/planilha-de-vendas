@@ -4,21 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planilha de Vendas</title>
-    <!-- ✅ Forçando recarregamento do CSS com versionamento -->
-    <link rel="stylesheet" href="/static/style.css?v=3.0">
-    <style>
-        /* ✅ ESTILO DE EMERGÊNCIA — FORÇA AS CORES DIRETO NO HTML (se o CSS externo falhar) */
-        .value-cell {
-            background-color: #f5f5f5 !important;
-            color: #000 !important;
-            border: 1px solid #ddd !important;
-            border-radius: 6px !important;
-            padding: 0.8rem !important;
-            text-align: center !important;
-            font-weight: 600 !important;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <!-- Seção de Login -->
@@ -65,27 +51,17 @@
                     </tr>
                 </thead>
                 <tbody id="employee-rows">
-                    <!-- Linha de exemplo com value-cell -->
-                    <tr>
-                        <td class="employee-name">Anderson</td>
-                        <td class="value-cell">R$ 2.500,00</td>
-                        <td class="value-cell">R$ 1.800,00</td>
-                        <td class="value-cell">R$ 3.200,00</td>
-                        <td class="value-cell">R$ 0,00</td>
-                        <td class="value-cell">R$ 4.100,00</td>
-                        <td class="total-cell">R$ 11.600,00</td>
-                    </tr>
                     <!-- Linhas dos funcionários serão inseridas aqui via JavaScript -->
                 </tbody>
                 <tfoot>
                     <tr class="daily-totals highlight">
                         <td><strong>TOTAL DIÁRIO</strong></td>
-                        <td id="monday-total" class="value-cell">R$ 21.575,53</td>
-                        <td id="tuesday-total" class="value-cell">R$ 0,00</td>
-                        <td id="wednesday-total" class="value-cell">R$ 36.221,71</td>
-                        <td id="thursday-total" class="value-cell">R$ 21.040,00</td>
-                        <td id="friday-total" class="value-cell">R$ 47.360,97</td>
-                        <td id="week-total" class="total-cell">R$ 126.198,21</td>
+                        <td id="monday-total">R$ 0,00</td>
+                        <td id="tuesday-total">R$ 0,00</td>
+                        <td id="wednesday-total">R$ 0,00</td>
+                        <td id="thursday-total">R$ 0,00</td>
+                        <td id="friday-total">R$ 0,00</td>
+                        <td id="week-total">R$ 0,00</td>
                     </tr>
                 </tfoot>
             </table>
@@ -147,7 +123,7 @@
             });
         }
 
-        // Preenchimento dos totais diários
+        // Exemplo de preenchimento manual (pode ser substituído por fetch da API)
         document.getElementById("monday-total").innerText = formatBRL(21575.53);
         document.getElementById("tuesday-total").innerText = formatBRL(0);
         document.getElementById("wednesday-total").innerText = formatBRL(36221.71);
@@ -155,24 +131,11 @@
         document.getElementById("friday-total").innerText = formatBRL(47360.97);
         document.getElementById("week-total").innerText = formatBRL(126198.21);
 
-        // Função para adicionar linhas dinamicamente com a classe value-cell
-        function addEmployeeRow(name, monday, tuesday, wednesday, thursday, friday, total) {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td class="employee-name">${name}</td>
-                <td class="value-cell">${formatBRL(monday)}</td>
-                <td class="value-cell">${formatBRL(tuesday)}</td>
-                <td class="value-cell">${formatBRL(wednesday)}</td>
-                <td class="value-cell">${formatBRL(thursday)}</td>
-                <td class="value-cell">${formatBRL(friday)}</td>
-                <td class="total-cell">${formatBRL(total)}</td>
-            `;
-            document.getElementById("employee-rows").appendChild(row);
-        }
-
-        // Exemplo de uso (descomente para testar):
-        // addEmployeeRow("João Silva", 1500, 2300, 0, 3100, 4500, 11400);
-        // addEmployeeRow("Maria Oliveira", 2000, 1800, 2200, 0, 3900, 9900);
+        // Para popular linhas de vendedores via JS:
+        // const employeeRows = document.getElementById("employee-rows");
+        // employeeRows.innerHTML = `<tr>
+        //   <td>João</td><td>${formatBRL(1000)}</td>...
+        // </tr>`;
     </script>
 </body>
 </html>
