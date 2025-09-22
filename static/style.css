@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #121212; /* Fundo escuro */
+    background-color: #f0f0f0; /* Fundo cinza claro */
     color: #ffffff;
     line-height: 1.6;
     animation: fadeIn 0.5s ease-in;
@@ -218,14 +218,14 @@ button:hover {
 }
 
 .daily-totals {
-    background-color: #fff9c4 !important;
+    background-color: #333 !important;
     font-weight: 600;
     border-top: 2px solid #FFD700;
 }
 
 .daily-totals td {
     padding: 1rem;
-    color: #000;
+    color: #FFD700;
 }
 
 .highlight {
@@ -260,7 +260,7 @@ button:hover {
     max-width: 100px;
     text-align: center;
     background: #1a1a1a;
-    color: white;
+    color: #FFD700;
     border: 1px solid #ccc;
     border-radius: 4px;
     padding: 0.5rem;
