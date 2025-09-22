@@ -244,26 +244,27 @@ button:hover {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* >>> NOVO: Estilo para células com valores (R$ 0,00) <<< */
-.value-cell {
+/* >>> CORREÇÃO FINAL: Células com valores (R$ 0,00) - fundo branco, texto preto <<< */
+.spreadsheet-table td.value-cell {
     background-color: white !important;
     color: #000 !important;
     font-weight: 600;
-    border: 1px solid #eee;
+    border: 1px solid #ccc !important;
     border-radius: 6px;
     padding: 0.8rem !important;
     text-align: center;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-/* Evita que hover ou linhas alternadas mudem o estilo */
-.spreadsheet-table tbody tr:hover .value-cell,
-.spreadsheet-table tbody tr:nth-child(odd) .value-cell,
-.spreadsheet-table tbody tr:nth-child(even) .value-cell {
+/* Evita que hover ou linhas alternadas interfiram */
+.spreadsheet-table tbody tr:hover td.value-cell,
+.spreadsheet-table tbody tr:nth-child(odd) td.value-cell,
+.spreadsheet-table tbody tr:nth-child(even) td.value-cell {
     background-color: white !important;
     color: #000 !important;
 }
 
+/* Inputs dentro das células editáveis */
 .editable-cell {
     cursor: pointer;
     position: relative;
@@ -279,8 +280,8 @@ button:hover {
     min-width: 60px;
     max-width: 100px;
     text-align: center;
-    background: white;
-    color: #000;
+    background: white !important;
+    color: #000 !important;
     border: 1px solid #ccc;
     border-radius: 4px;
     padding: 0.5rem;
@@ -512,20 +513,4 @@ button:hover {
 
 .binance-button {
     background-color: #FFD700;
-    color: #111;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    transition: background-color 0.3s;
-    margin-top: 1rem;
-    font-weight: bold;
-}
-
-.binance-button:hover {
-    background-color: #ffd000;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-}
+    color: #11
