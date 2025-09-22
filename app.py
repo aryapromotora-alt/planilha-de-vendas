@@ -13,9 +13,11 @@ from routes.resumo import resumo_bp  # dashboard
 
 
 def create_app():
+    # ✅ Define explicitamente onde estão os templates
     app = Flask(
         __name__,
         static_folder=os.path.join(os.path.dirname(__file__), "static"),
+        template_folder=os.path.join(os.path.dirname(__file__), "templates"),
     )
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "asdf#FGSgvasgf$5$WGT")
 
