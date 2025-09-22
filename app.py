@@ -78,6 +78,21 @@ def create_app():
         return f"Banco em uso: {app.config['SQLALCHEMY_DATABASE_URI']}"
 
     # ---------------------------
+    # Rota pública /tv para exibição em telão
+    # ---------------------------
+    @app.route("/tv")
+    def tv():
+        # Dados fictícios para teste — substitua pela sua lógica real
+        dados = [
+            {"nome": "Anderson", "seg": 1500, "ter": 2300, "qua": 0, "qui": 3100, "sex": 4500},
+            {"nome": "Vitória", "seg": 2000, "ter": 1800, "qua": 2200, "qui": 0, "sex": 3900},
+        ]
+        totais_diarios = {
+            "seg": 3500, "ter": 4100, "qua": 2200, "qui": 3100, "sex": 8400
+        }
+        return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
+
+    # ---------------------------
     # Rotas estáticas / SPA
     # ---------------------------
     @app.route("/", defaults={"path": ""})
