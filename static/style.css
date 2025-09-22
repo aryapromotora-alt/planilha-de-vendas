@@ -259,18 +259,21 @@ button:hover {
     min-width: 60px;
     max-width: 100px;
     text-align: center;
-    background: #333;
-    color: white;
-    border: 1px solid #555;
-    border-radius: 4px;
+    background: #fff9e6; /* Fundo amarelo claro */
+    color: #000; /* Texto preto */
+    border: 1px solid #FFD700; /* Borda em amarelo dourado */
+    border-radius: 6px;
     padding: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s;
 }
 
 .editable-cell input:focus {
     outline: none;
     border-color: #FFD700;
-    background: #444;
-    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
+    background: #fff; /* Ao focar, fundo branco puro */
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.4);
+    color: #000; /* Mantém texto preto */
 }
 
 .total-cell {
