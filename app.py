@@ -84,14 +84,29 @@ def create_app():
     # ---------------------------
     @app.route("/tv")
     def tv():
-        # Dados fictícios para teste — substitua pela sua lógica real
-        dados = [
+        # Dados fictícios com 'total' calculado
+        dados = []
+        vendedores = [
             {"nome": "Anderson", "seg": 1500, "ter": 2300, "qua": 0, "qui": 3100, "sex": 4500},
             {"nome": "Vitória", "seg": 2000, "ter": 1800, "qua": 2200, "qui": 0, "sex": 3900},
+            {"nome": "Carlos", "seg": 1200, "ter": 3100, "qua": 1800, "qui": 2500, "sex": 4100},
         ]
+
+        # Calcula 'total' para cada vendedor
+        for v in vendedores:
+            total = v["seg"] + v["ter"] + v["qua"] + v["qui"] + v["sex"]
+            v["total"] = total
+            dados.append(v)
+
+        # Calcula totais diários
         totais_diarios = {
-            "seg": 3500, "ter": 4100, "qua": 2200, "qui": 3100, "sex": 8400
+            "seg": sum(v["seg"] for v in dados),
+            "ter": sum(v["ter"] for v in dados),
+            "qua": sum(v["qua"] for v in dados),
+            "qui": sum(v["qui"] for v in dados),
+            "sex": sum(v["sex"] for v in dados),
         }
+
         return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
 
     # ---------------------------
