@@ -1,7 +1,6 @@
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import timezone
-import requests
 
 # imports diretos sem src/
 from routes.data import load_data
@@ -86,60 +85,20 @@ def salvar_resumo_diario(app):
             print(f"[ERRO] salvar_resumo_diario: {e}")
 
 # ---------------------------
-# Função que fecha a semana
-# ---------------------------
-def fechar_semana(app):
-    """
-    Chama a rota /api/resumo-archive para fechar a semana
-    """
-    with app.app_context():
-        try:
-            url = "http://localhost:5000/api/resumo-archive"
-            secret = app.config.get("RESUMO_ARCHIVE_SECRET")
-            headers = {"X-SECRET-KEY": secret}
-
-            response = requests.post(url, headers=headers)
-            if response.status_code == 200:
-                print(f"[OK] Fechamento semanal executado em {datetime.utcnow()}")
-            else:
-                print(f"[ERRO] Fechamento semanal falhou: {response.status_code} - {response.text}")
-
-        except Exception as e:
-            print(f"[ERRO] fechar_semana: {e}")
-
-# ---------------------------
 # Inicializa o scheduler
 # ---------------------------
 def start_scheduler(app):
     """
-    Agenda:
-    - Diário às 18:00 (save)
-    - Semanal às 18:00 de sexta-feira (fechamento + zera planilha)
+    Agenda diária às 23:59 no horário de Brasília
     """
     # Evita múltiplas instâncias do scheduler
     if not scheduler.get_jobs():
-        # 🔥 Save diário às 18:00
         scheduler.add_job(
             func=lambda: salvar_resumo_diario(app),
             trigger="cron",
-            hour=18,
-            minute=0,
-            timezone=timezone("America/Sao_Paulo"),
-            id="daily_save"
+            hour=23,
+            minute=59,
+            timezone=timezone("America/Sao_Paulo")
         )
-
-        # 🔥 Fechamento semanal (sexta-feira às 18:00)
-        scheduler.add_job(
-            func=lambda: fechar_semana(app),
-            trigger="cron",
-            day_of_week="fri",
-            hour=18,
-            minute=0,
-            timezone=timezone("America/Sao_Paulo"),
-            id="weekly_close"
-        )
-
         scheduler.start()
-        print("[INFO] Scheduler iniciado:")
-        print(" - Save diário: 18:00 todos os dias")
-        print(" - Fechamento semanal: 18:00 toda sexta-feira (Horário de Brasília)")
+        print("[INFO] Scheduler iniciado para resumo diário às 23:59 (Horário de Brasília)")
