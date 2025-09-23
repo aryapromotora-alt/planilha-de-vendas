@@ -113,17 +113,17 @@ def fechar_semana(app):
 def start_scheduler(app):
     """
     Agenda:
-    - Diário às 18:30 (save)
+    - Diário às 18:00 (save)
     - Semanal às 18:00 de sexta-feira (fechamento + zera planilha)
     """
     # Evita múltiplas instâncias do scheduler
     if not scheduler.get_jobs():
-        # 🔥 Save diário às 18:30
+        # 🔥 Save diário às 18:00
         scheduler.add_job(
             func=lambda: salvar_resumo_diario(app),
             trigger="cron",
             hour=18,
-            minute=30,
+            minute=0,
             timezone=timezone("America/Sao_Paulo"),
             id="daily_save"
         )
@@ -141,5 +141,5 @@ def start_scheduler(app):
 
         scheduler.start()
         print("[INFO] Scheduler iniciado:")
-        print(" - Save diário: 18:30 todos os dias")
+        print(" - Save diário: 18:00 todos os dias")
         print(" - Fechamento semanal: 18:00 toda sexta-feira (Horário de Brasília)")
