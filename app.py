@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import urllib.parse
 from flask import Flask, send_from_directory, render_template
@@ -80,31 +81,89 @@ def create_app():
         return f"Banco em uso: {app.config['SQLALCHEMY_DATABASE_URI']}"
 
     # ---------------------------
+    # Função para carregar dados da planilha (copiada de routes/data.py)
+    # ---------------------------
+    def load_spreadsheet_data():
+        DATA_FILE = os.path.join(os.path.dirname(__file__), "database", "planilha_data.json")
+        if os.path.exists(DATA_FILE):
+            try:
+                with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+
+                    # Gerar campo 'ordem' com base na posição dos nomes em employees
+                    ordem_map = {emp["name"]: i for i, emp in enumerate(data.get("employees", []), start=1)}
+                    for nome, valores in data.get("spreadsheetData", {}).items():
+                        valores["ordem"] = ordem_map.get(nome, 999)
+
+                    return data
+            except (json.JSONDecodeError, IOError):
+                pass
+
+        # Dados padrão se o arquivo não existir ou estiver corrompido
+        default_employees = [
+            {"name": "Anderson", "password": "123"},
+            {"name": "Vitoria", "password": "123"},
+            {"name": "Jemima", "password": "123"},
+            {"name": "Maiany", "password": "123"},
+            {"name": "Fernanda", "password": "123"},
+            {"name": "Nadia", "password": "123"},
+            {"name": "Giovana", "password": "123"}
+        ]
+
+        spreadsheet = {
+            emp["name"]: {
+                "monday": 0,
+                "tuesday": 0,
+                "wednesday": 0,
+                "thursday": 0,
+                "friday": 0,
+                "ordem": i + 1
+            }
+            for i, emp in enumerate(default_employees)
+        }
+
+        return {
+            "employees": default_employees,
+            "spreadsheetData": spreadsheet
+        }
+
+    # ---------------------------
     # Rota pública /tv para exibição em telão
     # ---------------------------
     @app.route("/tv")
     def tv():
-        # Dados fictícios com 'total' calculado
-        dados = []
-        vendedores = [
-            {"nome": "Anderson", "seg": 1500, "ter": 2300, "qua": 0, "qui": 3100, "sex": 4500},
-            {"nome": "Vitória", "seg": 2000, "ter": 1800, "qua": 2200, "qui": 0, "sex": 3900},
-            {"nome": "Carlos", "seg": 1200, "ter": 3100, "qua": 1800, "qui": 2500, "sex": 4100},
-        ]
+        # Carrega dados reais do arquivo JSON
+        data = load_spreadsheet_data()
 
-        # Calcula 'total' para cada vendedor
-        for v in vendedores:
-            total = v["seg"] + v["ter"] + v["qua"] + v["qui"] + v["sex"]
-            v["total"] = total
-            dados.append(v)
+        # Transforma os dados para o formato esperado pelo template tv.html
+        dados = []
+        for emp in data.get("employees", []):
+            nome = emp["name"]
+            valores = data["spreadsheetData"].get(nome, {})
+            linha = {
+                "nome": nome,
+                "seg": valores.get("monday", 0),
+                "ter": valores.get("tuesday", 0),
+                "qua": valores.get("wednesday", 0),
+                "qui": valores.get("thursday", 0),
+                "sex": valores.get("friday", 0),
+                "total": (
+                    valores.get("monday", 0) +
+                    valores.get("tuesday", 0) +
+                    valores.get("wednesday", 0) +
+                    valores.get("thursday", 0) +
+                    valores.get("friday", 0)
+                )
+            }
+            dados.append(linha)
 
         # Calcula totais diários
         totais_diarios = {
-            "seg": sum(v["seg"] for v in dados),
-            "ter": sum(v["ter"] for v in dados),
-            "qua": sum(v["qua"] for v in dados),
-            "qui": sum(v["qui"] for v in dados),
-            "sex": sum(v["sex"] for v in dados),
+            "seg": sum(linha["seg"] for linha in dados),
+            "ter": sum(linha["ter"] for linha in dados),
+            "qua": sum(linha["qua"] for linha in dados),
+            "qui": sum(linha["qui"] for linha in dados),
+            "sex": sum(linha["sex"] for linha in dados),
         }
 
         return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
