@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, date
 from models.user import db
 from models.archive import ResumoHistory, DailySales
 from routes.data import load_data, save_data
-from pytz import timezone
+from pytz import timezone  # ✅ Import necessário para timezone
 
 archive_bp = Blueprint('archive', __name__)
 

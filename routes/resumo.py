@@ -26,20 +26,18 @@ def resumo_page():
     ).all()
     total_semana = sum(r.total for r in registros_semana)
 
-    # --- Totais do mês atual ---
-    registros_mes = DailySales.query.filter(
-        extract("month", DailySales.dia) == mes,
-        extract("year", DailySales.dia) == ano
-    ).all()
-    total_mes = sum(r.total for r in registros_mes)
-
     # --- Histórico diário (segunda a sexta) ---
     dias_labels = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
+    nomes_campos = ["segunda", "terca", "quarta", "quinta", "sexta"]
+    
     historico_diario = {}
     for i, label in enumerate(dias_labels):
         dia_atual = inicio_semana + timedelta(days=i)
         registros_dia = DailySales.query.filter_by(dia=dia_atual).all()
-        historico_diario[label] = sum(r.total for r in registros_dia)
+        
+        # Soma apenas o campo correspondente ao dia
+        valor_dia = sum(getattr(r, nomes_campos[i]) for r in registros_dia)
+        historico_diario[label] = valor_dia
 
     # --- Totais semanais do mês atual ---
     primeiro_dia = date(ano, mes, 1)
