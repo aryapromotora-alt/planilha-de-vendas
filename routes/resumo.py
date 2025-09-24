@@ -26,6 +26,13 @@ def resumo_page():
     ).all()
     total_semana = sum(r.total for r in registros_semana)
 
+    # --- Totais do mês atual ---
+    registros_mes = DailySales.query.filter(
+        extract("month", DailySales.dia) == mes,
+        extract("year", DailySales.dia) == ano
+    ).all()
+    total_mes = sum(r.total for r in registros_mes)
+
     # --- Histórico diário (segunda a sexta) ---
     dias_labels = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
     nomes_campos = ["segunda", "terca", "quarta", "quinta", "sexta"]
@@ -46,7 +53,7 @@ def resumo_page():
     num_semanas = ((dias_no_mes + primeiro_dia.weekday()) // 7) + 1
 
     totais_mes = [0 for _ in range(num_semanas)]
-    for r in registros_mes:
+    for r in registros_mes:  # ✅ Agora 'registros_mes' já está definido
         semana_index = ((r.dia.day + primeiro_dia.weekday() - 1) // 7)
         if 0 <= semana_index < num_semanas:
             totais_mes[semana_index] += r.total
