@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, date
 from models.user import db
 from models.archive import ResumoHistory, DailySales
 from routes.data import load_data, save_data
+from pytz import timezone
 
 archive_bp = Blueprint('archive', __name__)
 
@@ -84,31 +85,54 @@ def resumo_archive():
 def daily_save():
     """
     Salva o estado atual da planilha no banco (DailySales).
-    Pode ser chamado 1x por dia (scheduler) ou manualmente.
+    Salva apenas o valor do dia atual da semana.
     """
     data = load_data()
     spreadsheet = data.get("spreadsheetData", {})
-
-    today = date.today()
+    
+    # Mapeamento de dias da semana (0=segunda, 4=sexta)
+    dias_semana = ["monday", "tuesday", "wednesday", "thursday", "friday"]
+    nomes_dias = ["segunda", "terca", "quarta", "quinta", "sexta"]
+    
+    # Pega o dia da semana atual (0=segunda, 1=terça, etc.)
+    hoje = datetime.now(timezone("America/Sao_Paulo"))
+    dia_semana = hoje.weekday()  # 0=segunda, 1=terça, ..., 4=sexta
+    today = hoje.date()
+    
+    # Verifica se é fim de semana
+    if dia_semana >= 5:  # sábado=5, domingo=6
+        return jsonify({"status": "weekend", "message": "Fim de semana - não salva"}), 200
+    
+    # Pega o campo correspondente ao dia atual
+    campo_dia = dias_semana[dia_semana]
+    nome_dia = nomes_dias[dia_semana]
+    
+    print(f"[INFO] Salvando daily-save para {nome_dia} ({today})")
+    
+    total_dia = 0
     for nome, valores in spreadsheet.items():
+        valor_dia = float(valores.get(campo_dia, 0) or 0)
+        total_dia += valor_dia
+        
         record = DailySales(
             vendedor=nome,
             dia=today,
-            segunda=valores.get("monday", 0) or 0,
-            terca=valores.get("tuesday", 0) or 0,
-            quarta=valores.get("wednesday", 0) or 0,
-            quinta=valores.get("thursday", 0) or 0,
-            sexta=valores.get("friday", 0) or 0,
-            total=(valores.get("monday", 0) or 0) +
-                  (valores.get("tuesday", 0) or 0) +
-                  (valores.get("wednesday", 0) or 0) +
-                  (valores.get("thursday", 0) or 0) +
-                  (valores.get("friday", 0) or 0),
+            segunda=valor_dia if nome_dia == "segunda" else 0,
+            terca=valor_dia if nome_dia == "terca" else 0,
+            quarta=valor_dia if nome_dia == "quarta" else 0,
+            quinta=valor_dia if nome_dia == "quinta" else 0,
+            sexta=valor_dia if nome_dia == "sexta" else 0,
+            total=valor_dia
         )
         db.session.add(record)
 
     db.session.commit()
-    return jsonify({"status": "ok", "date": today.isoformat()})
+    return jsonify({
+        "status": "ok", 
+        "date": today.isoformat(),
+        "day": nome_dia,
+        "total": format_brl(total_dia)
+    })
 
 # ---------------------------
 # Rota para consultar histórico diário em JSON
