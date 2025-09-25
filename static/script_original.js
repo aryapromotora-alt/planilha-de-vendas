@@ -4,6 +4,19 @@ let isAdmin = false;
 let employees = [];
 let spreadsheetData = {};
 
+// Dados padrão (fallback)
+const defaultEmployees = [
+    { name: 'Anderson', password: '123' },
+    { name: 'Vitoria', password: '123' },
+    { name: 'Jemima', password: '123' },
+    { name: 'Maiany', password: '123' },
+    { name: 'Fernanda', password: '123' },
+    { name: 'Nadia', password: '123' },
+    { name: 'Giovana', password: '123' }
+];
+
+const adminCredentials = { username: 'admin', password: 'admin123' };
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -11,29 +24,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function initializeApp() {
-    // Verificar se já existe uma sessão ativa
-    try {
-        const sessionResponse = await fetch('/api/check-session');
-        if (sessionResponse.ok) {
-            const sessionData = await sessionResponse.json();
-            if (sessionData.logged_in) {
-                currentUser = sessionData.user;
-                isAdmin = sessionData.is_admin;
-                showMainSection();
-                return;
-            }
-        }
-    } catch (error) {
-        console.error('Erro ao verificar sessão:', error);
-    }
-
     // Carregar dados do servidor
     try {
         await loadDataFromServer();
     } catch (error) {
         console.error('Erro ao carregar dados do servidor:', error);
         // Usar dados padrão em caso de erro
-        employees = [];
+        employees = [...defaultEmployees];
         initializeSpreadsheetData();
     }
 }
@@ -43,7 +40,7 @@ async function loadDataFromServer() {
         const response = await fetch('/api/data');
         if (response.ok) {
             const data = await response.json();
-            employees = data.employees || [];
+            employees = data.employees || [...defaultEmployees];
             spreadsheetData = data.spreadsheetData || {};
             
             // Garantir que todos os funcionários tenham dados na planilha
@@ -127,48 +124,35 @@ function setupEventListeners() {
     document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
 }
 
-async function handleLogin(e) {
+function handleLogin(e) {
     e.preventDefault();
     
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     
-    if (!username || !password) {
-        showMessage('Por favor, preencha todos os campos!', 'error');
+    // Verificar se é admin
+    if (username === adminCredentials.username && password === adminCredentials.password) {
+        currentUser = 'Administrador';
+        isAdmin = true;
+        showMainSection();
         return;
     }
+    
+    // Verificar funcionários
+    const employee = employees.find(emp => 
+        emp.name.toLowerCase() === username.toLowerCase()
+    );
 
-    try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            currentUser = data.user;
-            isAdmin = data.is_admin;
-            showMainSection();
-        } else {
-            showMessage(data.message || 'Erro no login', 'error');
-        }
-    } catch (error) {
-        console.error('Erro no login:', error);
-        showMessage('Erro de conexão. Tente novamente.', 'error');
+    if (employee && employee.check_password(password)) {
+        currentUser = employee.name;
+        isAdmin = false;
+        showMainSection();
+    } else {
+        showMessage('Usuário ou senha incorretos!', 'error');
     }
 }
 
-async function handleLogout() {
-    try {
-        await fetch('/api/logout', { method: 'POST' });
-    } catch (error) {
-        console.error('Erro no logout:', error);
-    }
-    
+function handleLogout() {
     currentUser = null;
     isAdmin = false;
     document.getElementById('login-section').style.display = 'block';
@@ -229,7 +213,7 @@ function createEmployeeRow(employeeName) {
         cell.dataset.employee = employeeName;
         cell.dataset.day = day;
         
-        // Adicionar evento de clique para edição (apenas se for admin ou se for o próprio funcionário)
+        // Adicionar evento de clique para edição (apenas se não for admin ou se for o próprio funcionário)
         if (isAdmin || currentUser === employeeName) {
             cell.addEventListener('click', handleCellClick);
         }
@@ -487,49 +471,6 @@ async function removeEmployee(employeeName) {
     }
 }
 
-async function handleChangePassword(employeeName) {
-    const newPassword = prompt(`Digite a nova senha para ${employeeName}:`);
-    
-    if (!newPassword) {
-        return; // Usuário cancelou
-    }
-    
-    if (newPassword.length < 3) {
-        showMessage('A senha deve ter pelo menos 3 caracteres!', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/change-employee-password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                employee_name: employeeName,
-                new_password: newPassword
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Atualizar dados locais
-            const employee = employees.find(emp => emp.name === employeeName);
-            if (employee) {
-                employee.password = newPassword;
-            }
-            
-            showMessage('Senha alterada com sucesso!', 'success');
-        } else {
-            showMessage(data.message || 'Erro ao alterar senha', 'error');
-        }
-    } catch (error) {
-        console.error('Erro ao alterar senha:', error);
-        showMessage('Erro de conexão. Tente novamente.', 'error');
-    }
-}
-
 // Função para mostrar mensagens
 function showMessage(text, type) {
     // Remover mensagem anterior se existir
@@ -559,4 +500,50 @@ function showMessage(text, type) {
         }
     }, 3000);
 }
+
+
+
+async function handleChangePassword(employeeName) {
+    const newPassword = prompt(`Digite a nova senha para ${employeeName}:`);
+    if (!newPassword) {
+        return;
+    }
+
+    // Encontrar o funcionário para obter o ID (se estiver usando API real)
+    const employeeToUpdate = employees.find(emp => emp.name === employeeName);
+    if (!employeeToUpdate) {
+        showMessage("Funcionário não encontrado!", "error");
+        return;
+    }
+
+    // Simular atualização de senha no frontend (para a demo)
+    employeeToUpdate.password = newPassword; // Em um sistema real, você enviaria para o backend
+
+    // Em um sistema real, você faria uma requisição PUT para o backend:
+    // try {
+    //     const response = await fetch(`/api/users/${employeeToUpdate.id}/change_password`, {
+    //         method: 'PUT',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ new_password: newPassword })
+    //     });
+    //     if (!response.ok) {
+    //         throw new Error('Erro ao alterar senha no servidor');
+    //     }
+    //     showMessage(`Senha de ${employeeName} alterada com sucesso!`, 'success');
+    // } catch (error) {
+    //     console.error('Erro ao alterar senha:', error);
+    //     showMessage('Erro ao alterar senha!', 'error');
+    // }
+
+    // Para esta demo, apenas salvamos os dados atualizados localmente
+    const saved = await saveDataToServer();
+    if (saved) {
+        showMessage(`Senha de ${employeeName} alterada com sucesso!`, 'success');
+    } else {
+        showMessage('Erro ao salvar a nova senha!', 'error');
+    }
+}
+
 
