@@ -1,157 +1,490 @@
-// ========================
-// UTILS
-// ========================
+// Dados iniciais e configurações
+let currentUser = null;
+let isAdmin = false;
+let employees = [];
+let spreadsheetData = {};
 
-function formatBRL(value) {
-    if (typeof value !== 'number' || isNaN(value)) return 'R$ 0,00';
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(value);
+// Dados padrão (fallback)
+const defaultEmployees = [
+    { name: 'Anderson', password: '123' },
+    { name: 'Vitoria', password: '123' },
+    { name: 'Jemima', password: '123' },
+    { name: 'Maiany', password: '123' },
+    { name: 'Fernanda', password: '123' },
+    { name: 'Nadia', password: '123' },
+    { name: 'Giovana', password: '123' }
+];
+
+const adminCredentials = { username: 'admin', password: 'admin123' };
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    initializeApp();
+    setupEventListeners();
+});
+
+async function initializeApp() {
+    // Carregar dados do servidor
+    try {
+        await loadDataFromServer();
+    } catch (error) {
+        console.error('Erro ao carregar dados do servidor:', error);
+        // Usar dados padrão em caso de erro
+        employees = [...defaultEmployees];
+        initializeSpreadsheetData();
+    }
 }
 
-// ========================
-// DADOS DOS USUÁRIOS (mantém o login no frontend)
-// ========================
-
-const USERS = {
-    'admin': 'minha_senha_secreta',
-    'Anderson': '123',
-    'Vitoria': '123',
-    'Jemima': '123',
-    'Maiany': '123',
-    'Fernanda': '123',
-    'Nadia': '123',
-    'Giovana': '123'
-};
-
-// ========================
-// DADOS DA PLANILHA (valores reais)
-// ========================
-
-const SPREADSHEET_DATA = {
-    'Anderson': { monday: 52894.08, tuesday: 18245.38, wednesday: 53967.95, thursday: 18553.33, friday: 0 },
-    'Vitoria': { monday: 89715.38, tuesday: 31844.79, wednesday: 0, thursday: 0, friday: 0 },
-    'Jemima': { monday: 0, tuesday: 11597.24, wednesday: 28200.08, thursday: 0, friday: 0 },
-    'Maiany': { monday: 18629.33, tuesday: 23459.00, wednesday: 17023.23, thursday: 0, friday: 0 },
-    'Fernanda': { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0 },
-    'Nadia': { monday: 46888.05, tuesday: 31758.48, wednesday: 69249.82, thursday: 0, friday: 0 },
-    'Giovana': { monday: 16270.00, tuesday: 70779.45, wednesday: 0, thursday: 0, friday: 0 }
-};
-
-// ========================
-// FUNÇÕES DE LOGIN (mantém o funcionamento antigo)
-// ========================
-
-function login(username, password) {
-    return USERS[username] === password;
+async function loadDataFromServer() {
+    try {
+        const response = await fetch('/api/data');
+        if (response.ok) {
+            const data = await response.json();
+            employees = data.employees || [...defaultEmployees];
+            spreadsheetData = data.spreadsheetData || {};
+            
+            // Garantir que todos os funcionários tenham dados na planilha
+            employees.forEach(emp => {
+                if (!spreadsheetData[emp.name]) {
+                    spreadsheetData[emp.name] = {
+                        monday: 0,
+                        tuesday: 0,
+                        wednesday: 0,
+                        thursday: 0,
+                        friday: 0
+                    };
+                }
+            });
+        } else {
+            throw new Error('Erro ao carregar dados do servidor');
+        }
+    } catch (error) {
+        console.error('Erro na requisição:', error);
+        throw error;
+    }
 }
 
-function logout() {
-    sessionStorage.removeItem('loggedUser');
-    window.location.reload();
+async function saveDataToServer() {
+    try {
+        const dataToSave = {
+            employees: employees,
+            spreadsheetData: spreadsheetData
+        };
+        
+        const response = await fetch('/api/data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dataToSave)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao salvar dados no servidor');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Erro ao salvar dados:', error);
+        showMessage('Erro ao salvar dados no servidor!', 'error');
+        return false;
+    }
 }
 
-function getCurrentUser() {
-    return sessionStorage.getItem('loggedUser');
+function initializeSpreadsheetData() {
+    spreadsheetData = {};
+    employees.forEach(emp => {
+        spreadsheetData[emp.name] = {
+            monday: 0,
+            tuesday: 0,
+            wednesday: 0,
+            thursday: 0,
+            friday: 0
+        };
+    });
 }
 
-// ========================
-// RENDERIZAÇÃO DA PLANILHA
-// ========================
+function setupEventListeners() {
+    // Login
+    document.getElementById('login-form').addEventListener('submit', handleLogin);
+    
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', handleLogout);
+    
+    // Admin panel
+    document.getElementById('admin-panel-btn').addEventListener('click', showAdminPanel);
+    document.getElementById('back-to-main').addEventListener('click', hideAdminPanel);
+    
+    // Admin tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', switchTab);
+    });
+    
+    // Adicionar funcionário
+    document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
+}
+
+function handleLogin(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    
+    // Verificar se é admin
+    if (username === adminCredentials.username && password === adminCredentials.password) {
+        currentUser = 'Administrador';
+        isAdmin = true;
+        showMainSection();
+        return;
+    }
+    
+    // Verificar funcionários
+    const employee = employees.find(emp => 
+        emp.name.toLowerCase() === username.toLowerCase() && emp.password === password
+    );
+    
+    if (employee) {
+        currentUser = employee.name;
+        isAdmin = false;
+        showMainSection();
+    } else {
+        showMessage('Usuário ou senha incorretos!', 'error');
+    }
+}
+
+function handleLogout() {
+    currentUser = null;
+    isAdmin = false;
+    document.getElementById('login-section').style.display = 'block';
+    document.getElementById('main-section').style.display = 'none';
+    document.getElementById('admin-section').style.display = 'none';
+    
+    // Limpar formulário de login
+    document.getElementById('login-form').reset();
+}
+
+function showMainSection() {
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('main-section').style.display = 'block';
+    document.getElementById('admin-section').style.display = 'none';
+    
+    // Atualizar informações do usuário
+    document.getElementById('logged-user').textContent = `Logado como: ${currentUser}`;
+    
+    // Mostrar botão admin se for admin
+    if (isAdmin) {
+        document.getElementById('admin-panel-btn').style.display = 'inline-block';
+    } else {
+        document.getElementById('admin-panel-btn').style.display = 'none';
+    }
+    
+    // Renderizar planilha
+    renderSpreadsheet();
+}
 
 function renderSpreadsheet() {
     const tbody = document.getElementById('employee-rows');
     tbody.innerHTML = '';
-
-    const employees = Object.keys(SPREADSHEET_DATA);
-    const dailyTotals = { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0 };
-
-    employees.forEach(name => {
-        const data = SPREADSHEET_DATA[name];
-        const total = data.monday + data.tuesday + data.wednesday + data.thursday + data.friday;
-        
-        // Acumula totais diários
-        dailyTotals.monday += data.monday;
-        dailyTotals.tuesday += data.tuesday;
-        dailyTotals.wednesday += data.wednesday;
-        dailyTotals.thursday += data.thursday;
-        dailyTotals.friday += data.friday;
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${name}</td>
-            <td>${formatBRL(data.monday)}</td>
-            <td>${formatBRL(data.tuesday)}</td>
-            <td>${formatBRL(data.wednesday)}</td>
-            <td>${formatBRL(data.thursday)}</td>
-            <td>${formatBRL(data.friday)}</td>
-            <td class="total-cell">${formatBRL(total)}</td>
-        `;
+    
+    employees.forEach(employee => {
+        const row = createEmployeeRow(employee.name);
         tbody.appendChild(row);
     });
-
-    // Atualiza totais diários
-    document.getElementById('monday-total').textContent = formatBRL(dailyTotals.monday);
-    document.getElementById('tuesday-total').textContent = formatBRL(dailyTotals.tuesday);
-    document.getElementById('wednesday-total').textContent = formatBRL(dailyTotals.wednesday);
-    document.getElementById('thursday-total').textContent = formatBRL(dailyTotals.thursday);
-    document.getElementById('friday-total').textContent = formatBRL(dailyTotals.friday);
-    document.getElementById('week-total').textContent = formatBRL(
-        dailyTotals.monday + dailyTotals.tuesday + dailyTotals.wednesday + dailyTotals.thursday + dailyTotals.friday
-    );
+    
+    updateTotals();
 }
 
-// ========================
-// INICIALIZAÇÃO
-// ========================
-
-document.addEventListener('DOMContentLoaded', () => {
-    const loginSection = document.getElementById('login-section');
-    const mainSection = document.getElementById('main-section');
-    const adminBtn = document.getElementById('admin-panel-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const loggedUserSpan = document.getElementById('logged-user');
-
-    const currentUser = getCurrentUser();
+function createEmployeeRow(employeeName) {
+    const row = document.createElement('tr');
     
-    if (currentUser) {
-        loginSection.style.display = 'none';
-        mainSection.style.display = 'block';
-        loggedUserSpan.textContent = `Logado como: ${currentUser}`;
+    // Nome do funcionário
+    const nameCell = document.createElement('td');
+    nameCell.textContent = employeeName;
+    nameCell.className = 'employee-name';
+    row.appendChild(nameCell);
+    
+    // Dias da semana
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+    days.forEach(day => {
+        const cell = document.createElement('td');
+        const value = spreadsheetData[employeeName] ? spreadsheetData[employeeName][day] : 0;
+        cell.textContent = formatCurrency(value);
+        cell.className = 'editable-cell';
+        cell.dataset.employee = employeeName;
+        cell.dataset.day = day;
         
-        // Mostra botão de admin apenas para "admin"
-        if (currentUser === 'admin') {
-            adminBtn.style.display = 'block';
+        // Adicionar evento de clique para edição (apenas se não for admin ou se for o próprio funcionário)
+        if (isAdmin || currentUser === employeeName) {
+            cell.addEventListener('click', handleCellClick);
         }
         
-        renderSpreadsheet();
-    } else {
-        loginSection.style.display = 'flex';
-        mainSection.style.display = 'none';
-    }
+        row.appendChild(cell);
+    });
+    
+    // Total semanal
+    const totalCell = document.createElement('td');
+    const weeklyTotal = calculateWeeklyTotal(employeeName);
+    totalCell.textContent = formatCurrency(weeklyTotal);
+    totalCell.className = 'total-cell';
+    row.appendChild(totalCell);
+    
+    return row;
+}
 
-    // Login
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (login(username, password)) {
-                sessionStorage.setItem('loggedUser', username);
-                window.location.reload();
-            } else {
-                alert('Usuário ou senha inválidos');
+function handleCellClick(e) {
+    const cell = e.target;
+    const currentValue = spreadsheetData[cell.dataset.employee][cell.dataset.day];
+    
+    // Criar input para edição
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = '0.01';
+    input.value = currentValue;
+    input.style.width = '100%';
+    input.style.textAlign = 'center';
+    
+    // Substituir conteúdo da célula
+    cell.innerHTML = '';
+    cell.appendChild(input);
+    input.focus();
+    input.select();
+    
+    // Eventos do input
+    input.addEventListener('blur', () => finishEditing(cell, input));
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            finishEditing(cell, input);
+        }
+    });
+}
+
+async function finishEditing(cell, input) {
+    const newValue = parseFloat(input.value) || 0;
+    const employee = cell.dataset.employee;
+    const day = cell.dataset.day;
+    
+    // Atualizar dados
+    if (!spreadsheetData[employee]) {
+        spreadsheetData[employee] = {
+            monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0
+        };
+    }
+    
+    spreadsheetData[employee][day] = newValue;
+    
+    // Restaurar célula
+    cell.textContent = formatCurrency(newValue);
+    
+    // Salvar no servidor e atualizar totais
+    await saveDataToServer();
+    updateTotals();
+}
+
+function calculateWeeklyTotal(employeeName) {
+    if (!spreadsheetData[employeeName]) return 0;
+    
+    const data = spreadsheetData[employeeName];
+    return data.monday + data.tuesday + data.wednesday + data.thursday + data.friday;
+}
+
+function updateTotals() {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+    let weekTotal = 0;
+    
+    days.forEach(day => {
+        let dayTotal = 0;
+        employees.forEach(employee => {
+            if (spreadsheetData[employee.name]) {
+                dayTotal += spreadsheetData[employee.name][day];
             }
         });
+        
+        const dayTotalElement = document.getElementById(`${day}-total`);
+        if (dayTotalElement) {
+            dayTotalElement.textContent = formatCurrency(dayTotal);
+        }
+        
+        weekTotal += dayTotal;
+    });
+    
+    // Atualizar totais semanais individuais
+    employees.forEach(employee => {
+        const weeklyTotal = calculateWeeklyTotal(employee.name);
+        const row = document.querySelector(`[data-employee="${employee.name}"]`)?.parentElement;
+        if (row) {
+            const totalCell = row.querySelector('.total-cell');
+            if (totalCell) {
+                totalCell.textContent = formatCurrency(weeklyTotal);
+            }
+        }
+    });
+    
+    // Atualizar total geral da semana
+    const weekTotalElement = document.getElementById('week-total');
+    if (weekTotalElement) {
+        weekTotalElement.textContent = formatCurrency(weekTotal);
     }
+}
 
-    // Logout
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', logout);
+function formatCurrency(value) {
+    return `R$ ${value.toFixed(2).replace('.', ',')}`;
+}
+
+// Funções de administração
+function showAdminPanel() {
+    document.getElementById('admin-section').style.display = 'block';
+    renderEmployeeManagement();
+}
+
+function hideAdminPanel() {
+    document.getElementById('admin-section').style.display = 'none';
+}
+
+function switchTab(e) {
+    const targetTab = e.target.dataset.tab;
+    
+    // Atualizar botões
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    e.target.classList.add('active');
+    
+    // Atualizar conteúdo
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById(targetTab).classList.add('active');
+    
+    if (targetTab === 'manage-employees') {
+        renderEmployeeManagement();
     }
-});
+}
+
+function renderEmployeeManagement() {
+    const list = document.getElementById('employee-management-list');
+    list.innerHTML = '';
+    
+    // Filtrar funcionários (não mostrar admin)
+    const regularEmployees = employees.filter(emp => emp.name !== 'admin');
+    
+    regularEmployees.forEach(employee => {
+        const li = document.createElement('li');
+        
+        const info = document.createElement('span');
+        info.className = 'employee-info';
+        info.textContent = employee.name;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remover';
+        removeBtn.className = 'remove-btn';
+        removeBtn.addEventListener('click', () => removeEmployee(employee.name));
+        
+        li.appendChild(info);
+        li.appendChild(removeBtn);
+        list.appendChild(li);
+    });
+}
+
+async function handleAddEmployee(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('new-employee-name').value.trim();
+    const password = document.getElementById('new-employee-password').value;
+    
+    if (!name || !password) {
+        showMessage('Por favor, preencha todos os campos!', 'error');
+        return;
+    }
+    
+    // Verificar se já existe
+    if (employees.find(emp => emp.name.toLowerCase() === name.toLowerCase())) {
+        showMessage('Funcionário já existe!', 'error');
+        return;
+    }
+    
+    // Adicionar funcionário
+    employees.push({ name, password });
+    
+    // Inicializar dados da planilha para o novo funcionário
+    spreadsheetData[name] = {
+        monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0
+    };
+    
+    // Salvar no servidor
+    const saved = await saveDataToServer();
+    if (!saved) {
+        // Reverter mudanças se não conseguiu salvar
+        employees = employees.filter(emp => emp.name !== name);
+        delete spreadsheetData[name];
+        return;
+    }
+    
+    // Limpar formulário
+    document.getElementById('add-employee-form').reset();
+    
+    // Atualizar interface
+    renderEmployeeManagement();
+    renderSpreadsheet();
+    
+    showMessage('Funcionário adicionado com sucesso!', 'success');
+}
+
+async function removeEmployee(employeeName) {
+    if (confirm(`Tem certeza que deseja remover ${employeeName}?`)) {
+        // Fazer backup dos dados antes de remover
+        const backupEmployees = [...employees];
+        const backupSpreadsheetData = { ...spreadsheetData };
+        
+        // Remover da lista de funcionários
+        employees = employees.filter(emp => emp.name !== employeeName);
+        
+        // Remover dados da planilha
+        delete spreadsheetData[employeeName];
+        
+        // Tentar salvar no servidor
+        const saved = await saveDataToServer();
+        if (!saved) {
+            // Restaurar dados se não conseguiu salvar
+            employees = backupEmployees;
+            spreadsheetData = backupSpreadsheetData;
+            return;
+        }
+        
+        // Atualizar interface
+        renderEmployeeManagement();
+        renderSpreadsheet();
+        
+        showMessage('Funcionário removido com sucesso!', 'success');
+    }
+}
+
+// Função para mostrar mensagens
+function showMessage(text, type) {
+    // Remover mensagem anterior se existir
+    const existingMessage = document.querySelector('.message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    const message = document.createElement('div');
+    message.className = `message ${type}`;
+    message.textContent = text;
+    
+    // Inserir no formulário de login ou no painel admin
+    const loginForm = document.querySelector('.login-form');
+    const adminPanel = document.querySelector('.admin-panel');
+    
+    if (document.getElementById('login-section').style.display !== 'none') {
+        loginForm.insertBefore(message, loginForm.firstChild);
+    } else if (document.getElementById('admin-section').style.display !== 'none') {
+        adminPanel.insertBefore(message, adminPanel.firstChild);
+    }
+    
+    // Remover mensagem após 3 segundos
+    setTimeout(() => {
+        if (message.parentNode) {
+            message.remove();
+        }
+    }, 3000);
+}
+
