@@ -32,10 +32,10 @@
   "spreadsheetData": {
     "Anderson": {
       "friday": 0,
-      "monday": 1234.56,
+      "monday": 0,
       "ordem": 1,
       "thursday": 0,
-      "tuesday": 15678.9,
+      "tuesday": 0,
       "wednesday": 0
     },
     "Fernanda": {
