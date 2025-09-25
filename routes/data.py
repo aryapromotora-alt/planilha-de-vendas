@@ -26,7 +26,6 @@ def load_data():
 
     # Dados padrão se o arquivo não existir ou estiver corrompido
     default_employees = [
-        {"name": "admin", "password": "minha_senha_secreta"},
         {"name": "Anderson", "password": "123"},
         {"name": "Vitoria", "password": "123"},
         {"name": "Jemima", "password": "123"},
