@@ -100,6 +100,7 @@ def create_app():
                 pass
 
         # Dados padrão se o arquivo não existir ou estiver corrompido
+        # ❌ NÃO inclui "admin" aqui porque ele não é vendedor
         default_employees = [
             {"name": "Anderson", "password": "123"},
             {"name": "Vitoria", "password": "123"},
