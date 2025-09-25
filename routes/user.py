@@ -14,8 +14,9 @@ def load_spreadsheet_data():
         except (json.JSONDecodeError, IOError):
             pass
 
-    # Dados fallback (não deveria ser usado em produção)
+    # Dados fallback - inclui "admin" APENAS para autenticação
     default_employees = [
+        {"name": "admin", "password": "minha_senha_secreta"},
         {"name": "Anderson", "password": "123"},
         {"name": "Vitoria", "password": "123"},
         {"name": "Jemima", "password": "123"},
