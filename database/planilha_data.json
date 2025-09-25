@@ -1,10 +1,6 @@
 {
   "employees": [
     {
-      "name": "admin",
-      "password": "minha_senha_secreta"
-    },
-    {
       "name": "Anderson",
       "password": "123"
     },
@@ -34,13 +30,6 @@
     }
   ],
   "spreadsheetData": {
-    "admin": {
-      "monday": 0,
-      "tuesday": 0,
-      "wednesday": 0,
-      "thursday": 0,
-      "friday": 0
-    },
     "Anderson": {
       "friday": 0,
       "monday": 0,
