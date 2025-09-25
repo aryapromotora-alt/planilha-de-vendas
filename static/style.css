@@ -509,3 +509,58 @@ button:hover {
     background-color: #ffd000;
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
 }
+/* Estilos para ações dos funcionários no painel admin */
+.employee-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.change-password-btn {
+    background-color: #2d5aa0;
+    color: white;
+    border: 1px solid #2d5aa0;
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.change-password-btn:hover {
+    background-color: #1e3f73;
+    box-shadow: 0 2px 8px rgba(45, 90, 160, 0.3);
+}
+
+.remove-btn {
+    background-color: #dc3545;
+    color: white;
+    border: 1px solid #dc3545;
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.remove-btn:hover {
+    background-color: #c82333;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+#employee-management-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    background-color: #2d2d2d;
+    border-radius: 6px;
+    border: 1px solid #444;
+}
+
+.employee-info {
+    font-weight: 500;
+    color: #FFD700;
+}
+

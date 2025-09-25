@@ -32,14 +32,16 @@
   "spreadsheetData": {
     "Anderson": {
       "friday": 0,
-      "monday": 0,
+      "monday": 1234.56,
+      "ordem": 1,
       "thursday": 0,
-      "tuesday": 0,
+      "tuesday": 15678.9,
       "wednesday": 0
     },
     "Fernanda": {
       "friday": 0,
       "monday": 0,
+      "ordem": 5,
       "thursday": 0,
       "tuesday": 0,
       "wednesday": 0
@@ -47,6 +49,7 @@
     "Giovana": {
       "friday": 0,
       "monday": 0,
+      "ordem": 7,
       "thursday": 0,
       "tuesday": 0,
       "wednesday": 0
@@ -54,6 +57,7 @@
     "Jemima": {
       "friday": 0,
       "monday": 0,
+      "ordem": 3,
       "thursday": 0,
       "tuesday": 0,
       "wednesday": 0
@@ -61,6 +65,7 @@
     "Maiany": {
       "friday": 0,
       "monday": 0,
+      "ordem": 4,
       "thursday": 0,
       "tuesday": 0,
       "wednesday": 0
@@ -68,6 +73,7 @@
     "Nadia": {
       "friday": 0,
       "monday": 0,
+      "ordem": 6,
       "thursday": 0,
       "tuesday": 0,
       "wednesday": 0
@@ -75,6 +81,7 @@
     "Vitoria": {
       "friday": 0,
       "monday": 0,
+      "ordem": 2,
       "thursday": 0,
       "tuesday": 0,
       "wednesday": 0

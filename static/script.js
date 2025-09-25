@@ -140,10 +140,10 @@ function handleLogin(e) {
     
     // Verificar funcionários
     const employee = employees.find(emp => 
-        emp.name.toLowerCase() === username.toLowerCase() && emp.password === password
+        emp.name.toLowerCase() === username.toLowerCase()
     );
-    
-    if (employee) {
+
+    if (employee && employee.check_password(password)) {
         currentUser = employee.name;
         isAdmin = false;
         showMainSection();
@@ -327,7 +327,10 @@ function updateTotals() {
 }
 
 function formatCurrency(value) {
-    return `R$ ${value.toFixed(2).replace('.', ',')}`;
+    return "R$ " + parseFloat(value).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 // Funções de administração
@@ -368,19 +371,29 @@ function renderEmployeeManagement() {
     const regularEmployees = employees.filter(emp => emp.name !== 'admin');
     
     regularEmployees.forEach(employee => {
-        const li = document.createElement('li');
+        const li = document.createElement("li");
         
-        const info = document.createElement('span');
-        info.className = 'employee-info';
+        const info = document.createElement("span");
+        info.className = "employee-info";
         info.textContent = employee.name;
         
-        const removeBtn = document.createElement('button');
-        removeBtn.textContent = 'Remover';
-        removeBtn.className = 'remove-btn';
-        removeBtn.addEventListener('click', () => removeEmployee(employee.name));
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "employee-actions";
+
+        const changePasswordBtn = document.createElement("button");
+        changePasswordBtn.textContent = "Alterar Senha";
+        changePasswordBtn.className = "change-password-btn";
+        changePasswordBtn.addEventListener("click", () => handleChangePassword(employee.name));
+        actionsDiv.appendChild(changePasswordBtn);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remover";
+        removeBtn.className = "remove-btn";
+        removeBtn.addEventListener("click", () => removeEmployee(employee.name));
+        actionsDiv.appendChild(removeBtn);
         
         li.appendChild(info);
-        li.appendChild(removeBtn);
+        li.appendChild(actionsDiv);
         list.appendChild(li);
     });
 }
@@ -487,4 +500,50 @@ function showMessage(text, type) {
         }
     }, 3000);
 }
+
+
+
+async function handleChangePassword(employeeName) {
+    const newPassword = prompt(`Digite a nova senha para ${employeeName}:`);
+    if (!newPassword) {
+        return;
+    }
+
+    // Encontrar o funcionário para obter o ID (se estiver usando API real)
+    const employeeToUpdate = employees.find(emp => emp.name === employeeName);
+    if (!employeeToUpdate) {
+        showMessage("Funcionário não encontrado!", "error");
+        return;
+    }
+
+    // Simular atualização de senha no frontend (para a demo)
+    employeeToUpdate.password = newPassword; // Em um sistema real, você enviaria para o backend
+
+    // Em um sistema real, você faria uma requisição PUT para o backend:
+    // try {
+    //     const response = await fetch(`/api/users/${employeeToUpdate.id}/change_password`, {
+    //         method: 'PUT',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ new_password: newPassword })
+    //     });
+    //     if (!response.ok) {
+    //         throw new Error('Erro ao alterar senha no servidor');
+    //     }
+    //     showMessage(`Senha de ${employeeName} alterada com sucesso!`, 'success');
+    // } catch (error) {
+    //     console.error('Erro ao alterar senha:', error);
+    //     showMessage('Erro ao alterar senha!', 'error');
+    // }
+
+    // Para esta demo, apenas salvamos os dados atualizados localmente
+    const saved = await saveDataToServer();
+    if (saved) {
+        showMessage(`Senha de ${employeeName} alterada com sucesso!`, 'success');
+    } else {
+        showMessage('Erro ao salvar a nova senha!', 'error');
+    }
+}
+
 

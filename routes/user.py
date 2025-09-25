@@ -11,7 +11,21 @@ def get_users():
 @user_bp.route('/users', methods=['POST'])
 def create_user():
     data = request.json
-    user = User(username=data['username'], email=data['email'])
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+
+    if not username or not email or not password:
+        return jsonify({"message": "Dados incompletos"}), 400
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({"message": "Nome de usuário já existe"}), 409
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({"message": "Email já existe"}), 409
+
+    user = User(username=username, email=email)
+    user.set_password(password)
     db.session.add(user)
     db.session.commit()
     return jsonify(user.to_dict()), 201
@@ -36,3 +50,19 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
     return '', 204
+
+
+@user_bp.route("/users/<int:user_id>/change_password", methods=["PUT"])
+def change_password(user_id):
+    user = User.query.get_or_404(user_id)
+    data = request.json
+    new_password = data.get("new_password")
+
+    if not new_password:
+        return jsonify({"message": "Nova senha não fornecida"}), 400
+
+    user.set_password(new_password)
+    db.session.commit()
+    return jsonify({"message": "Senha alterada com sucesso"}), 200
+
+

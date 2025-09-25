@@ -26,18 +26,19 @@ def create_app():
     # Configuração do banco de dados
     # ---------------------------
     db_url = os.getenv("DATABASE_URL")
-    if db_url:
+    if db_url and db_url.startswith(("postgresql://", "postgres://")):
         parsed = urllib.parse.urlparse(db_url)
         safe_password = urllib.parse.quote_plus(parsed.password or "")
         db_url = f"{parsed.scheme}://{parsed.username}:{safe_password}@{parsed.hostname}:{parsed.port}{parsed.path}"
         db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
         db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
         app.config["SQLALCHEMY_DATABASE_URI"] = db_url
-        print(f"🔗 Conectando ao banco: {app.config['SQLALCHEMY_DATABASE_URI']}")
+        print(f"🔗 Conectando ao banco PostgreSQL: {app.config['SQLALCHEMY_DATABASE_URI']}")
     else:
-        raise RuntimeError(
-            "DATABASE_URL não configurado — verifique variáveis de ambiente."
-        )
+        # Usar SQLite como padrão
+        db_path = os.path.join(os.path.dirname(__file__), "database", "app.db")
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
+        print(f"🔗 Usando banco SQLite: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -67,9 +68,10 @@ def create_app():
     @app.template_filter("format_brl")
     def format_brl(value):
         try:
-            return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace(
-                "X", "."
-            )
+            # Converte para float e formata com duas casas decimais
+            # Usa replace para trocar o separador decimal de '.' para ','
+            # E o separador de milhares de ',' para '.'
+            return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         except (ValueError, TypeError):
             return "0,00"
 
