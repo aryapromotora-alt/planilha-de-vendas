@@ -39,7 +39,7 @@ async function initializeApp() {
     }
 
     // Se não estiver logado, mostra login (mas dados já foram carregados)
-    document.getElementById('login-section').style.display = 'block';
+    document.getElementById('login-section').style.display = 'flex';
 }
 
 async function loadDataFromServer() {
@@ -174,7 +174,7 @@ async function handleLogout() {
     
     currentUser = null;
     isAdmin = false;
-    document.getElementById('login-section').style.display = 'block';
+    document.getElementById('login-section').style.display = 'flex';
     document.getElementById('main-section').style.display = 'none';
     document.getElementById('admin-section').style.display = 'none';
     document.getElementById('login-form').reset();
