@@ -132,7 +132,7 @@ button:hover {
 #logout-btn, #admin-panel-btn {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
-    background: #b35600;
+    background: #3d3d3d;
     color: #FFD700;
     border: 1px solid #FFD700;
     border-radius: 6px;
