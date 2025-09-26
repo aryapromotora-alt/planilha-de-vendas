@@ -49,6 +49,11 @@ def create_app():
     # Inicializa banco
     db.init_app(app)
 
+    # 🔑 Cria as tabelas no banco (incluindo 'sales', se existir o modelo)
+    with app.app_context():
+        db.create_all()
+        print("✅ Tabelas do banco verificadas/criadas com sucesso.")
+
     # ---------------------------
     # CORS
     # ---------------------------
@@ -68,9 +73,6 @@ def create_app():
     @app.template_filter("format_brl")
     def format_brl(value):
         try:
-            # Converte para float e formata com duas casas decimais
-            # Usa replace para trocar o separador decimal de '.' para ','
-            # E o separador de milhares de ',' para '.'
             return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         except (ValueError, TypeError):
             return "0,00"
@@ -91,17 +93,13 @@ def create_app():
             try:
                 with open(DATA_FILE, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-
-                    # Gerar campo 'ordem' com base na posição dos nomes em employees
                     ordem_map = {emp["name"]: i for i, emp in enumerate(data.get("employees", []), start=1)}
                     for nome, valores in data.get("spreadsheetData", {}).items():
                         valores["ordem"] = ordem_map.get(nome, 999)
-
                     return data
             except (json.JSONDecodeError, IOError):
                 pass
 
-        # Dados padrão se o arquivo não existir ou estiver corrompido
         default_employees = [
             {"name": "Anderson", "password": "123"},
             {"name": "Vitoria", "password": "123"},
@@ -134,10 +132,7 @@ def create_app():
     # ---------------------------
     @app.route("/tv")
     def tv():
-        # Carrega dados reais do arquivo JSON
         data = load_spreadsheet_data()
-
-        # Transforma os dados para o formato esperado pelo template tv.html
         dados = []
         for emp in data.get("employees", []):
             nome = emp["name"]
@@ -159,7 +154,6 @@ def create_app():
             }
             dados.append(linha)
 
-        # Calcula totais diários
         totais_diarios = {
             "seg": sum(linha["seg"] for linha in dados),
             "ter": sum(linha["ter"] for linha in dados),
@@ -184,7 +178,6 @@ def create_app():
         if path and os.path.exists(full_path):
             return send_from_directory(static_folder_path, path)
         else:
-            # sempre renderiza o index.html da SPA
             return send_from_directory(static_folder_path, "index.html")
 
     # ---------------------------
