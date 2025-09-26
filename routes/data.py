@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from flask_cors import cross_origin
 
 data_bp = Blueprint('data', __name__)
@@ -67,7 +67,7 @@ def save_data(data):
 @data_bp.route('/data', methods=['GET'])
 @cross_origin()
 def get_data():
-    """Retorna todos os dados da planilha"""
+    """Retorna todos os dados da planilha (pública)"""
     try:
         data = load_data()
         return jsonify(data), 200
@@ -77,18 +77,21 @@ def get_data():
 @data_bp.route('/data', methods=['POST'])
 @cross_origin()
 def save_data_endpoint():
-    """Salva os dados da planilha"""
+    """Salva os dados da planilha — requer autenticação"""
+    # 🔒 Proteger com sessão do Flask
+    if 'user' not in session:
+        return jsonify({"error": "Não autenticado. Faça login primeiro."}), 401
+
     try:
         data = request.get_json()
 
         if not data:
             return jsonify({"error": "Nenhum dado fornecido"}), 400
 
-        # Validar estrutura básica dos dados
         if 'employees' not in data or 'spreadsheetData' not in data:
             return jsonify({"error": "Estrutura de dados inválida"}), 400
 
-        # Recalcular campo 'ordem' com base na nova lista de employees
+        # Recalcular campo 'ordem'
         ordem_map = {emp["name"]: i for i, emp in enumerate(data.get("employees", []), start=1)}
         for nome, valores in data.get("spreadsheetData", {}).items():
             valores["ordem"] = ordem_map.get(nome, 999)
@@ -96,7 +99,7 @@ def save_data_endpoint():
         if save_data(data):
             return jsonify({"message": "Dados salvos com sucesso"}), 200
         else:
-            return jsonify({"error": "Erro ao salvar dados"}), 500
+            return jsonify({"error": "Erro ao salvar dados no servidor"}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
