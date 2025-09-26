@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f0f0; /* Fundo cinza claro */
+    background-color: #121212; /* ALTERADO: fundo preto para combinar com o login */
     color: #ffffff;
     line-height: 1.6;
     animation: fadeIn 0.5s ease-in;
@@ -24,7 +24,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #121212;
+    background-color: transparent; /* ALTERADO: transparente */
 }
 
 .login-form {
@@ -509,6 +509,7 @@ button:hover {
     background-color: #ffd000;
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
 }
+
 /* Estilos para ações dos funcionários no painel admin */
 .employee-actions {
     display: flex;
@@ -563,4 +564,3 @@ button:hover {
     font-weight: 500;
     color: #FFD700;
 }
-
