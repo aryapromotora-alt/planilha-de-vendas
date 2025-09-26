@@ -180,33 +180,5 @@
     </div>
 
     <script src="/static/script.js"></script>
-    <script>
-        // Função utilitária para formatar valores em BRL
-        function formatBRL(value) {
-            return "R$ " + parseFloat(value).toLocaleString("pt-BR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
-
-        // Exemplo de preenchimento manual (pode ser substituído por fetch da API)
-        document.getElementById("monday-total").innerText = formatBRL(21575.53);
-        document.getElementById("tuesday-total").innerText = formatBRL(0);
-        document.getElementById("wednesday-total").innerText = formatBRL(36221.71);
-        document.getElementById("thursday-total").innerText = formatBRL(21040.00);
-        document.getElementById("friday-total").innerText = formatBRL(47360.97);
-        document.getElementById("week-total").innerText = formatBRL(126198.21);
-
-        // Para popular linhas de vendedores via JS:
-        // const employeeRows = document.getElementById("employee-rows");
-        // employeeRows.innerHTML = `<tr>
-        //   <td>João</td><td>${formatBRL(1000)}</td>...
-        // </tr>`;
-    </script>
 </body>
 </html>
-
-                    <div class="employee-actions">
-                        <button class="change-password-btn" data-employee-name="${employee.name}">Alterar Senha</button>
-                    </div>
-
