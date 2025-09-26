@@ -11,10 +11,19 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function initializeApp() {
-    // Verificar se já existe uma sessão ativa
+    // 🔑 PRIMEIRO: Carregar dados do servidor (sempre)
+    try {
+        await loadDataFromServer();
+    } catch (error) {
+        console.error('Erro ao carregar dados do servidor:', error);
+        employees = [];
+        initializeSpreadsheetData();
+    }
+
+    // 🔑 DEPOIS: Verificar sessão para definir permissões
     try {
         const sessionResponse = await fetch('/api/check-session', {
-            credentials: 'include'  // 👈 Envia cookies
+            credentials: 'include'
         });
         if (sessionResponse.ok) {
             const sessionData = await sessionResponse.json();
@@ -29,20 +38,14 @@ async function initializeApp() {
         console.error('Erro ao verificar sessão:', error);
     }
 
-    // Carregar dados do servidor
-    try {
-        await loadDataFromServer();
-    } catch (error) {
-        console.error('Erro ao carregar dados do servidor:', error);
-        employees = [];
-        initializeSpreadsheetData();
-    }
+    // Se não estiver logado, mostra login (mas dados já foram carregados)
+    document.getElementById('login-section').style.display = 'block';
 }
 
 async function loadDataFromServer() {
     try {
         const response = await fetch('/api/data', {
-            credentials: 'include'  // 👈 Envia cookies
+            credentials: 'include'
         });
         if (response.ok) {
             const data = await response.json();
@@ -82,7 +85,7 @@ async function saveDataToServer() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(dataToSave),
-            credentials: 'include'  // 👈 Envia cookies
+            credentials: 'include'
         });
         
         if (!response.ok) {
@@ -141,7 +144,7 @@ async function handleLogin(e) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ username, password }),
-            credentials: 'include'  // 👈 Envia cookies
+            credentials: 'include'
         });
 
         const data = await response.json();
@@ -163,7 +166,7 @@ async function handleLogout() {
     try {
         await fetch('/api/logout', {
             method: 'POST',
-            credentials: 'include'  // 👈 Envia cookies
+            credentials: 'include'
         });
     } catch (error) {
         console.error('Erro no logout:', error);
@@ -461,7 +464,7 @@ async function handleChangePassword(employeeName) {
                 employee_name: employeeName,
                 new_password: newPassword
             }),
-            credentials: 'include'  // 👈 Envia cookies
+            credentials: 'include'
         });
         
         const data = await response.json();
