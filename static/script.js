@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initializeApp() {
     // Verificar se já existe uma sessão ativa
     try {
-        const sessionResponse = await fetch('/api/check-session');
+        const sessionResponse = await fetch('/api/check-session', {
+            credentials: 'include'  // 👈 Envia cookies
+        });
         if (sessionResponse.ok) {
             const sessionData = await sessionResponse.json();
             if (sessionData.logged_in) {
@@ -32,7 +34,6 @@ async function initializeApp() {
         await loadDataFromServer();
     } catch (error) {
         console.error('Erro ao carregar dados do servidor:', error);
-        // Usar dados padrão em caso de erro
         employees = [];
         initializeSpreadsheetData();
     }
@@ -40,13 +41,14 @@ async function initializeApp() {
 
 async function loadDataFromServer() {
     try {
-        const response = await fetch('/api/data');
+        const response = await fetch('/api/data', {
+            credentials: 'include'  // 👈 Envia cookies
+        });
         if (response.ok) {
             const data = await response.json();
             employees = data.employees || [];
             spreadsheetData = data.spreadsheetData || {};
             
-            // Garantir que todos os funcionários tenham dados na planilha
             employees.forEach(emp => {
                 if (!spreadsheetData[emp.name]) {
                     spreadsheetData[emp.name] = {
@@ -79,7 +81,8 @@ async function saveDataToServer() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(dataToSave)
+            body: JSON.stringify(dataToSave),
+            credentials: 'include'  // 👈 Envia cookies
         });
         
         if (!response.ok) {
@@ -108,22 +111,15 @@ function initializeSpreadsheetData() {
 }
 
 function setupEventListeners() {
-    // Login
     document.getElementById('login-form').addEventListener('submit', handleLogin);
-    
-    // Logout
     document.getElementById('logout-btn').addEventListener('click', handleLogout);
-    
-    // Admin panel
     document.getElementById('admin-panel-btn').addEventListener('click', showAdminPanel);
     document.getElementById('back-to-main').addEventListener('click', hideAdminPanel);
     
-    // Admin tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', switchTab);
     });
     
-    // Adicionar funcionário
     document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
 }
 
@@ -144,7 +140,8 @@ async function handleLogin(e) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password }),
+            credentials: 'include'  // 👈 Envia cookies
         });
 
         const data = await response.json();
@@ -164,7 +161,10 @@ async function handleLogin(e) {
 
 async function handleLogout() {
     try {
-        await fetch('/api/logout', { method: 'POST' });
+        await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include'  // 👈 Envia cookies
+        });
     } catch (error) {
         console.error('Erro no logout:', error);
     }
@@ -174,8 +174,6 @@ async function handleLogout() {
     document.getElementById('login-section').style.display = 'block';
     document.getElementById('main-section').style.display = 'none';
     document.getElementById('admin-section').style.display = 'none';
-    
-    // Limpar formulário de login
     document.getElementById('login-form').reset();
 }
 
@@ -183,18 +181,14 @@ function showMainSection() {
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('main-section').style.display = 'block';
     document.getElementById('admin-section').style.display = 'none';
-    
-    // Atualizar informações do usuário
     document.getElementById('logged-user').textContent = `Logado como: ${currentUser}`;
     
-    // Mostrar botão admin se for admin
     if (isAdmin) {
         document.getElementById('admin-panel-btn').style.display = 'inline-block';
     } else {
         document.getElementById('admin-panel-btn').style.display = 'none';
     }
     
-    // Renderizar planilha
     renderSpreadsheet();
 }
 
@@ -213,13 +207,11 @@ function renderSpreadsheet() {
 function createEmployeeRow(employeeName) {
     const row = document.createElement('tr');
     
-    // Nome do funcionário
     const nameCell = document.createElement('td');
     nameCell.textContent = employeeName;
     nameCell.className = 'employee-name';
     row.appendChild(nameCell);
     
-    // Dias da semana
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
     days.forEach(day => {
         const cell = document.createElement('td');
@@ -229,7 +221,6 @@ function createEmployeeRow(employeeName) {
         cell.dataset.employee = employeeName;
         cell.dataset.day = day;
         
-        // Adicionar evento de clique para edição (apenas se for admin ou se for o próprio funcionário)
         if (isAdmin || currentUser === employeeName) {
             cell.addEventListener('click', handleCellClick);
         }
@@ -237,7 +228,6 @@ function createEmployeeRow(employeeName) {
         row.appendChild(cell);
     });
     
-    // Total semanal
     const totalCell = document.createElement('td');
     const weeklyTotal = calculateWeeklyTotal(employeeName);
     totalCell.textContent = formatCurrency(weeklyTotal);
@@ -251,7 +241,6 @@ function handleCellClick(e) {
     const cell = e.target;
     const currentValue = spreadsheetData[cell.dataset.employee][cell.dataset.day];
     
-    // Criar input para edição
     const input = document.createElement('input');
     input.type = 'number';
     input.step = '0.01';
@@ -259,13 +248,11 @@ function handleCellClick(e) {
     input.style.width = '100%';
     input.style.textAlign = 'center';
     
-    // Substituir conteúdo da célula
     cell.innerHTML = '';
     cell.appendChild(input);
     input.focus();
     input.select();
     
-    // Eventos do input
     input.addEventListener('blur', () => finishEditing(cell, input));
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -279,7 +266,6 @@ async function finishEditing(cell, input) {
     const employee = cell.dataset.employee;
     const day = cell.dataset.day;
     
-    // Atualizar dados
     if (!spreadsheetData[employee]) {
         spreadsheetData[employee] = {
             monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0
@@ -287,18 +273,14 @@ async function finishEditing(cell, input) {
     }
     
     spreadsheetData[employee][day] = newValue;
-    
-    // Restaurar célula
     cell.textContent = formatCurrency(newValue);
     
-    // Salvar no servidor e atualizar totais
     await saveDataToServer();
     updateTotals();
 }
 
 function calculateWeeklyTotal(employeeName) {
     if (!spreadsheetData[employeeName]) return 0;
-    
     const data = spreadsheetData[employeeName];
     return data.monday + data.tuesday + data.wednesday + data.thursday + data.friday;
 }
@@ -314,16 +296,13 @@ function updateTotals() {
                 dayTotal += spreadsheetData[employee.name][day];
             }
         });
-        
         const dayTotalElement = document.getElementById(`${day}-total`);
         if (dayTotalElement) {
             dayTotalElement.textContent = formatCurrency(dayTotal);
         }
-        
         weekTotal += dayTotal;
     });
     
-    // Atualizar totais semanais individuais
     employees.forEach(employee => {
         const weeklyTotal = calculateWeeklyTotal(employee.name);
         const row = document.querySelector(`[data-employee="${employee.name}"]`)?.parentElement;
@@ -335,7 +314,6 @@ function updateTotals() {
         }
     });
     
-    // Atualizar total geral da semana
     const weekTotalElement = document.getElementById('week-total');
     if (weekTotalElement) {
         weekTotalElement.textContent = formatCurrency(weekTotal);
@@ -349,7 +327,6 @@ function formatCurrency(value) {
     });
 }
 
-// Funções de administração
 function showAdminPanel() {
     document.getElementById('admin-section').style.display = 'block';
     renderEmployeeManagement();
@@ -362,13 +339,11 @@ function hideAdminPanel() {
 function switchTab(e) {
     const targetTab = e.target.dataset.tab;
     
-    // Atualizar botões
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     e.target.classList.add('active');
     
-    // Atualizar conteúdo
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
     });
@@ -383,12 +358,10 @@ function renderEmployeeManagement() {
     const list = document.getElementById('employee-management-list');
     list.innerHTML = '';
     
-    // Filtrar funcionários (não mostrar admin)
     const regularEmployees = employees.filter(emp => emp.name !== 'admin');
     
     regularEmployees.forEach(employee => {
         const li = document.createElement("li");
-        
         const info = document.createElement("span");
         info.className = "employee-info";
         info.textContent = employee.name;
@@ -425,64 +398,46 @@ async function handleAddEmployee(e) {
         return;
     }
     
-    // Verificar se já existe
     if (employees.find(emp => emp.name.toLowerCase() === name.toLowerCase())) {
         showMessage('Funcionário já existe!', 'error');
         return;
     }
     
-    // Adicionar funcionário
     employees.push({ name, password });
-    
-    // Inicializar dados da planilha para o novo funcionário
     spreadsheetData[name] = {
         monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0
     };
     
-    // Salvar no servidor
     const saved = await saveDataToServer();
     if (!saved) {
-        // Reverter mudanças se não conseguiu salvar
         employees = employees.filter(emp => emp.name !== name);
         delete spreadsheetData[name];
         return;
     }
     
-    // Limpar formulário
     document.getElementById('add-employee-form').reset();
-    
-    // Atualizar interface
     renderEmployeeManagement();
     renderSpreadsheet();
-    
     showMessage('Funcionário adicionado com sucesso!', 'success');
 }
 
 async function removeEmployee(employeeName) {
     if (confirm(`Tem certeza que deseja remover ${employeeName}?`)) {
-        // Fazer backup dos dados antes de remover
         const backupEmployees = [...employees];
         const backupSpreadsheetData = { ...spreadsheetData };
         
-        // Remover da lista de funcionários
         employees = employees.filter(emp => emp.name !== employeeName);
-        
-        // Remover dados da planilha
         delete spreadsheetData[employeeName];
         
-        // Tentar salvar no servidor
         const saved = await saveDataToServer();
         if (!saved) {
-            // Restaurar dados se não conseguiu salvar
             employees = backupEmployees;
             spreadsheetData = backupSpreadsheetData;
             return;
         }
         
-        // Atualizar interface
         renderEmployeeManagement();
         renderSpreadsheet();
-        
         showMessage('Funcionário removido com sucesso!', 'success');
     }
 }
@@ -490,10 +445,7 @@ async function removeEmployee(employeeName) {
 async function handleChangePassword(employeeName) {
     const newPassword = prompt(`Digite a nova senha para ${employeeName}:`);
     
-    if (!newPassword) {
-        return; // Usuário cancelou
-    }
-    
+    if (!newPassword) return;
     if (newPassword.length < 3) {
         showMessage('A senha deve ter pelo menos 3 caracteres!', 'error');
         return;
@@ -508,18 +460,17 @@ async function handleChangePassword(employeeName) {
             body: JSON.stringify({
                 employee_name: employeeName,
                 new_password: newPassword
-            })
+            }),
+            credentials: 'include'  // 👈 Envia cookies
         });
         
         const data = await response.json();
         
         if (data.success) {
-            // Atualizar dados locais
             const employee = employees.find(emp => emp.name === employeeName);
             if (employee) {
                 employee.password = newPassword;
             }
-            
             showMessage('Senha alterada com sucesso!', 'success');
         } else {
             showMessage(data.message || 'Erro ao alterar senha', 'error');
@@ -530,9 +481,7 @@ async function handleChangePassword(employeeName) {
     }
 }
 
-// Função para mostrar mensagens
 function showMessage(text, type) {
-    // Remover mensagem anterior se existir
     const existingMessage = document.querySelector('.message');
     if (existingMessage) {
         existingMessage.remove();
@@ -542,7 +491,6 @@ function showMessage(text, type) {
     message.className = `message ${type}`;
     message.textContent = text;
     
-    // Inserir no formulário de login ou no painel admin
     const loginForm = document.querySelector('.login-form');
     const adminPanel = document.querySelector('.admin-panel');
     
@@ -552,11 +500,9 @@ function showMessage(text, type) {
         adminPanel.insertBefore(message, adminPanel.firstChild);
     }
     
-    // Remover mensagem após 3 segundos
     setTimeout(() => {
         if (message.parentNode) {
             message.remove();
         }
     }, 3000);
 }
-
