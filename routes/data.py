@@ -1,3 +1,5 @@
+# routes/data.py (versão final segura)
+
 from flask import Blueprint, jsonify, request, session
 from flask_cors import cross_origin
 from models.sales import Sale
@@ -5,7 +7,6 @@ from models.user import db
 
 data_bp = Blueprint('data', __name__)
 
-# Lista fixa de funcionários (pode ser movida para tabela depois)
 EMPLOYEES = [
     {"name": "Anderson", "password": "123"},
     {"name": "Vitoria", "password": "123"},
@@ -51,12 +52,19 @@ def save_data_to_db(data):
         print(f"Erro ao salvar: {e}")
         return False
 
+# 🔑 FUNÇÕES PÚBLICAS PARA O archive.py
+def load_data():
+    return load_data_from_db()
+
+def save_data(data):
+    return save_data_to_db(data)
+
+# Rotas da API
 @data_bp.route('/data', methods=['GET'])
 @cross_origin()
 def get_data():
     try:
-        data = load_data_from_db()
-        return jsonify(data), 200
+        return jsonify(load_data_from_db()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -65,12 +73,10 @@ def get_data():
 def save_data_endpoint():
     if 'user' not in session:
         return jsonify({"error": "Não autenticado"}), 401
-
     try:
         data = request.get_json()
         if not data or 'employees' not in data or 'spreadsheetData' not in data:
             return jsonify({"error": "Dados inválidos"}), 400
-
         if save_data_to_db(data):
             return jsonify({"message": "Dados salvos"}), 200
         else:
