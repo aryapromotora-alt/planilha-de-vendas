@@ -1,9 +1,19 @@
 import os
-import json
 import logging
 import urllib.parse
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
+
+# Lista fixa de funcionários (reutilizada em /tv e outros lugares)
+EMPLOYEES = [
+    {"name": "Anderson", "password": "123"},
+    {"name": "Vitoria", "password": "123"},
+    {"name": "Jemima", "password": "123"},
+    {"name": "Maiany", "password": "123"},
+    {"name": "Fernanda", "password": "123"},
+    {"name": "Nadia", "password": "123"},
+    {"name": "Giovana", "password": "123"}
+]
 
 # Imports dos blueprints
 from models.user import db
@@ -49,7 +59,7 @@ def create_app():
     # Inicializa banco
     db.init_app(app)
 
-    # 🔑 Cria as tabelas no banco (incluindo 'sales', se existir o modelo)
+    # 🔑 Cria as tabelas no banco (incluindo 'sales')
     with app.app_context():
         db.create_all()
         print("✅ Tabelas do banco verificadas/criadas com sucesso.")
@@ -85,71 +95,29 @@ def create_app():
         return f"Banco em uso: {app.config['SQLALCHEMY_DATABASE_URI']}"
 
     # ---------------------------
-    # Função para carregar dados da planilha (copiada de routes/data.py)
-    # ---------------------------
-    def load_spreadsheet_data():
-        DATA_FILE = os.path.join(os.path.dirname(__file__), "database", "planilha_data.json")
-        if os.path.exists(DATA_FILE):
-            try:
-                with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    ordem_map = {emp["name"]: i for i, emp in enumerate(data.get("employees", []), start=1)}
-                    for nome, valores in data.get("spreadsheetData", {}).items():
-                        valores["ordem"] = ordem_map.get(nome, 999)
-                    return data
-            except (json.JSONDecodeError, IOError):
-                pass
-
-        default_employees = [
-            {"name": "Anderson", "password": "123"},
-            {"name": "Vitoria", "password": "123"},
-            {"name": "Jemima", "password": "123"},
-            {"name": "Maiany", "password": "123"},
-            {"name": "Fernanda", "password": "123"},
-            {"name": "Nadia", "password": "123"},
-            {"name": "Giovana", "password": "123"}
-        ]
-
-        spreadsheet = {
-            emp["name"]: {
-                "monday": 0,
-                "tuesday": 0,
-                "wednesday": 0,
-                "thursday": 0,
-                "friday": 0,
-                "ordem": i + 1
-            }
-            for i, emp in enumerate(default_employees)
-        }
-
-        return {
-            "employees": default_employees,
-            "spreadsheetData": spreadsheet
-        }
-
-    # ---------------------------
-    # Rota pública /tv para exibição em telão
+    # Rota pública /tv para exibição em telão (AGORA USA O BANCO!)
     # ---------------------------
     @app.route("/tv")
     def tv():
-        data = load_spreadsheet_data()
+        from models.sales import Sale  # Importa dentro da rota para evitar problemas de ciclo
         dados = []
-        for emp in data.get("employees", []):
+        for emp in EMPLOYEES:
             nome = emp["name"]
-            valores = data["spreadsheetData"].get(nome, {})
+            sales = Sale.query.filter_by(employee_name=nome).all()
+            day_values = {s.day: s.value for s in sales}
             linha = {
                 "nome": nome,
-                "seg": valores.get("monday", 0),
-                "ter": valores.get("tuesday", 0),
-                "qua": valores.get("wednesday", 0),
-                "qui": valores.get("thursday", 0),
-                "sex": valores.get("friday", 0),
+                "seg": day_values.get("monday", 0),
+                "ter": day_values.get("tuesday", 0),
+                "qua": day_values.get("wednesday", 0),
+                "qui": day_values.get("thursday", 0),
+                "sex": day_values.get("friday", 0),
                 "total": (
-                    valores.get("monday", 0) +
-                    valores.get("tuesday", 0) +
-                    valores.get("wednesday", 0) +
-                    valores.get("thursday", 0) +
-                    valores.get("friday", 0)
+                    day_values.get("monday", 0) +
+                    day_values.get("tuesday", 0) +
+                    day_values.get("wednesday", 0) +
+                    day_values.get("thursday", 0) +
+                    day_values.get("friday", 0)
                 )
             }
             dados.append(linha)
