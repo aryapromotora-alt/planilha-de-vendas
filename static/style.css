@@ -570,7 +570,7 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #121212;
+  background-color: #f0f0f0;
   z-index: 1000;
 }
 
