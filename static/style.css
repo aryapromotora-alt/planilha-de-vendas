@@ -201,6 +201,12 @@ button:hover {
     font-weight: 500;
 }
 
+/* Linhas verticais douradas entre os dias */
+.spreadsheet-table td.editable-cell {
+    border-left: 1px solid #FFD700;
+    border-right: 1px solid #FFD700;
+}
+
 .spreadsheet-table tbody tr:hover {
     background-color: #2a2a2a;
 }
