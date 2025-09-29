@@ -4,7 +4,7 @@ from sqlalchemy.exc import OperationalError
 from flask import request, abort
 from flask_login import current_user
 
-from app import create_app
+from __init__ import create_app  # Corrigido: importa da raiz, não da pasta 'app'
 from scheduler import start_scheduler
 from models.user import db
 
