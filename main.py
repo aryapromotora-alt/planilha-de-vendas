@@ -14,7 +14,9 @@ app = create_app()
 # 🔐 Restrição de acesso externo: só admin pode acessar fora da empresa
 @app.before_request
 def restringir_acesso_externo():
-    ip = request.remote_addr
+    # Captura o IP real do visitante, mesmo atrás de proxy
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+    ip = ip.split(",")[0].strip()  # pega o primeiro IP da lista
 
     # Verifica se o IP é da rede interna da empresa
     ip_interno = (
