@@ -1,12 +1,33 @@
 import os
 import time
 from sqlalchemy.exc import OperationalError
+from flask import request, abort
+from flask_login import current_user
+
 from app import create_app
 from scheduler import start_scheduler
 from models.user import db
 
 # Cria a aplicação Flask
 app = create_app()
+
+# 🔐 Restrição de acesso externo: só admin pode acessar fora da empresa
+@app.before_request
+def restringir_acesso_externo():
+    ip = request.remote_addr
+
+    # Verifica se o IP é da rede interna da empresa
+    ip_interno = (
+        ip.startswith("192.168.") or
+        ip.startswith("10.") or
+        ip.startswith("172.")
+    )
+
+    # Se estiver fora da empresa e não for admin, bloqueia
+    if not ip_interno:
+        if not current_user.is_authenticated or getattr(current_user, "role", "") != "admin":
+            print(f"[BLOQUEIO] Acesso externo negado para IP {ip}")
+            abort(403)
 
 # Garante que as tabelas sejam criadas com tolerância ao tempo de boot do banco
 with app.app_context():
