@@ -14,49 +14,40 @@
         box-sizing: border-box;
     }
 
+    html, body {
+        height: 100%; /* Garante que body e html ocupem 100% da altura */
+        overflow: hidden; /* Evita scrollbars */
+    }
+
     body {
         font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f0f0f0; /* Fundo cinza claro */
+        background-color: #121212; /* Fundo escuro para TV */
         color: #ffffff;
         line-height: 1.6;
         padding: 0;
         margin: 0;
-    }
-
-    .header, .footer {
-        text-align: center;
-        background: #121212;
-        color: #FFD700; /* Amarelo dourado */
-        padding: 0.5rem 2rem;
-        font-weight: 700;
-        font-size: 1.4rem;
-        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        border-bottom: 1px solid #FFD700;
-    }
-
-    .footer {
-        position: sticky;
-        bottom: 0;
-        font-size: 1rem;
-        padding: 0.75rem;
-        border-top: 1px solid #FFD700;
-        background: #1a1a1a;
+        display: flex; /* Para centralizar o conteúdo verticalmente se necessário */
+        justify-content: center;
+        align-items: center;
     }
 
     .spreadsheet-container {
-        overflow-x: auto;
-        padding: 20px;
-        margin: 0 auto;
-        max-width: 100%;
+        overflow: hidden; /* Esconde scrollbars se a tabela for maior que a tela */
+        padding: 0; /* Remove padding */
+        margin: 0; /* Remove margens */
+        width: 100vw; /* Ocupa 100% da largura da viewport */
+        height: 100vh; /* Ocupa 100% da altura da viewport */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 
     table.spreadsheet-table {
         width: 100%;
+        height: 100%; /* Ocupa 100% da altura do container */
         border-collapse: collapse;
-        font-size: 1.4rem; /* Letras maiores para TV */
+        font-size: 2.0rem; /* Aumentado para TV */
         font-weight: 500;
         color: #ffffff;
         margin: 0 auto;
@@ -65,11 +56,11 @@
     table.spreadsheet-table th {
         background-color: #2c3e50; /* Azul escuro */
         color: #FFD700; /* Amarelo dourado */
-        padding: 1.2rem;
+        padding: 1.5rem; /* Aumentado */
         text-align: center;
         font-weight: 700;
         text-transform: uppercase;
-        font-size: 1.2rem;
+        font-size: 1.6rem; /* Aumentado */
         letter-spacing: 0.8px;
         border-bottom: 2px solid #FFD700;
         position: sticky;
@@ -78,7 +69,7 @@
     }
 
     table.spreadsheet-table td {
-        padding: 1.2rem;
+        padding: 1.5rem; /* Aumentado */
         text-align: center;
         border-bottom: 1px solid #333;
         transition: background-color 0.2s;
@@ -106,14 +97,14 @@
         color: #FFD700 !important;
         font-weight: 700;
         text-align: left;
-        padding-left: 1.5rem;
+        padding-left: 1.8rem; /* Aumentado */
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .total-cell {
         background-color: #2d2d2d !important;
         font-weight: 600;
-        color: #FFD700 !important; /* ✅ TILO EM AMARELO */
+        color: #FFD700 !important;
         border-left: 2px solid #FFD700;
     }
 
@@ -131,32 +122,24 @@
     /* Responsividade para TVs e telas grandes */
     @media (max-width: 1200px) {
         table.spreadsheet-table {
-            font-size: 1.2rem;
+            font-size: 1.8rem;
         }
-        .header h1 {
-            font-size: 1.6rem;
+        table.spreadsheet-table th {
+            font-size: 1.4rem;
         }
     }
 
     @media (max-width: 768px) {
         table.spreadsheet-table {
-            font-size: 1rem;
+            font-size: 1.5rem;
         }
-        .header h1 {
-            font-size: 1.4rem;
+        table.spreadsheet-table th {
+            font-size: 1.2rem;
         }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <img src="/static/logo.png" alt="Logo da Empresa" style="height: 40px; margin-right: 10px;">
-      <h1 style="flex: 1; text-align: center; font-size: 1.4rem;">Resumo de Vendas</h1>
-      <div style="width: 40px;"></div> <!-- Espaço para alinhar -->
-    </div>
-  </div>
-
   <div class="spreadsheet-container">
     <table class="spreadsheet-table">
       <thead>
@@ -198,9 +181,6 @@
       </tbody>
     </table>
   </div>
-
-  <div class="footer">
-    Atualizado automaticamente a cada 60 segundos
-  </div>
 </body>
 </html>
+
