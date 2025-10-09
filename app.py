@@ -152,3 +152,43 @@ def create_app():
     # FINAL: retorna a aplicação
     # ---------------------------
     return app
+
+
+    # ---------------------------
+    # Rota para extração de dados
+    # ---------------------------
+    @app.route("/export_table")
+    def export_table():
+        from models.sales import Sale
+        dados = []
+        for emp in EMPLOYEES:
+            nome = emp["name"]
+            sales = Sale.query.filter_by(employee_name=nome).all()
+            day_values = {s.day: s.value for s in sales}
+            linha = {
+                "nome": nome,
+                "seg": day_values.get("monday", 0),
+                "ter": day_values.get("tuesday", 0),
+                "qua": day_values.get("wednesday", 0),
+                "qui": day_values.get("thursday", 0),
+                "sex": day_values.get("friday", 0),
+                "total": (
+                    day_values.get("monday", 0) +
+                    day_values.get("tuesday", 0) +
+                    day_values.get("wednesday", 0) +
+                    day_values.get("thursday", 0) +
+                    day_values.get("friday", 0)
+                )
+            }
+            dados.append(linha)
+
+        totais_diarios = {
+            "seg": sum(linha["seg"] for linha in dados),
+            "ter": sum(linha["ter"] for linha in dados),
+            "qua": sum(linha["qua"] for linha in dados),
+            "qui": sum(linha["qui"] for linha in dados),
+            "sex": sum(linha["sex"] for linha in dados),
+        }
+
+        return render_template("tabela_para_extracao.html", dados=dados, totais_diarios=totais_diarios)
+
