@@ -149,12 +149,6 @@ def create_app():
             return send_from_directory(static_folder_path, "index.html")
 
     # ---------------------------
-    # FINAL: retorna a aplicação
-    # ---------------------------
-    return app
-
-
-    # ---------------------------
     # Rota para extração de dados
     # ---------------------------
     @app.route("/export_table")
@@ -191,4 +185,9 @@ def create_app():
         }
 
         return render_template("tabela_para_extracao.html", dados=dados, totais_diarios=totais_diarios)
+
+    # ---------------------------
+    # FINAL: retorna a aplicação
+    # ---------------------------
+    return app
 
