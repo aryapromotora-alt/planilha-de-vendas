@@ -226,10 +226,7 @@
 
     // Função para exportar para Excel
     function exportToExcel() {
-        // Criar uma nova tabela apenas com os dados (sem botões)
         const table = document.getElementById('sales-table').cloneNode(true);
-        
-        // Criar um novo documento HTML temporário
         const htmlContent = `
             <html>
             <head>
@@ -243,8 +240,6 @@
             </body>
             </html>
         `;
-        
-        // Criar blob e fazer download
         const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -254,28 +249,21 @@
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        
         alert('📗 Arquivo Excel baixado com sucesso!');
     }
 
     // Função para exportar para PDF
     function exportToPDF() {
-        // Esconder botões temporariamente
         const buttons = document.querySelector('.export-buttons');
         buttons.style.display = 'none';
-        
-        // Usar a funcionalidade de impressão do navegador para gerar PDF
         window.print();
-        
-        // Mostrar botões novamente após um delay
         setTimeout(() => {
             buttons.style.display = 'block';
         }, 1000);
-        
         alert('📄 Para salvar como PDF, escolha "Salvar como PDF" na janela de impressão que abriu.');
     }
 
-    // Adicionar funcionalidade de cópia da tabela para clipboard
+    // Função para copiar tabela
     function copyTableToClipboard() {
         const table = document.getElementById('sales-table');
         const range = document.createRange();
@@ -289,32 +277,30 @@
 
     // Função para enviar por E-mail
     function sendEmail() {
-        const table = document.getElementById(\'sales-table\');
-        let emailBody = \'Prezados,\n\nSegue o resumo de vendas:\n\n\';
+        const table = document.getElementById('sales-table');
+        let emailBody = 'Prezados,\n\nSegue o resumo de vendas:\n\n';
 
-        // Adicionar cabeçalho da tabela
-        const headers = Array.from(table.querySelectorAll(\'thead th\')).map(th => th.innerText.trim());
-        emailBody += headers.join(\'\t\') + \'\n\';
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+        emailBody += headers.join('\t') + '\n';
 
-        // Adicionar dados da tabela
-        table.querySelectorAll(\'tbody tr\').forEach(row => {
-            const rowData = Array.from(row.querySelectorAll(\'td\')).map(td => td.innerText.trim());
-            emailBody += rowData.join(\'\t\') + \'\n\';
+        table.querySelectorAll('tbody tr').forEach(row => {
+            const rowData = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim());
+            emailBody += rowData.join('\t') + '\n';
         });
 
-        const subject = \'Resumo de Vendas - \' + new Date().toLocaleDateString(\'pt-BR\');
-        const mailtoLink = \'mailto:?subject=\' + encodeURIComponent(subject) + \'&body=\' + encodeURIComponent(emailBody);
+        const subject = 'Resumo de Vendas - ' + new Date().toLocaleDateString('pt-BR');
+        const mailtoLink = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(emailBody);
         
-        window.open(mailtoLink, \'_blank\');
-        alert(\'📧 Seu cliente de e-mail será aberto com o resumo de vendas.\');
+        window.open(mailtoLink, '_blank');
+        alert('📧 Seu cliente de e-mail será aberto com o resumo de vendas.');
     }
 
     // Adicionar botão de cópia
-    document.addEventListener(\'DOMContentLoaded\', function() {
-        const exportButtons = document.querySelector(\'\.export-buttons\');
-        const copyBtn = document.createElement(\'button\');
-        copyBtn.className = \'export-btn\';
-        copyBtn.innerHTML = \'📋 Copiar Tabela\';
+    document.addEventListener('DOMContentLoaded', function() {
+        const exportButtons = document.querySelector('.export-buttons');
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'export-btn';
+        copyBtn.innerHTML = '📋 Copiar Tabela';
         copyBtn.onclick = copyTableToClipboard;
         exportButtons.appendChild(copyBtn);
     });
