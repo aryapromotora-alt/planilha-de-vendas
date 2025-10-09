@@ -184,7 +184,20 @@ def create_app():
             "sex": sum(linha["sex"] for linha in dados),
         }
 
-        return render_template("tabela_para_extracao.html", dados=dados, totais_diarios=totais_diarios)
+        total_geral = (
+            totais_diarios["seg"] +
+            totais_diarios["ter"] +
+            totais_diarios["qua"] +
+            totais_diarios["qui"] +
+            totais_diarios["sex"]
+        )
+
+        return render_template(
+            "tabela_para_extracao.html",
+            dados=dados,
+            totais_diarios=totais_diarios,
+            total_geral=total_geral
+        )
 
     # ---------------------------
     # FINAL: retorna a aplicação
