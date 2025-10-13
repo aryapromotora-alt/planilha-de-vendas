@@ -1,25 +1,15 @@
-# routes/data.py (versão final segura)
-
 from flask import Blueprint, jsonify, request, session
 from flask_cors import cross_origin
 from models.sales import Sale
 from models.user import db
+from routes.user import load_employees_data  # ← Importa os dados reais do JSON
 
 data_bp = Blueprint('data', __name__)
 
-EMPLOYEES = [
-    {"name": "Anderson", "password": "123"},
-    {"name": "Vitoria", "password": "123"},
-    {"name": "Jemima", "password": "123"},
-    {"name": "Maiany", "password": "123"},
-    {"name": "Fernanda", "password": "123"},
-    {"name": "Nadia", "password": "123"},
-    {"name": "Giovana", "password": "123"}
-]
-
 def load_data_from_db():
     spreadsheetData = {}
-    for emp in EMPLOYEES:
+    employees = load_employees_data()  # ← Carrega os funcionários do JSON
+    for emp in employees:
         sales = Sale.query.filter_by(employee_name=emp["name"]).all()
         day_values = {sale.day: sale.value for sale in sales}
         spreadsheetData[emp["name"]] = {
@@ -30,7 +20,7 @@ def load_data_from_db():
             "friday": day_values.get("friday", 0),
         }
     return {
-        "employees": EMPLOYEES,
+        "employees": employees,
         "spreadsheetData": spreadsheetData
     }
 
