@@ -4,7 +4,7 @@ from models.user import db, User
 from werkzeug.security import generate_password_hash
 from sqlalchemy import text
 
-# Configurações do admin (você pode mudar depois)
+# Configurações do admin
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
 ADMIN_ROLE = "admin"
@@ -23,7 +23,7 @@ with app.app_context():
         print(f"❌ Erro ao criar tabelas: {e}")
         exit(1)
 
-    # 2. GARANTE QUE A COLUNA 'password' EXISTA
+    # 2. Garante que a coluna 'password' exista
     try:
         result = db.session.execute(text("""
             SELECT column_name FROM information_schema.columns 
@@ -33,14 +33,31 @@ with app.app_context():
             print("⚠️ Coluna 'password' não encontrada. Adicionando...")
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN password VARCHAR(128) NOT NULL DEFAULT \'\';'))
             db.session.commit()
-            print("✅ Coluna 'password' adicionada com sucesso.")
+            print("✅ Coluna 'password' adicionada.")
         else:
             print("✅ Coluna 'password' já existe.")
     except Exception as e:
         print(f"❌ Erro ao verificar/criar coluna 'password': {e}")
         exit(1)
 
-    # 3. Cria o usuário admin se não existir
+    # 3. Garante que a coluna 'role' exista
+    try:
+        result = db.session.execute(text("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'user' AND column_name = 'role';
+        """))
+        if not result.fetchone():
+            print("⚠️ Coluna 'role' não encontrada. Adicionando...")
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN role VARCHAR(20) DEFAULT \'user\';'))
+            db.session.commit()
+            print("✅ Coluna 'role' adicionada.")
+        else:
+            print("✅ Coluna 'role' já existe.")
+    except Exception as e:
+        print(f"❌ Erro ao verificar/criar coluna 'role': {e}")
+        exit(1)
+
+    # 4. Cria o usuário admin se não existir
     admin_user = User.query.filter_by(username=ADMIN_USERNAME).first()
     if not admin_user:
         try:
@@ -49,7 +66,7 @@ with app.app_context():
                 username=ADMIN_USERNAME,
                 password=hashed_password,
                 role=ADMIN_ROLE,
-                email=""  # evita erro se email for NOT NULL
+                email=""
             )
             db.session.add(new_admin)
             db.session.commit()
