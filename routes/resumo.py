@@ -9,7 +9,8 @@ resumo_bp = Blueprint("resumo", __name__)
 
 @resumo_bp.route("/resumo")
 def resumo_page():
-    hoje = datetime.utcnow().date()
+    try:
+        hoje = datetime.utcnow().date()
     ano = hoje.year
     mes = hoje.month
 
@@ -94,3 +95,7 @@ def resumo_page():
         anos_disponiveis=anos_disponiveis,
         meses_nomes=meses_nomes
     )
+    except Exception as e:
+        # Em caso de erro de banco de dados ou outro erro, retorna uma mensagem de erro
+        print(f"Erro ao carregar dados para /resumo: {e}")
+        return f"Erro Interno do Servidor ao carregar dados: {e}", 500

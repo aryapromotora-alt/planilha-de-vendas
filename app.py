@@ -98,40 +98,45 @@ def create_app():
     # ---------------------------
     @app.route("/tv")
     def tv():
-        from models.sales import Sale  # Importa dentro da rota para evitar problemas de ciclo
-        from models.user import User
-        dados = []
-        employees_from_db = User.query.filter_by(role='user').all()
-        for emp in employees_from_db:
-            nome = emp.username
-            sales = Sale.query.filter_by(employee_name=nome).all()
-            day_values = {s.day: s.value for s in sales}
-            linha = {
-                "nome": nome,
-                "seg": day_values.get("monday", 0),
-                "ter": day_values.get("tuesday", 0),
-                "qua": day_values.get("wednesday", 0),
-                "qui": day_values.get("thursday", 0),
-                "sex": day_values.get("friday", 0),
-                "total": (
-                    day_values.get("monday", 0) +
-                    day_values.get("tuesday", 0) +
-                    day_values.get("wednesday", 0) +
-                    day_values.get("thursday", 0) +
-                    day_values.get("friday", 0)
-                )
+        try:
+            from models.sales import Sale  # Importa dentro da rota para evitar problemas de ciclo
+            from models.user import User
+            dados = []
+            employees_from_db = User.query.filter_by(role='user').all()
+            for emp in employees_from_db:
+                nome = emp.username
+                sales = Sale.query.filter_by(employee_name=nome).all()
+                day_values = {s.day: s.value for s in sales}
+                linha = {
+                    "nome": nome,
+                    "seg": day_values.get("monday", 0),
+                    "ter": day_values.get("tuesday", 0),
+                    "qua": day_values.get("wednesday", 0),
+                    "qui": day_values.get("thursday", 0),
+                    "sex": day_values.get("friday", 0),
+                    "total": (
+                        day_values.get("monday", 0) +
+                        day_values.get("tuesday", 0) +
+                        day_values.get("wednesday", 0) +
+                        day_values.get("thursday", 0) +
+                        day_values.get("friday", 0)
+                    )
+                }
+                dados.append(linha)
+
+            totais_diarios = {
+                "seg": sum(linha["seg"] for linha in dados),
+                "ter": sum(linha["ter"] for linha in dados),
+                "qua": sum(linha["qua"] for linha in dados),
+                "qui": sum(linha["qui"] for linha in dados),
+                "sex": sum(linha["sex"] for linha in dados),
             }
-            dados.append(linha)
 
-        totais_diarios = {
-            "seg": sum(linha["seg"] for linha in dados),
-            "ter": sum(linha["ter"] for linha in dados),
-            "qua": sum(linha["qua"] for linha in dados),
-            "qui": sum(linha["qui"] for linha in dados),
-            "sex": sum(linha["sex"] for linha in dados),
-        }
-
-        return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
+            return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
+        except Exception as e:
+            # Em caso de erro de banco de dados ou outro erro, retorna uma mensagem de erro
+            print(f"Erro ao carregar dados para /tv: {e}")
+            return f"Erro Interno do Servidor ao carregar dados: {e}", 500
 
     # ---------------------------
     # Rotas estáticas / SPA
@@ -154,53 +159,58 @@ def create_app():
     # ---------------------------
     @app.route("/export_table")
     def export_table():
-        from models.sales import Sale
-        from models.user import User
-        dados = []
-        employees_from_db = User.query.filter_by(role='user').all()
-        for emp in employees_from_db:
-            nome = emp.username
-            sales = Sale.query.filter_by(employee_name=nome).all()
-            day_values = {s.day: s.value for s in sales}
-            linha = {
-                "nome": nome,
-                "seg": day_values.get("monday", 0),
-                "ter": day_values.get("tuesday", 0),
-                "qua": day_values.get("wednesday", 0),
-                "qui": day_values.get("thursday", 0),
-                "sex": day_values.get("friday", 0),
-                "total": (
-                    day_values.get("monday", 0) +
-                    day_values.get("tuesday", 0) +
-                    day_values.get("wednesday", 0) +
-                    day_values.get("thursday", 0) +
-                    day_values.get("friday", 0)
-                )
+        try:
+            from models.sales import Sale
+            from models.user import User
+            dados = []
+            employees_from_db = User.query.filter_by(role='user').all()
+            for emp in employees_from_db:
+                nome = emp.username
+                sales = Sale.query.filter_by(employee_name=nome).all()
+                day_values = {s.day: s.value for s in sales}
+                linha = {
+                    "nome": nome,
+                    "seg": day_values.get("monday", 0),
+                    "ter": day_values.get("tuesday", 0),
+                    "qua": day_values.get("wednesday", 0),
+                    "qui": day_values.get("thursday", 0),
+                    "sex": day_values.get("friday", 0),
+                    "total": (
+                        day_values.get("monday", 0) +
+                        day_values.get("tuesday", 0) +
+                        day_values.get("wednesday", 0) +
+                        day_values.get("thursday", 0) +
+                        day_values.get("friday", 0)
+                    )
+                }
+                dados.append(linha)
+
+            totais_diarios = {
+                "seg": sum(linha["seg"] for linha in dados),
+                "ter": sum(linha["ter"] for linha in dados),
+                "qua": sum(linha["qua"] for linha in dados),
+                "qui": sum(linha["qui"] for linha in dados),
+                "sex": sum(linha["sex"] for linha in dados),
             }
-            dados.append(linha)
 
-        totais_diarios = {
-            "seg": sum(linha["seg"] for linha in dados),
-            "ter": sum(linha["ter"] for linha in dados),
-            "qua": sum(linha["qua"] for linha in dados),
-            "qui": sum(linha["qui"] for linha in dados),
-            "sex": sum(linha["sex"] for linha in dados),
-        }
+            total_geral = (
+                totais_diarios["seg"] +
+                totais_diarios["ter"] +
+                totais_diarios["qua"] +
+                totais_diarios["qui"] +
+                totais_diarios["sex"]
+            )
 
-        total_geral = (
-            totais_diarios["seg"] +
-            totais_diarios["ter"] +
-            totais_diarios["qua"] +
-            totais_diarios["qui"] +
-            totais_diarios["sex"]
-        )
-
-        return render_template(
-            "tabela_para_extracao.html",
-            dados=dados,
-            totais_diarios=totais_diarios,
-            total_geral=total_geral
-        )
+            return render_template(
+                "tabela_para_extracao.html",
+                dados=dados,
+                totais_diarios=totais_diarios,
+                total_geral=total_geral
+            )
+        except Exception as e:
+            # Em caso de erro de banco de dados ou outro erro, retorna uma mensagem de erro
+            print(f"Erro ao carregar dados para /export_table: {e}")
+            return f"Erro Interno do Servidor ao carregar dados: {e}", 500
 
     # ---------------------------
     # FINAL: retorna a aplicação
