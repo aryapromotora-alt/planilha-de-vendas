@@ -4,38 +4,19 @@ from sqlalchemy.exc import OperationalError
 from app import create_app
 from scheduler import start_scheduler
 from models.user import db
-from sqlalchemy import text  # ← adicionado para rodar SQL diretamente
 
 # Cria a aplicação Flask
 app = create_app()
 
-# Garante que as tabelas sejam criadas e que a coluna 'password' exista
+# Garante que o banco esteja online e cria tabelas (sem mexer em colunas)
 with app.app_context():
-    for tentativa in range(10):  # tenta por até 10 vezes
+    for tentativa in range(10):
         try:
-            # Primeiro, cria as tabelas se não existirem
-            db.create_all()
-            
-            # Depois, garante que a coluna 'password' exista na tabela 'user'
-            try:
-                result = db.session.execute(text("""
-                    SELECT column_name FROM information_schema.columns 
-                    WHERE table_name = 'user' AND column_name = 'password';
-                """))
-                if not result.fetchone():
-                    # Adiciona a coluna se não existir
-                    db.session.execute(text('ALTER TABLE "user" ADD COLUMN password VARCHAR(128) NOT NULL DEFAULT \'\';'))
-                    db.session.commit()
-                    print("✅ Coluna 'password' adicionada à tabela 'user'.")
-                else:
-                    print("✅ Coluna 'password' já existe.")
-            except Exception as col_err:
-                print(f"⚠️ Erro ao verificar/criar coluna 'password': {col_err}")
-            
-            print("✅ Tabelas e colunas verificadas com sucesso.")
+            db.create_all()  # Só cria tabelas que não existem
+            print("✅ Tabelas verificadas/criadas (main.py).")
             break
         except OperationalError as e:
-            print(f"⚠️ Tentativa {tentativa + 1}: banco ainda não está pronto. Aguardando...")
+            print(f"⚠️ Tentativa {tentativa + 1}: banco não está pronto. Aguardando...")
             time.sleep(3)
     else:
         print("❌ Erro: banco não respondeu após múltiplas tentativas.")

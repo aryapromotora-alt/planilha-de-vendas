@@ -2,8 +2,9 @@ import os
 from app import create_app
 from models.user import db, User
 from werkzeug.security import generate_password_hash
+from sqlalchemy import text
 
-# Configurações do admin
+# Configurações do admin (você pode mudar depois)
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
 ADMIN_ROLE = "admin"
@@ -12,40 +13,52 @@ ADMIN_ROLE = "admin"
 app = create_app()
 
 with app.app_context():
-    print("Iniciando a criação das tabelas no banco de dados...")
-    
-    # 1. Cria todas as tabelas
+    print("Iniciando a inicialização do banco de dados...")
+
+    # 1. Cria todas as tabelas (se não existirem)
     try:
         db.create_all()
-        print("✅ Todas as tabelas criadas com sucesso.")
+        print("✅ Tabelas criadas (se necessário).")
     except Exception as e:
         print(f"❌ Erro ao criar tabelas: {e}")
         exit(1)
 
-    # 2. Cria o usuário admin se ele não existir
+    # 2. GARANTE QUE A COLUNA 'password' EXISTA
+    try:
+        result = db.session.execute(text("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'user' AND column_name = 'password';
+        """))
+        if not result.fetchone():
+            print("⚠️ Coluna 'password' não encontrada. Adicionando...")
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN password VARCHAR(128) NOT NULL DEFAULT \'\';'))
+            db.session.commit()
+            print("✅ Coluna 'password' adicionada com sucesso.")
+        else:
+            print("✅ Coluna 'password' já existe.")
+    except Exception as e:
+        print(f"❌ Erro ao verificar/criar coluna 'password': {e}")
+        exit(1)
+
+    # 3. Cria o usuário admin se não existir
     admin_user = User.query.filter_by(username=ADMIN_USERNAME).first()
-    
     if not admin_user:
         try:
-            # O campo 'email' é opcional no modelo, mas o banco pode ter restrição NOT NULL.
-            # Usamos uma string vazia para garantir a compatibilidade.
             hashed_password = generate_password_hash(ADMIN_PASSWORD)
-            
             new_admin = User(
                 username=ADMIN_USERNAME,
                 password=hashed_password,
                 role=ADMIN_ROLE,
-                email="" # Garante que o campo não seja NULL
+                email=""  # evita erro se email for NOT NULL
             )
-            
             db.session.add(new_admin)
             db.session.commit()
-            print(f"✅ Usuário admin ('{ADMIN_USERNAME}') criado com sucesso.")
+            print(f"✅ Usuário admin '{ADMIN_USERNAME}' criado.")
         except Exception as e:
             db.session.rollback()
-            print(f"❌ Erro ao criar usuário admin: {e}")
+            print(f"❌ Erro ao criar admin: {e}")
             exit(1)
     else:
-        print(f"ℹ️ Usuário admin ('{ADMIN_USERNAME}') já existe. Ignorando criação.")
+        print(f"ℹ️ Usuário admin '{ADMIN_USERNAME}' já existe.")
 
-    print("Processo de inicialização do banco de dados concluído.")
+    print("✅ Inicialização do banco concluída com sucesso.")
