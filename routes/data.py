@@ -38,14 +38,10 @@ def save_data_to_db(data):
                 if day not in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
                     continue
 
-                # Se estiver usando reference_date no modelo Sale:
                 sale = Sale.query.filter_by(
                     employee_name=emp_name,
                     day=day,
-                    reference_date=today  # ← só se esse campo existir
-                ).first() if hasattr(Sale, "reference_date") else Sale.query.filter_by(
-                    employee_name=emp_name,
-                    day=day
+                    reference_date=today
                 ).first()
 
                 if sale:
@@ -55,7 +51,7 @@ def save_data_to_db(data):
                         employee_name=emp_name,
                         day=day,
                         value=value,
-                        reference_date=today if hasattr(Sale, "reference_date") else None
+                        reference_date=today
                     )
                     db.session.add(sale)
 
@@ -92,6 +88,8 @@ def save_data_endpoint():
 
     try:
         data = request.get_json()
+        print("📥 Dados recebidos no /data:", data)
+
         if not data or 'spreadsheetData' not in data:
             return jsonify({"error": "Dados inválidos"}), 400
 

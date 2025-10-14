@@ -57,7 +57,7 @@ def get_users():
     users = User.query.all()
     return jsonify([user.to_dict() for user in users])
 
-# ➕ Criar novo usuário
+# ➕ Criar novo usuário (corrigido)
 @user_bp.route('/users', methods=['POST'])
 def create_user():
     data = request.json
@@ -65,13 +65,13 @@ def create_user():
     email = data.get("email")
     password = data.get("password")
 
-    if not username or not email or not password:
-        return jsonify({"message": "Dados incompletos"}), 400
+    if not username or not password:
+        return jsonify({"message": "Nome de usuário e senha são obrigatórios"}), 400
 
     if User.query.filter_by(username=username).first():
         return jsonify({"message": "Nome de usuário já existe"}), 409
 
-    if User.query.filter_by(email=email).first():
+    if email and User.query.filter_by(email=email).first():
         return jsonify({"message": "Email já existe"}), 409
 
     user = User(username=username, email=email)
