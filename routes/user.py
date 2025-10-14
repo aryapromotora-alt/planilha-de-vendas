@@ -117,3 +117,7 @@ def change_password(user_id):
     user.set_password(new_password)
     db.session.commit()
     return jsonify({"message": "Senha alterada com sucesso"}), 200
+
+# 📋 Função utilitária para carregar funcionários (usada em routes/data.py)
+def load_employees_data():
+    return [{"name": user.username} for user in User.query.all()]
