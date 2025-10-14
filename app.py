@@ -58,9 +58,29 @@ def create_app():
     # Inicializa banco
     db.init_app(app)
 
-    # 🔑 Cria as tabelas no banco (incluindo 'sales')
+    # 🔑 Cria as tabelas e garante que a coluna 'password' exista
     with app.app_context():
+        # Primeiro, cria as tabelas se não existirem
         db.create_all()
+        
+        # Depois, garante que a coluna 'password' exista na tabela 'user'
+        from sqlalchemy import text
+        try:
+            # Verifica se a coluna 'password' já existe
+            result = db.session.execute(text("""
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_name = 'user' AND column_name = 'password';
+            """))
+            if not result.fetchone():
+                # Adiciona a coluna se não existir
+                db.session.execute(text('ALTER TABLE "user" ADD COLUMN password VARCHAR(128) NOT NULL DEFAULT \'\';'))
+                db.session.commit()
+                print("✅ Coluna 'password' adicionada à tabela 'user'.")
+            else:
+                print("✅ Coluna 'password' já existe.")
+        except Exception as e:
+            print(f"⚠️ Erro ao verificar/criar coluna 'password': {e}")
+        
         print("✅ Tabelas do banco verificadas/criadas com sucesso.")
 
     # ---------------------------
@@ -216,4 +236,3 @@ def create_app():
     # FINAL: retorna a aplicação
     # ---------------------------
     return app
-
