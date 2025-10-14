@@ -23,21 +23,32 @@ with app.app_context():
         print(f"❌ Erro ao criar tabelas: {e}")
         exit(1)
 
-    # 2. Garante que a coluna 'password' exista
+    # 2. Garante que a coluna 'password' exista e tenha tamanho suficiente (256)
     try:
         result = db.session.execute(text("""
-            SELECT column_name FROM information_schema.columns 
+            SELECT column_name, character_maximum_length
+            FROM information_schema.columns 
             WHERE table_name = 'user' AND column_name = 'password';
         """))
-        if not result.fetchone():
+        row = result.fetchone()
+        if not row:
+            # Coluna não existe: cria com 256
             print("⚠️ Coluna 'password' não encontrada. Adicionando...")
-            db.session.execute(text('ALTER TABLE "user" ADD COLUMN password VARCHAR(128) NOT NULL DEFAULT \'\';'))
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN password VARCHAR(256) NOT NULL DEFAULT \'\';'))
             db.session.commit()
-            print("✅ Coluna 'password' adicionada.")
+            print("✅ Coluna 'password' adicionada com tamanho 256.")
         else:
-            print("✅ Coluna 'password' já existe.")
+            current_length = row[1]
+            if current_length < 256:
+                # Coluna existe, mas é pequena: aumenta para 256
+                print(f"⚠️ Coluna 'password' tem tamanho {current_length}. Aumentando para 256...")
+                db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(256);'))
+                db.session.commit()
+                print("✅ Tamanho da coluna 'password' atualizado para 256.")
+            else:
+                print("✅ Coluna 'password' já existe com tamanho adequado.")
     except Exception as e:
-        print(f"❌ Erro ao verificar/criar coluna 'password': {e}")
+        print(f"❌ Erro ao verificar/ajustar coluna 'password': {e}")
         exit(1)
 
     # 3. Garante que a coluna 'role' exista
