@@ -4,27 +4,14 @@ import urllib.parse
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
 
-# Lista fixa de funcionários (reutilizada em /tv e outros lugares)
-EMPLOYEES = [
-    {"name": "Anderson", "password": "123"},
-    {"name": "Vitoria", "password": "123"},
-    {"name": "Jemima", "password": "123"},
-    {"name": "Maiany", "password": "123"},
-    {"name": "Fernanda", "password": "123"},
-    {"name": "Nadia", "password": "123"},
-    {"name": "Giovana", "password": "123"}
-]
-
-# Imports dos blueprints
+# Banco e blueprints
 from models.user import db
 from routes.user import user_bp
 from routes.data import data_bp
 from routes.archive import archive_bp
-from routes.resumo import resumo_bp  # dashboard
-
+from routes.resumo import resumo_bp
 
 def create_app():
-    # ✅ Define explicitamente onde estão os templates
     app = Flask(
         __name__,
         static_folder=os.path.join(os.path.dirname(__file__), "static"),
@@ -32,9 +19,7 @@ def create_app():
     )
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "asdf#FGSgvasgf$5$WGT")
 
-    # ---------------------------
-    # Configuração do banco de dados
-    # ---------------------------
+    # 🔗 Configuração do banco de dados
     db_url = os.getenv("DATABASE_URL")
     if db_url and db_url.startswith(("postgresql://", "postgres://")):
         parsed = urllib.parse.urlparse(db_url)
@@ -45,41 +30,28 @@ def create_app():
         app.config["SQLALCHEMY_DATABASE_URI"] = db_url
         print(f"🔗 Conectando ao banco PostgreSQL: {app.config['SQLALCHEMY_DATABASE_URI']}")
     else:
-        # Usar SQLite como padrão
         db_path = os.path.join(os.path.dirname(__file__), "database", "app.db")
         app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
         print(f"🔗 Usando banco SQLite: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-    # Ativar logs SQL
     logging.basicConfig()
     logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
-
-    # Inicializa banco
     db.init_app(app)
 
-    # 🔑 Cria as tabelas no banco (incluindo 'sales')
     with app.app_context():
         db.create_all()
         print("✅ Tabelas do banco verificadas/criadas com sucesso.")
 
-    # ---------------------------
-    # CORS
-    # ---------------------------
     CORS(app)
 
-    # ---------------------------
-    # Registrar blueprints
-    # ---------------------------
-    app.register_blueprint(user_bp, url_prefix="/api")
-    app.register_blueprint(data_bp, url_prefix="/api")
-    app.register_blueprint(archive_bp, url_prefix="/archive")  # API de arquivamento
-    app.register_blueprint(resumo_bp)  # Dashboard /resumo
+    # 🔌 Blueprints (sem prefixo /api)
+    app.register_blueprint(user_bp)
+    app.register_blueprint(data_bp)
+    app.register_blueprint(archive_bp, url_prefix="/archive")
+    app.register_blueprint(resumo_bp)
 
-    # ---------------------------
-    # Filtro Jinja moeda brasileira
-    # ---------------------------
+    # 💰 Filtro Jinja para moeda brasileira
     @app.template_filter("format_brl")
     def format_brl(value):
         try:
@@ -87,54 +59,85 @@ def create_app():
         except (ValueError, TypeError):
             return "0,00"
 
-    # ---------------------------
-    # Rota para verificar banco
-    # ---------------------------
+    # 🔍 Verificação do banco
     @app.route("/db-check")
     def db_check():
         return f"Banco em uso: {app.config['SQLALCHEMY_DATABASE_URI']}"
 
-    # ---------------------------
-    # Rota pública /tv para exibição em telão (AGORA USA O BANCO!)
-    # ---------------------------
+    # 📺 Rota pública /tv
     @app.route("/tv")
     def tv():
-        from models.sales import Sale  # Importa dentro da rota para evitar problemas de ciclo
+        from models.sales import Sale
+        from models.user import User
+
         dados = []
-        for emp in EMPLOYEES:
-            nome = emp["name"]
-            sales = Sale.query.filter_by(employee_name=nome).all()
+        users = User.query.all()
+
+        for user in users:
+            sales = Sale.query.filter_by(employee_name=user.username).all()
             day_values = {s.day: s.value for s in sales}
             linha = {
-                "nome": nome,
+                "nome": user.username,
                 "seg": day_values.get("monday", 0),
                 "ter": day_values.get("tuesday", 0),
                 "qua": day_values.get("wednesday", 0),
                 "qui": day_values.get("thursday", 0),
                 "sex": day_values.get("friday", 0),
-                "total": (
-                    day_values.get("monday", 0) +
-                    day_values.get("tuesday", 0) +
-                    day_values.get("wednesday", 0) +
-                    day_values.get("thursday", 0) +
-                    day_values.get("friday", 0)
-                )
+                "total": sum(day_values.get(dia, 0) for dia in ["monday", "tuesday", "wednesday", "thursday", "friday"])
             }
             dados.append(linha)
 
         totais_diarios = {
-            "seg": sum(linha["seg"] for linha in dados),
-            "ter": sum(linha["ter"] for linha in dados),
-            "qua": sum(linha["qua"] for linha in dados),
-            "qui": sum(linha["qui"] for linha in dados),
-            "sex": sum(linha["sex"] for linha in dados),
+            "seg": sum(l["seg"] for l in dados),
+            "ter": sum(l["ter"] for l in dados),
+            "qua": sum(l["qua"] for l in dados),
+            "qui": sum(l["qui"] for l in dados),
+            "sex": sum(l["sex"] for l in dados),
         }
 
         return render_template("tv.html", dados=dados, totais_diarios=totais_diarios)
 
-    # ---------------------------
-    # Rotas estáticas / SPA
-    # ---------------------------
+    # 📤 Rota para exportação de dados
+    @app.route("/export_table")
+    def export_table():
+        from models.sales import Sale
+        from models.user import User
+
+        dados = []
+        users = User.query.all()
+
+        for user in users:
+            sales = Sale.query.filter_by(employee_name=user.username).all()
+            day_values = {s.day: s.value for s in sales}
+            linha = {
+                "nome": user.username,
+                "seg": day_values.get("monday", 0),
+                "ter": day_values.get("tuesday", 0),
+                "qua": day_values.get("wednesday", 0),
+                "qui": day_values.get("thursday", 0),
+                "sex": day_values.get("friday", 0),
+                "total": sum(day_values.get(dia, 0) for dia in ["monday", "tuesday", "wednesday", "thursday", "friday"])
+            }
+            dados.append(linha)
+
+        totais_diarios = {
+            "seg": sum(l["seg"] for l in dados),
+            "ter": sum(l["ter"] for l in dados),
+            "qua": sum(l["qua"] for l in dados),
+            "qui": sum(l["qui"] for l in dados),
+            "sex": sum(l["sex"] for l in dados),
+        }
+
+        total_geral = sum(totais_diarios.values())
+
+        return render_template(
+            "tabela_para_extracao.html",
+            dados=dados,
+            totais_diarios=totais_diarios,
+            total_geral=total_geral
+        )
+
+    # 🌐 Rota SPA / arquivos estáticos
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def serve(path):
@@ -148,59 +151,4 @@ def create_app():
         else:
             return send_from_directory(static_folder_path, "index.html")
 
-    # ---------------------------
-    # Rota para extração de dados
-    # ---------------------------
-    @app.route("/export_table")
-    def export_table():
-        from models.sales import Sale
-        dados = []
-        for emp in EMPLOYEES:
-            nome = emp["name"]
-            sales = Sale.query.filter_by(employee_name=nome).all()
-            day_values = {s.day: s.value for s in sales}
-            linha = {
-                "nome": nome,
-                "seg": day_values.get("monday", 0),
-                "ter": day_values.get("tuesday", 0),
-                "qua": day_values.get("wednesday", 0),
-                "qui": day_values.get("thursday", 0),
-                "sex": day_values.get("friday", 0),
-                "total": (
-                    day_values.get("monday", 0) +
-                    day_values.get("tuesday", 0) +
-                    day_values.get("wednesday", 0) +
-                    day_values.get("thursday", 0) +
-                    day_values.get("friday", 0)
-                )
-            }
-            dados.append(linha)
-
-        totais_diarios = {
-            "seg": sum(linha["seg"] for linha in dados),
-            "ter": sum(linha["ter"] for linha in dados),
-            "qua": sum(linha["qua"] for linha in dados),
-            "qui": sum(linha["qui"] for linha in dados),
-            "sex": sum(linha["sex"] for linha in dados),
-        }
-
-        total_geral = (
-            totais_diarios["seg"] +
-            totais_diarios["ter"] +
-            totais_diarios["qua"] +
-            totais_diarios["qui"] +
-            totais_diarios["sex"]
-        )
-
-        return render_template(
-            "tabela_para_extracao.html",
-            dados=dados,
-            totais_diarios=totais_diarios,
-            total_geral=total_geral
-        )
-
-    # ---------------------------
-    # FINAL: retorna a aplicação
-    # ---------------------------
     return app
-
