@@ -22,7 +22,7 @@ async function initializeApp() {
 
     // 🔑 DEPOIS: Verificar sessão para definir permissões
     try {
-        const sessionResponse = await fetch('/api/check-session', {
+        const sessionResponse = await fetch('/check-session', {
             credentials: 'include'
         });
         if (sessionResponse.ok) {
@@ -44,7 +44,7 @@ async function initializeApp() {
 
 async function loadDataFromServer() {
     try {
-        const response = await fetch('/api/data', {
+        const response = await fetch('/data', {
             credentials: 'include'
         });
         if (response.ok) {
@@ -79,7 +79,7 @@ async function saveDataToServer() {
             spreadsheetData: spreadsheetData
         };
         
-        const response = await fetch('/api/data', {
+        const response = await fetch('/data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ async function handleLogin(e) {
     }
 
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ async function handleLogin(e) {
 
 async function handleLogout() {
     try {
-        await fetch('/api/logout', {
+        await fetch('/logout', {
             method: 'POST',
             credentials: 'include'
         });
@@ -455,7 +455,7 @@ async function handleChangePassword(employeeName) {
     }
     
     try {
-        const response = await fetch('/api/change-employee-password', {
+        const response = await fetch('/change-employee-password', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
