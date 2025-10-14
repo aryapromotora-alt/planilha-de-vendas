@@ -1,7 +1,7 @@
 // Dados iniciais e configurações
 let currentUser = null;
 let isAdmin = false;
-let employees = [];
+let employees = []; // Agora conterá objetos de usuário do banco de dados
 let spreadsheetData = {};
 
 // Inicialização
@@ -49,12 +49,13 @@ async function loadDataFromServer() {
         });
         if (response.ok) {
             const data = await response.json();
-            employees = data.employees || [];
+            // employees agora virá com 'id', 'username', 'email', 'role'
+            employees = data.employees || []; 
             spreadsheetData = data.spreadsheetData || {};
             
             employees.forEach(emp => {
-                if (!spreadsheetData[emp.name]) {
-                    spreadsheetData[emp.name] = {
+                if (!spreadsheetData[emp.username]) { // Usar emp.username
+                    spreadsheetData[emp.username] = {
                         monday: 0,
                         tuesday: 0,
                         wednesday: 0,
@@ -75,7 +76,7 @@ async function loadDataFromServer() {
 async function saveDataToServer() {
     try {
         const dataToSave = {
-            employees: employees,
+            // employees não é mais enviado aqui, pois é gerenciado por /api/users
             spreadsheetData: spreadsheetData
         };
         
@@ -103,7 +104,7 @@ async function saveDataToServer() {
 function initializeSpreadsheetData() {
     spreadsheetData = {};
     employees.forEach(emp => {
-        spreadsheetData[emp.name] = {
+        spreadsheetData[emp.username] = {
             monday: 0,
             tuesday: 0,
             wednesday: 0,
@@ -200,7 +201,7 @@ function renderSpreadsheet() {
     tbody.innerHTML = '';
     
     employees.forEach(employee => {
-        const row = createEmployeeRow(employee.name);
+        const row = createEmployeeRow(employee.username); // Usar employee.username
         tbody.appendChild(row);
     });
     
@@ -295,8 +296,8 @@ function updateTotals() {
     days.forEach(day => {
         let dayTotal = 0;
         employees.forEach(employee => {
-            if (spreadsheetData[employee.name]) {
-                dayTotal += spreadsheetData[employee.name][day];
+            if (spreadsheetData[employee.username]) { // Usar employee.username
+                dayTotal += spreadsheetData[employee.username][day];
             }
         });
         const dayTotalElement = document.getElementById(`${day}-total`);
@@ -307,8 +308,8 @@ function updateTotals() {
     });
     
     employees.forEach(employee => {
-        const weeklyTotal = calculateWeeklyTotal(employee.name);
-        const row = document.querySelector(`[data-employee="${employee.name}"]`)?.parentElement;
+        const weeklyTotal = calculateWeeklyTotal(employee.username); // Usar employee.username
+        const row = document.querySelector(`[data-employee="${employee.username}"]`)?.parentElement; // Usar employee.username
         if (row) {
             const totalCell = row.querySelector('.total-cell');
             if (totalCell) {
@@ -330,7 +331,8 @@ function formatCurrency(value) {
     });
 }
 
-function showAdminPanel() {
+async function showAdminPanel() {
+    await loadEmployeesForAdmin(); // Carregar funcionários do banco de dados
     document.getElementById('admin-section').style.display = 'block';
     renderEmployeeManagement();
 }
@@ -357,17 +359,34 @@ function switchTab(e) {
     }
 }
 
+let adminEmployees = []; // Nova variável para gerenciar funcionários no painel admin
+
+async function loadEmployeesForAdmin() {
+    try {
+        const response = await fetch('/api/users', { credentials: 'include' });
+        if (response.ok) {
+            adminEmployees = await response.json();
+            // Filtrar para mostrar apenas usuários com role 'user' no painel de gerenciamento
+            adminEmployees = adminEmployees.filter(emp => emp.role === 'user');
+        } else {
+            console.error('Erro ao carregar usuários para o admin:', response.statusText);
+            adminEmployees = [];
+        }
+    } catch (error) {
+        console.error('Erro na requisição de usuários para o admin:', error);
+        adminEmployees = [];
+    }
+}
+
 function renderEmployeeManagement() {
     const list = document.getElementById('employee-management-list');
     list.innerHTML = '';
     
-    const regularEmployees = employees.filter(emp => emp.name !== 'admin');
-    
-    regularEmployees.forEach(employee => {
+    adminEmployees.forEach(employee => {
         const li = document.createElement("li");
         const info = document.createElement("span");
         info.className = "employee-info";
-        info.textContent = employee.name;
+        info.textContent = employee.username; // Usar employee.username
         
         const actionsDiv = document.createElement("div");
         actionsDiv.className = "employee-actions";
@@ -375,13 +394,13 @@ function renderEmployeeManagement() {
         const changePasswordBtn = document.createElement("button");
         changePasswordBtn.textContent = "Alterar Senha";
         changePasswordBtn.className = "change-password-btn";
-        changePasswordBtn.addEventListener("click", () => handleChangePassword(employee.name));
+        changePasswordBtn.addEventListener("click", () => handleChangePassword(employee.username)); // Usar employee.username
         actionsDiv.appendChild(changePasswordBtn);
 
         const removeBtn = document.createElement("button");
         removeBtn.textContent = "Remover";
         removeBtn.className = "remove-btn";
-        removeBtn.addEventListener("click", () => removeEmployee(employee.name));
+        removeBtn.addEventListener("click", () => removeEmployee(employee.id, employee.username)); // Passar ID e username
         actionsDiv.appendChild(removeBtn);
         
         li.appendChild(info);
@@ -395,53 +414,65 @@ async function handleAddEmployee(e) {
     
     const name = document.getElementById('new-employee-name').value.trim();
     const password = document.getElementById('new-employee-password').value;
+    const email = document.getElementById('new-employee-email').value.trim(); // Adicionar campo de email
     
     if (!name || !password) {
-        showMessage('Por favor, preencha todos os campos!', 'error');
+        showMessage('Por favor, preencha o nome de usuário e a senha!', 'error');
         return;
     }
     
-    if (employees.find(emp => emp.name.toLowerCase() === name.toLowerCase())) {
-        showMessage('Funcionário já existe!', 'error');
-        return;
+    try {
+        const response = await fetch('/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: name, password: password, email: email, role: 'user' }),
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Atualizar a lista de funcionários no frontend
+            await loadDataFromServer(); // Recarregar dados principais
+            await loadEmployeesForAdmin(); // Recarregar dados do admin
+            renderEmployeeManagement();
+            renderSpreadsheet();
+            document.getElementById('add-employee-form').reset();
+            showMessage('Funcionário adicionado com sucesso!', 'success');
+        } else {
+            showMessage(data.message || 'Erro ao adicionar funcionário!', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar funcionário:', error);
+        showMessage('Erro de conexão ao adicionar funcionário.', 'error');
     }
-    
-    employees.push({ name, password });
-    spreadsheetData[name] = {
-        monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0
-    };
-    
-    const saved = await saveDataToServer();
-    if (!saved) {
-        employees = employees.filter(emp => emp.name !== name);
-        delete spreadsheetData[name];
-        return;
-    }
-    
-    document.getElementById('add-employee-form').reset();
-    renderEmployeeManagement();
-    renderSpreadsheet();
-    showMessage('Funcionário adicionado com sucesso!', 'success');
 }
 
-async function removeEmployee(employeeName) {
-    if (confirm(`Tem certeza que deseja remover ${employeeName}?`)) {
-        const backupEmployees = [...employees];
-        const backupSpreadsheetData = { ...spreadsheetData };
-        
-        employees = employees.filter(emp => emp.name !== employeeName);
-        delete spreadsheetData[employeeName];
-        
-        const saved = await saveDataToServer();
-        if (!saved) {
-            employees = backupEmployees;
-            spreadsheetData = backupSpreadsheetData;
-            return;
+async function removeEmployee(employeeId, employeeName) {
+    if (confirm(`Tem certeza que deseja remover ${employeeName}? Esta ação também removerá todos os dados de vendas associados.`)) {
+        try {
+            const response = await fetch(`/api/users/${employeeId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                // Atualizar a lista de funcionários no frontend
+                await loadDataFromServer(); // Recarregar dados principais
+                await loadEmployeesForAdmin(); // Recarregar dados do admin
+                renderEmployeeManagement();
+                renderSpreadsheet();
+                showMessage('Funcionário removido com sucesso!', 'success');
+            } else {
+                const errorData = await response.json();
+                showMessage(errorData.message || 'Erro ao remover funcionário!', 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao remover funcionário:', error);
+            showMessage('Erro de conexão ao remover funcionário.', 'error');
         }
-        
-        renderEmployeeManagement();
-        renderSpreadsheet();
-        showMessage('Funcionário removido com sucesso!', 'success');
     }
 }
 
@@ -455,13 +486,19 @@ async function handleChangePassword(employeeName) {
     }
     
     try {
-        const response = await fetch('/api/change-employee-password', {
-            method: 'POST',
+        // Encontrar o ID do funcionário pelo nome
+        const employee = adminEmployees.find(emp => emp.username === employeeName);
+        if (!employee) {
+            showMessage('Funcionário não encontrado para alterar a senha.', 'error');
+            return;
+        }
+
+        const response = await fetch(`/api/users/${employee.id}/change_password`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                employee_name: employeeName,
                 new_password: newPassword
             }),
             credentials: 'include'
@@ -469,11 +506,7 @@ async function handleChangePassword(employeeName) {
         
         const data = await response.json();
         
-        if (data.success) {
-            const employee = employees.find(emp => emp.name === employeeName);
-            if (employee) {
-                employee.password = newPassword;
-            }
+        if (response.ok) {
             showMessage('Senha alterada com sucesso!', 'success');
         } else {
             showMessage(data.message || 'Erro ao alterar senha', 'error');

@@ -1,116 +1,32 @@
 from flask import Blueprint, jsonify, request, session
 from models.user import User, db
+from models.sales import Sale # Importar o modelo Sale
 import json
 import os
 
 user_bp = Blueprint('user', __name__)
-
-# Função para carregar dados dos funcionários do arquivo JSON
-def load_employees_data():
-    DATA_FILE = os.path.join(os.path.dirname(__file__), "..", "database", "planilha_data.json")
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                return data.get("employees", [])
-        except (json.JSONDecodeError, IOError):
-            print("Erro ao ler o JSON, retornando lista vazia.")
-            return []
-    else:
-        # Se o arquivo não existir, retorna dados padrão
-        return [
-            {"name": "Anderson", "password": "123"},
-            {"name": "Vitoria", "password": "123"},
-            {"name": "Jemima", "password": "123"},
-            {"name": "Maiany", "password": "123"},
-            {"name": "Fernanda", "password": "123"},
-            {"name": "Nadia", "password": "123"},
-            {"name": "Giovana", "password": "123"}
-        ]
-
-# Função para salvar dados dos funcionários no arquivo JSON
-def save_employees_data(employees):
-    DATA_FILE = os.path.join(os.path.dirname(__file__), "..", "database", "planilha_data.json")
-    try:
-        existing_data = {}
-        if os.path.exists(DATA_FILE):
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                existing_data = json.load(f)
-
-        existing_data["employees"] = employees
-
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(existing_data, f, ensure_ascii=False, indent=2)
-        return True
-    except Exception as e:
-        print(f"Erro ao salvar dados dos funcionários: {e}")
-        return False
-
-@user_bp.route('/delete-employee', methods=['POST'])
-def delete_employee():
-    if not session.get('is_admin'):
-        return jsonify({"success": False, "message": "Acesso negado"}), 403
-
-    data = request.json
-    employee_name = data.get("employee_name")
-
-    print(f"Tentando excluir funcionário: {employee_name}")
-    if not employee_name:
-        return jsonify({"success": False, "message": "Nome do funcionário é obrigatório"}), 400
-
-    DATA_FILE = os.path.join(os.path.dirname(__file__), "..", "database", "planilha_data.json")
-    try:
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            full_data = json.load(f)
-
-        employees = full_data.get("employees", [])
-        updated_employees = [emp for emp in employees if emp["name"] != employee_name]
-        full_data["employees"] = updated_employees
-
-        if "spreadsheetData" in full_data and employee_name in full_data["spreadsheetData"]:
-            del full_data["spreadsheetData"][employee_name]
-
-        # Salva os dados atualizados no arquivo JSON
-        save_employees_data(updated_employees)
-
-
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(full_data, f, ensure_ascii=False, indent=2)
-
-        return jsonify({"success": True, "message": f"Funcionário '{employee_name}' excluído com sucesso"})
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Erro ao salvar: {e}"}), 500
 
 @user_bp.route('/login', methods=['POST'])
 def login():
     data = request.json
     username = data.get("username", "").strip()
     password = data.get("password", "")
-
+    
     if not username or not password:
         return jsonify({"success": False, "message": "Usuário e senha são obrigatórios"}), 400
+    
+    # Verificar se é admin (usuário com role 'admin' no banco de dados)
+    user = User.query.filter_by(username=username).first()
 
-    if username == "admin" and password == "admin123":
-        session['user'] = 'admin'
-        session['is_admin'] = True
+    if user and user.check_password(password):
+        session['user'] = user.username
+        session['is_admin'] = (user.role == 'admin')
         return jsonify({
-            "success": True,
-            "user": "Administrador",
-            "is_admin": True
+            "success": True, 
+            "user": user.username, 
+            "is_admin": (user.role == 'admin')
         })
-
-    employees = load_employees_data()
-    employee = next((emp for emp in employees if emp["name"].lower() == username.lower()), None)
-
-    if employee and employee["password"] == password:
-        session['user'] = employee["name"]
-        session['is_admin'] = False
-        return jsonify({
-            "success": True,
-            "user": employee["name"],
-            "is_admin": False
-        })
-
+    
     return jsonify({"success": False, "message": "Usuário ou senha incorretos"}), 401
 
 @user_bp.route('/logout', methods=['POST'])
@@ -130,32 +46,31 @@ def check_session():
 
 @user_bp.route('/change-employee-password', methods=['POST'])
 def change_employee_password():
+    # Verificar se o usuário é admin
     if not session.get('is_admin'):
         return jsonify({"success": False, "message": "Acesso negado"}), 403
-
+    
     data = request.json
     employee_name = data.get("employee_name")
     new_password = data.get("new_password")
-
+    
     if not employee_name or not new_password:
         return jsonify({"success": False, "message": "Nome do funcionário e nova senha são obrigatórios"}), 400
-
-    employees = load_employees_data()
-    employee = next((emp for emp in employees if emp["name"] == employee_name), None)
-
-    if not employee:
+    
+    user = User.query.filter_by(username=employee_name).first()
+    
+    if not user:
         return jsonify({"success": False, "message": "Funcionário não encontrado"}), 404
-
-    employee["password"] = new_password
-
-    if save_employees_data(employees):
-        return jsonify({"success": True, "message": "Senha alterada com sucesso"})
-    else:
-        return jsonify({"success": False, "message": "Erro ao salvar alterações"}), 500
+    
+    # Atualizar senha
+    user.set_password(new_password)
+    db.session.commit()
+    return jsonify({"success": True, "message": "Senha alterada com sucesso"})
 
 @user_bp.route('/users', methods=['GET'])
 def get_users():
-    users = User.query.all()
+    # Retorna apenas usuários com role 'user' para o painel de funcionários
+    users = User.query.filter_by(role='user').all()
     return jsonify([user.to_dict() for user in users])
 
 @user_bp.route('/users', methods=['POST'])
@@ -164,17 +79,19 @@ def create_user():
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
+    role = data.get("role", "user") # Permite definir a role, padrão 'user'
 
-    if not username or not email or not password:
-        return jsonify({"message": "Dados incompletos"}), 400
+    if not username or not password:
+        return jsonify({"message": "Nome de usuário e senha são obrigatórios"}), 400
+    
+    # Email é opcional, mas se fornecido, deve ser único
+    if email and User.query.filter_by(email=email).first():
+        return jsonify({"message": "Email já existe"}), 409
 
     if User.query.filter_by(username=username).first():
         return jsonify({"message": "Nome de usuário já existe"}), 409
 
-    if User.query.filter_by(email=email).first():
-        return jsonify({"message": "Email já existe"}), 409
-
-    user = User(username=username, email=email)
+    user = User(username=username, email=email, role=role)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
@@ -191,15 +108,19 @@ def update_user(user_id):
     data = request.json
     user.username = data.get('username', user.username)
     user.email = data.get('email', user.email)
+    user.role = data.get('role', user.role) # Permite atualizar a role
     db.session.commit()
     return jsonify(user.to_dict())
 
 @user_bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
+    
+    # Excluir vendas associadas ao funcionário
+    Sale.query.filter_by(employee_name=user.username).delete()
+    
     db.session.delete(user)
     db.session.commit()
-    print(f"Usuário com ID {user_id} excluído com sucesso.")
     return '', 204
 
 @user_bp.route("/users/<int:user_id>/change_password", methods=["PUT"])
@@ -214,3 +135,4 @@ def change_password(user_id):
     user.set_password(new_password)
     db.session.commit()
     return jsonify({"message": "Senha alterada com sucesso"}), 200
+

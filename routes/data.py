@@ -1,18 +1,19 @@
+# routes/data.py (versão final segura)
+
 from flask import Blueprint, jsonify, request, session
 from flask_cors import cross_origin
 from models.sales import Sale
-from models.user import db
-from routes.user import load_employees_data  # ← Importa os dados reais do JSON
+from models.user import User, db
 
 data_bp = Blueprint('data', __name__)
 
 def load_data_from_db():
     spreadsheetData = {}
-    employees = load_employees_data()  # ← Carrega os funcionários do JSON
+    employees = User.query.filter_by(role='user').all()
     for emp in employees:
-        sales = Sale.query.filter_by(employee_name=emp["name"]).all()
+        sales = Sale.query.filter_by(employee_name=emp.username).all()
         day_values = {sale.day: sale.value for sale in sales}
-        spreadsheetData[emp["name"]] = {
+        spreadsheetData[emp.username] = {
             "monday": day_values.get("monday", 0),
             "tuesday": day_values.get("tuesday", 0),
             "wednesday": day_values.get("wednesday", 0),
@@ -20,7 +21,7 @@ def load_data_from_db():
             "friday": day_values.get("friday", 0),
         }
     return {
-        "employees": employees,
+        "employees": [emp.to_dict() for emp in employees],
         "spreadsheetData": spreadsheetData
     }
 
@@ -65,7 +66,7 @@ def save_data_endpoint():
         return jsonify({"error": "Não autenticado"}), 401
     try:
         data = request.get_json()
-        if not data or 'employees' not in data or 'spreadsheetData' not in data:
+        if not data or 'spreadsheetData' not in data:
             return jsonify({"error": "Dados inválidos"}), 400
         if save_data_to_db(data):
             return jsonify({"message": "Dados salvos"}), 200
@@ -73,3 +74,4 @@ def save_data_endpoint():
             return jsonify({"error": "Erro ao salvar"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+

@@ -4,17 +4,6 @@ import urllib.parse
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
 
-# Lista fixa de funcionários (reutilizada em /tv e outros lugares)
-EMPLOYEES = [
-    {"name": "Anderson", "password": "123"},
-    {"name": "Vitoria", "password": "123"},
-    {"name": "Jemima", "password": "123"},
-    {"name": "Maiany", "password": "123"},
-    {"name": "Fernanda", "password": "123"},
-    {"name": "Nadia", "password": "123"},
-    {"name": "Giovana", "password": "123"}
-]
-
 # Imports dos blueprints
 from models.user import db
 from routes.user import user_bp
@@ -100,9 +89,11 @@ def create_app():
     @app.route("/tv")
     def tv():
         from models.sales import Sale  # Importa dentro da rota para evitar problemas de ciclo
+        from models.user import User
         dados = []
-        for emp in EMPLOYEES:
-            nome = emp["name"]
+        employees_from_db = User.query.filter_by(role='user').all()
+        for emp in employees_from_db:
+            nome = emp.username
             sales = Sale.query.filter_by(employee_name=nome).all()
             day_values = {s.day: s.value for s in sales}
             linha = {
@@ -154,9 +145,11 @@ def create_app():
     @app.route("/export_table")
     def export_table():
         from models.sales import Sale
+        from models.user import User
         dados = []
-        for emp in EMPLOYEES:
-            nome = emp["name"]
+        employees_from_db = User.query.filter_by(role='user').all()
+        for emp in employees_from_db:
+            nome = emp.username
             sales = Sale.query.filter_by(employee_name=nome).all()
             day_values = {s.day: s.value for s in sales}
             linha = {
