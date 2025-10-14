@@ -75,8 +75,7 @@ async function loadDataFromServer() {
 async function saveDataToServer() {
     try {
         const dataToSave = {
-            employees: employees,
-            spreadsheetData: spreadsheetData
+          spreadsheetData: spreadsheetData
         };
         
         const response = await fetch('/data', {
