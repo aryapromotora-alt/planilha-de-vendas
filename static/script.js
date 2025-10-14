@@ -5,7 +5,7 @@ let isAdmin = false;
 
 async function loadDataFromServer() {
     try {
-        const response = await fetch('/api/users', { credentials: 'include' });
+        const response = await fetch('/users', { credentials: 'include' });
         if (response.ok) {
             const data = await response.json();
             employees = data || [];
@@ -38,7 +38,7 @@ async function handleLogin(e) {
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -62,7 +62,7 @@ async function handleLogin(e) {
 }
 
 function handleLogout() {
-    fetch('/api/logout', {
+    fetch('/logout', {
         method: 'POST',
         credentials: 'include'
     }).then(() => {
@@ -72,6 +72,7 @@ function handleLogout() {
         document.getElementById('login-section').style.display = 'block';
     });
 }
+
 async function handleAddEmployee(e) {
     e.preventDefault();
     const name = document.getElementById('new-employee-name').value.trim();
@@ -88,7 +89,7 @@ async function handleAddEmployee(e) {
     }
 
     try {
-        const response = await fetch('/api/users', {
+        const response = await fetch('/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -125,7 +126,7 @@ async function removeEmployee(employeeName) {
 
     if (confirm(`Tem certeza que deseja remover ${employeeName}?`)) {
         try {
-            const response = await fetch(`/api/users/${user.id}`, {
+            const response = await fetch(`/users/${user.id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -157,7 +158,7 @@ async function handleChangePassword(employeeName) {
     }
 
     try {
-        const response = await fetch(`/api/users/${user.id}/change_password`, {
+        const response = await fetch(`/users/${user.id}/change_password`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ new_password: newPassword }),
@@ -175,6 +176,7 @@ async function handleChangePassword(employeeName) {
         showMessage('Erro de conexão. Tente novamente.', 'error');
     }
 }
+
 function renderEmployeeManagement() {
     const container = document.getElementById('employee-list');
     container.innerHTML = '';
@@ -217,6 +219,7 @@ function updateCell(username, day, value) {
     }
     spreadsheetData[username][day] = parseFloat(value) || 0;
 }
+
 function showMessage(text, type) {
     const existingMessage = document.querySelector('.message');
     if (existingMessage) {
