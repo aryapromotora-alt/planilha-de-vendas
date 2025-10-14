@@ -66,7 +66,7 @@ def create_app():
     # ---------------------------
     # CORS
     # ---------------------------
-    CORS(app)
+    CORS(app, supports_credentials=True)
 
     # ---------------------------
     # Registrar blueprints
