@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template
 from datetime import datetime, timedelta, date
 from models.archive import DailySales
-from sqlalchemy import extract
+from sqlalchemy.sql import extract
 from calendar import monthrange
 from collections import defaultdict
 
