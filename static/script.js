@@ -142,7 +142,7 @@ async function handleLogin(e) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ username, name, password }),
             credentials: 'include'
         });
 
@@ -405,7 +405,7 @@ async function handleAddEmployee(e) {
         return;
     }
     
-    employees.push({ name, password });
+    employees.push({ username: name });
     spreadsheetData[name] = {
         monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0
     };
