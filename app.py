@@ -21,6 +21,16 @@ def create_app():
     )
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "asdf#FGSgvasgf$5$WGT")
 
+    # Configurações para ambientes de produção com proxy reverso (Northflank)
+    # Garante que os cookies de sessão funcionem corretamente em HTTPS
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["PREFERRED_URL_SCHEME"] = "https"
+
+    # Configuração para lidar com cabeçalhos de proxy (necessário para o Northflank)
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
     # ---------------------------
     # Configuração do banco de dados
     # ---------------------------
