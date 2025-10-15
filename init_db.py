@@ -1,7 +1,7 @@
 import os
 from app import create_app
 from models.user import db, User
-from models.sales import Sale  # Importante: garantir que Sale seja importado
+from models.sales import Sale  # Importante para garantir que a tabela 'sales' seja criada
 from werkzeug.security import generate_password_hash
 from sqlalchemy import text
 
@@ -33,7 +33,6 @@ with app.app_context():
         """))
         row = result.fetchone()
         if not row:
-            # Coluna não existe: cria com 256
             print("⚠️ Coluna 'password' não encontrada. Adicionando...")
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN password VARCHAR(256) NOT NULL DEFAULT \'\';'))
             db.session.commit()
@@ -41,7 +40,6 @@ with app.app_context():
         else:
             current_length = row[1]
             if current_length < 256:
-                # Coluna existe, mas é pequena: aumenta para 256
                 print(f"⚠️ Coluna 'password' tem tamanho {current_length}. Aumentando para 256...")
                 db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(256);'))
                 db.session.commit()
@@ -70,29 +68,37 @@ with app.app_context():
         exit(1)
 
     # 4. Garante que a coluna 'sheet_type' exista na tabela 'sales'
+    sheet_type_exists = False
     try:
         # Tenta verificar via information_schema (PostgreSQL/MySQL)
         result = db.session.execute(text("""
-            SELECT column_name FROM information_schema.columns 
+            SELECT column_name 
+            FROM information_schema.columns 
             WHERE table_name = 'sales' AND column_name = 'sheet_type';
         """))
-        if not result.fetchone():
-            raise Exception("Coluna 'sheet_type' não encontrada no information_schema")
-        print("✅ Coluna 'sheet_type' já existe na tabela 'sales'.")
+        if result.fetchone():
+            sheet_type_exists = True
+            print("✅ Coluna 'sheet_type' já existe na tabela 'sales'.")
     except Exception as e_info:
         # Se falhar (ex: SQLite), tenta acessar diretamente
         try:
             db.session.execute(text("SELECT sheet_type FROM sales LIMIT 1;"))
+            sheet_type_exists = True
             print("✅ Coluna 'sheet_type' já existe na tabela 'sales'.")
-        except Exception as e_sqlite:
-            print("⚠️ Coluna 'sheet_type' não encontrada na tabela 'sales'. Adicionando...")
-            try:
-                db.session.execute(text("ALTER TABLE sales ADD COLUMN sheet_type VARCHAR(20) DEFAULT 'portabilidade';"))
-                db.session.commit()
-                print("✅ Coluna 'sheet_type' adicionada à tabela 'sales'.")
-            except Exception as e_alter:
-                print(f"❌ Erro ao adicionar coluna 'sheet_type': {e_alter}")
-                exit(1)
+        except:
+            sheet_type_exists = False
+
+    if not sheet_type_exists:
+        try:
+            print("⚠️ Coluna 'sheet_type' não encontrada. Adicionando...")
+            db.session.execute(text("ALTER TABLE sales ADD COLUMN sheet_type VARCHAR(20) DEFAULT 'portabilidade';"))
+            db.session.commit()
+            print("✅ Coluna 'sheet_type' adicionada à tabela 'sales'.")
+        except Exception as e_alter:
+            print(f"❌ Erro ao adicionar coluna 'sheet_type': {e_alter}")
+            # Não sai do script — continua mesmo se falhar (ex: coluna já existe por outro motivo)
+    else:
+        print("✅ Coluna 'sheet_type' já está presente.")
 
     # 5. Cria o usuário admin se não existir
     admin_user = User.query.filter_by(username=ADMIN_USERNAME).first()
