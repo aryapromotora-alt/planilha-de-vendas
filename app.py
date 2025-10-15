@@ -114,7 +114,7 @@ def create_app():
         return f"Banco em uso: {app.config['SQLALCHEMY_DATABASE_URI']}"
 
     # ---------------------------
-    # Rota pública /tv para exibição em telão (AGORA USA O BANCO!)
+    # Rota pública /tv para exibição em telão (PORTABILIDADE)
     # ---------------------------
     @app.route("/tv")
     def tv():
@@ -156,6 +156,51 @@ def create_app():
         except Exception as e:
             # Em caso de erro de banco de dados ou outro erro, retorna uma mensagem de erro
             print(f"Erro ao carregar dados para /tv: {e}")
+            return f"Erro Interno do Servidor ao carregar dados: {e}", 500
+
+    # ---------------------------
+    # Rota pública /tv/novo para exibição da planilha NOVO em telão
+    # ---------------------------
+    @app.route("/tv/novo")
+    def tv_novo():
+        try:
+            from models.sales import Sale
+            from models.user import User
+            dados = []
+            employees_from_db = User.query.filter_by(role='user').all()
+            for emp in employees_from_db:
+                nome = emp.username
+                # ⚠️ FILTRO ESSENCIAL: só carrega dados da planilha NOVO
+                sales = Sale.query.filter_by(employee_name=nome, sheet_type='novo').all()
+                day_values = {s.day: s.value for s in sales}
+                linha = {
+                    "nome": nome,
+                    "seg": day_values.get("monday", 0),
+                    "ter": day_values.get("tuesday", 0),
+                    "qua": day_values.get("wednesday", 0),
+                    "qui": day_values.get("thursday", 0),
+                    "sex": day_values.get("friday", 0),
+                    "total": (
+                        day_values.get("monday", 0) +
+                        day_values.get("tuesday", 0) +
+                        day_values.get("wednesday", 0) +
+                        day_values.get("thursday", 0) +
+                        day_values.get("friday", 0)
+                    )
+                }
+                dados.append(linha)
+
+            totais_diarios = {
+                "seg": sum(linha["seg"] for linha in dados),
+                "ter": sum(linha["ter"] for linha in dados),
+                "qua": sum(linha["qua"] for linha in dados),
+                "qui": sum(linha["qui"] for linha in dados),
+                "sex": sum(linha["sex"] for linha in dados),
+            }
+
+            return render_template("tv_novo.html", dados=dados, totais_diarios=totais_diarios)
+        except Exception as e:
+            print(f"Erro ao carregar dados para /tv/novo: {e}")
             return f"Erro Interno do Servidor ao carregar dados: {e}", 500
 
     # ---------------------------
