@@ -5,7 +5,146 @@
   <title>Resumo de Vendas - Dados para Extração</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* ... (mantenha todo o CSS existente) ... */
+    /* Estilos otimizados para extração de dados */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #ffffff;
+        color: #000000;
+        padding: 20px;
+        line-height: 1.4;
+    }
+
+    .header-info {
+        text-align: center;
+        margin-bottom: 30px;
+        page-break-inside: avoid;
+    }
+
+    .header-info h1 {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #2c3e50;
+    }
+
+    .header-info .date-info {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .export-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 12px;
+        background-color: #ffffff;
+        page-break-inside: avoid;
+    }
+
+    .export-table th {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 12px 8px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #495057;
+    }
+
+    .export-table td {
+        border: 1px solid #dee2e6;
+        padding: 10px 8px;
+        text-align: center;
+        font-size: 11px;
+    }
+
+    .export-table .employee-name {
+        text-align: left;
+        font-weight: bold;
+        background-color: #f8f9fa;
+        color: #2c3e50;
+    }
+
+    .export-table .total-cell {
+        background-color: #fff3cd;
+        font-weight: bold;
+        color: #856404;
+    }
+
+    .export-table .daily-totals {
+        background-color: #d1ecf1;
+        font-weight: bold;
+    }
+
+    .export-table .daily-totals td {
+        color: #0c5460;
+        font-weight: bold;
+    }
+
+    /* Estilos específicos para impressão/PDF */
+    @media print {
+        body {
+            padding: 10px;
+        }
+        
+        .export-table {
+            font-size: 10px;
+        }
+        
+        .export-table th,
+        .export-table td {
+            padding: 6px 4px;
+        }
+        
+        .header-info {
+            margin-bottom: 20px;
+        }
+    }
+
+    /* Botões de exportação */
+    .export-buttons {
+        text-align: center;
+        margin: 20px 0;
+        page-break-inside: avoid;
+    }
+
+    .export-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 0 5px 5px 5px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .export-btn.excel { background-color: #28a745; }
+    .export-btn.pdf { background-color: #dc3545; }
+    .export-btn:hover { opacity: 0.9; }
+
+    /* Informações de rodapé */
+    .footer-info {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 10px;
+        color: #666;
+        border-top: 1px solid #dee2e6;
+        padding-top: 15px;
+    }
+
+    /* Seções */
     .section {
         margin-bottom: 50px;
         page-break-inside: avoid;
@@ -20,27 +159,6 @@
         padding: 10px;
         border-radius: 5px;
     }
-    .export-buttons {
-        text-align: center;
-        margin: 20px 0;
-        page-break-inside: avoid;
-    }
-    .export-btn {
-        display: inline-block;
-        padding: 8px 16px;
-        margin: 0 5px 5px 5px;
-        background-color: #007bff;
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        font-weight: bold;
-        border: none;
-        cursor: pointer;
-        font-size: 12px;
-    }
-    .export-btn.excel { background-color: #28a745; }
-    .export-btn.pdf { background-color: #dc3545; }
-    .export-btn:hover { opacity: 0.9; }
   </style>
 </head>
 <body>
