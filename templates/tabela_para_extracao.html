@@ -5,160 +5,42 @@
   <title>Resumo de Vendas - Dados para Extração</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Estilos otimizados para extração de dados */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #ffffff;
-        color: #000000;
-        padding: 20px;
-        line-height: 1.4;
-    }
-
-    .header-info {
-        text-align: center;
-        margin-bottom: 30px;
+    /* ... (mantenha todo o CSS existente) ... */
+    .section {
+        margin-bottom: 50px;
         page-break-inside: avoid;
     }
-
-    .header-info h1 {
-        font-size: 24px;
+    .section-title {
+        text-align: center;
+        font-size: 20px;
         font-weight: bold;
-        margin-bottom: 10px;
-        color: #2c3e50;
-    }
-
-    .header-info .date-info {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 5px;
-    }
-
-    .export-table {
-        width: 100%;
-        border-collapse: collapse;
         margin: 20px 0;
-        font-size: 12px;
-        background-color: #ffffff;
-        page-break-inside: avoid;
-    }
-
-    .export-table th {
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        padding: 12px 8px;
-        text-align: center;
-        font-weight: bold;
-        font-size: 11px;
-        text-transform: uppercase;
-        color: #495057;
-    }
-
-    .export-table td {
-        border: 1px solid #dee2e6;
-        padding: 10px 8px;
-        text-align: center;
-        font-size: 11px;
-    }
-
-    .export-table .employee-name {
-        text-align: left;
-        font-weight: bold;
-        background-color: #f8f9fa;
         color: #2c3e50;
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
     }
-
-    .export-table .total-cell {
-        background-color: #fff3cd;
-        font-weight: bold;
-        color: #856404;
-    }
-
-    .export-table .daily-totals {
-        background-color: #d1ecf1;
-        font-weight: bold;
-    }
-
-    .export-table .daily-totals td {
-        color: #0c5460;
-        font-weight: bold;
-    }
-
-    /* Estilos específicos para impressão/PDF */
-    @media print {
-        body {
-            padding: 10px;
-        }
-        
-        .export-table {
-            font-size: 10px;
-        }
-        
-        .export-table th,
-        .export-table td {
-            padding: 6px 4px;
-        }
-        
-        .header-info {
-            margin-bottom: 20px;
-        }
-    }
-
-    /* Botões de exportação */
     .export-buttons {
         text-align: center;
         margin: 20px 0;
         page-break-inside: avoid;
     }
-
     .export-btn {
         display: inline-block;
-        padding: 10px 20px;
-        margin: 0 10px;
+        padding: 8px 16px;
+        margin: 0 5px 5px 5px;
         background-color: #007bff;
         color: white;
         text-decoration: none;
-        border-radius: 5px;
+        border-radius: 4px;
         font-weight: bold;
         border: none;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 12px;
     }
-
-    .export-btn:hover {
-        background-color: #0056b3;
-    }
-
-    .export-btn.excel {
-        background-color: #28a745;
-    }
-
-    .export-btn.excel:hover {
-        background-color: #1e7e34;
-    }
-
-    .export-btn.pdf {
-        background-color: #dc3545;
-    }
-
-    .export-btn.pdf:hover {
-        background-color: #c82333;
-    }
-
-    /* Informações de rodapé */
-    .footer-info {
-        margin-top: 30px;
-        text-align: center;
-        font-size: 10px;
-        color: #666;
-        border-top: 1px solid #dee2e6;
-        padding-top: 15px;
-    }
+    .export-btn.excel { background-color: #28a745; }
+    .export-btn.pdf { background-color: #dc3545; }
+    .export-btn:hover { opacity: 0.9; }
   </style>
 </head>
 <body>
@@ -168,52 +50,103 @@
     <div class="date-info">Gerado em: <span id="current-date"></span></div>
   </div>
 
-  <div class="export-buttons">
-    <button class="export-btn excel" onclick="exportToExcel()">📗 Exportar para Excel</button>
-    <button class="export-btn pdf" onclick="exportToPDF()">📄 Exportar para PDF</button>
-    <button class="export-btn" onclick="window.print()">🖨️ Imprimir</button>
-    <button class="export-btn" onclick="sendEmail()">📧 Enviar por E-mail</button>
+  <!-- Seção PORTABILIDADE -->
+  <div class="section">
+    <div class="section-title">📈 PLANILHA: PORTABILIDADE</div>
+    <div class="export-buttons" id="buttons-port">
+      <button class="export-btn excel" onclick="exportTable('sales-table-port', 'PORTABILIDADE')">📗 Excel</button>
+      <button class="export-btn pdf" onclick="printTable('sales-table-port')">📄 PDF</button>
+      <button class="export-btn" onclick="copyTable('sales-table-port')">📋 Copiar</button>
+      <button class="export-btn" onclick="emailTable('sales-table-port', 'PORTABILIDADE')">📧 E-mail</button>
+    </div>
+
+    <table class="export-table" id="sales-table-port">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Segunda</th>
+          <th>Terça</th>
+          <th>Quarta</th>
+          <th>Quinta</th>
+          <th>Sexta</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for linha in dados_port %}
+        <tr>
+          <td class="employee-name">{{ linha.nome }}</td>
+          <td>R$ {{ linha.seg | format_brl }}</td>
+          <td>R$ {{ linha.ter | format_brl }}</td>
+          <td>R$ {{ linha.qua | format_brl }}</td>
+          <td>R$ {{ linha.qui | format_brl }}</td>
+          <td>R$ {{ linha.sex | format_brl }}</td>
+          <td class="total-cell">R$ {{ linha.total | format_brl }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="daily-totals">
+          <td><strong>TOTAL DIÁRIO</strong></td>
+          <td>R$ {{ totais_port.seg | format_brl }}</td>
+          <td>R$ {{ totais_port.ter | format_brl }}</td>
+          <td>R$ {{ totais_port.qua | format_brl }}</td>
+          <td>R$ {{ totais_port.qui | format_brl }}</td>
+          <td>R$ {{ totais_port.sex | format_brl }}</td>
+          <td class="total-cell">R$ {{
+            (totais_port.seg + totais_port.ter + totais_port.qua + totais_port.qui + totais_port.sex) | format_brl
+          }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-  <table class="export-table" id="sales-table">
-    <thead>
-      <tr>
-        <th>Vendedor</th>
-        <th>Segunda-feira</th>
-        <th>Terça-feira</th>
-        <th>Quarta-feira</th>
-        <th>Quinta-feira</th>
-        <th>Sexta-feira</th>
-        <th>Total Semanal</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for linha in dados %}
-      <tr>
-        <td class="employee-name">{{ linha.nome }}</td>
-        <td>R$ {{ linha.seg | format_brl }}</td>
-        <td>R$ {{ linha.ter | format_brl }}</td>
-        <td>R$ {{ linha.qua | format_brl }}</td>
-        <td>R$ {{ linha.qui | format_brl }}</td>
-        <td>R$ {{ linha.sex | format_brl }}</td>
-        <td class="total-cell">R$ {{ linha.total | format_brl }}</td>
-      </tr>
-      {% endfor %}
+  <!-- Seção NOVO -->
+  <div class="section">
+    <div class="section-title">🆕 PLANILHA: NOVO</div>
+    <div class="export-buttons" id="buttons-novo">
+      <button class="export-btn excel" onclick="exportTable('sales-table-novo', 'NOVO')">📗 Excel</button>
+      <button class="export-btn pdf" onclick="printTable('sales-table-novo')">📄 PDF</button>
+      <button class="export-btn" onclick="copyTable('sales-table-novo')">📋 Copiar</button>
+      <button class="export-btn" onclick="emailTable('sales-table-novo', 'NOVO')">📧 E-mail</button>
+    </div>
 
-      <!-- Linha de Total Diário -->
-      <tr class="daily-totals">
-        <td><strong>TOTAL DIÁRIO</strong></td>
-        <td>R$ {{ totais_diarios.seg | format_brl }}</td>
-        <td>R$ {{ totais_diarios.ter | format_brl }}</td>
-        <td>R$ {{ totais_diarios.qua | format_brl }}</td>
-        <td>R$ {{ totais_diarios.qui | format_brl }}</td>
-        <td>R$ {{ totais_diarios.sex | format_brl }}</td>
-        <td class="total-cell">R$ {{
-          (totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex) | format_brl
-        }}</td>
-      </tr>
-    </tbody>
-  </table>
+    <table class="export-table" id="sales-table-novo">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Segunda</th>
+          <th>Terça</th>
+          <th>Quarta</th>
+          <th>Quinta</th>
+          <th>Sexta</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for linha in dados_novo %}
+        <tr>
+          <td class="employee-name">{{ linha.nome }}</td>
+          <td>R$ {{ linha.seg | format_brl }}</td>
+          <td>R$ {{ linha.ter | format_brl }}</td>
+          <td>R$ {{ linha.qua | format_brl }}</td>
+          <td>R$ {{ linha.qui | format_brl }}</td>
+          <td>R$ {{ linha.sex | format_brl }}</td>
+          <td class="total-cell">R$ {{ linha.total | format_brl }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="daily-totals">
+          <td><strong>TOTAL DIÁRIO</strong></td>
+          <td>R$ {{ totais_novo.seg | format_brl }}</td>
+          <td>R$ {{ totais_novo.ter | format_brl }}</td>
+          <td>R$ {{ totais_novo.qua | format_brl }}</td>
+          <td>R$ {{ totais_novo.qui | format_brl }}</td>
+          <td>R$ {{ totais_novo.sex | format_brl }}</td>
+          <td class="total-cell">R$ {{
+            (totais_novo.seg + totais_novo.ter + totais_novo.qua + totais_novo.qui + totais_novo.sex) | format_brl
+          }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="footer-info">
     <p>Relatório gerado automaticamente pelo sistema de vendas</p>
@@ -221,89 +154,60 @@
   </div>
 
   <script>
-    // Definir data atual
     document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR');
 
-    // Função para exportar para Excel
-    function exportToExcel() {
-        const table = document.getElementById('sales-table').cloneNode(true);
+    function exportTable(tableId, sheetName) {
+        const table = document.getElementById(tableId).cloneNode(true);
         const htmlContent = `
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Resumo de Vendas</title>
-            </head>
-            <body>
-                <h1>Resumo de Vendas por Vendedor</h1>
-                <p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
-                ${table.outerHTML}
-            </body>
-            </html>
-        `;
+            <html><head><meta charset="UTF-8"><title>${sheetName}</title></head>
+            <body><h1>Resumo - ${sheetName}</h1><p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+            ${table.outerHTML}</body></html>`;
         const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
-        const url = window.URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `resumo_vendas_${new Date().toISOString().split('T')[0]}.xls`;
+        a.download = `vendas_${sheetName.toLowerCase()}_${new Date().toISOString().split('T')[0]}.xls`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        alert('📗 Arquivo Excel baixado com sucesso!');
+        URL.revokeObjectURL(url);
+        alert(`✅ Arquivo ${sheetName} exportado!`);
     }
 
-    // Função para exportar para PDF
-    function exportToPDF() {
-        const buttons = document.querySelector('.export-buttons');
-        buttons.style.display = 'none';
+    function printTable(tableId) {
+        const buttons = document.querySelectorAll('.export-buttons');
+        buttons.forEach(btn => btn.style.display = 'none');
         window.print();
         setTimeout(() => {
-            buttons.style.display = 'block';
-        }, 1000);
-        alert('📄 Para salvar como PDF, escolha "Salvar como PDF" na janela de impressão que abriu.');
+            buttons.forEach(btn => btn.style.display = 'block');
+        }, 500);
+        alert('🖨️ Use "Salvar como PDF" na janela de impressão.');
     }
 
-    // Função para copiar tabela
-    function copyTableToClipboard() {
-        const table = document.getElementById('sales-table');
+    function copyTable(tableId) {
+        const table = document.getElementById(tableId);
         const range = document.createRange();
         range.selectNode(table);
         window.getSelection().removeAllRanges();
         window.getSelection().addRange(range);
         document.execCommand('copy');
         window.getSelection().removeAllRanges();
-        alert('📋 Tabela copiada para a área de transferência! Você pode colar no Excel ou Google Sheets.');
+        alert('📋 Tabela copiada! Cole no Excel.');
     }
 
-    // Função para enviar por E-mail
-    function sendEmail() {
-        const table = document.getElementById('sales-table');
-        let emailBody = 'Prezados,\n\nSegue o resumo de vendas:\n\n';
-
+    function emailTable(tableId, sheetName) {
+        const table = document.getElementById(tableId);
+        let body = `Resumo de Vendas - ${sheetName}\n\n`;
         const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
-        emailBody += headers.join('\t') + '\n';
-
+        body += headers.join('\t') + '\n';
         table.querySelectorAll('tbody tr').forEach(row => {
-            const rowData = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim());
-            emailBody += rowData.join('\t') + '\n';
+            const cells = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim());
+            body += cells.join('\t') + '\n';
         });
-
-        const subject = 'Resumo de Vendas - ' + new Date().toLocaleDateString('pt-BR');
-        const mailtoLink = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(emailBody);
-        
-        window.open(mailtoLink, '_blank');
-        alert('📧 Seu cliente de e-mail será aberto com o resumo de vendas.');
+        const subject = `Vendas - ${sheetName} - ${new Date().toLocaleDateString('pt-BR')}`;
+        window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+        alert('📧 Cliente de e-mail aberto.');
     }
-
-    // Adicionar botão de cópia
-    document.addEventListener('DOMContentLoaded', function() {
-        const exportButtons = document.querySelector('.export-buttons');
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'export-btn';
-        copyBtn.innerHTML = '📋 Copiar Tabela';
-        copyBtn.onclick = copyTableToClipboard;
-        exportButtons.appendChild(copyBtn);
-    });
   </script>
 </body>
 </html>
