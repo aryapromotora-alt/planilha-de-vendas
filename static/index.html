@@ -26,7 +26,16 @@
         </div>
     </div>
 
-    <!-- Seção Principal -->
+    <!-- Dashboard de Escolha (NOVO) -->
+    <div id="dashboard-section" class="main-container" style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+        <div class="login-form binance-style" style="width: 300px; padding: 30px;">
+            <h2>Escolha uma opção</h2>
+            <button id="btn-portabilidade" class="binance-button" style="width: 100%; margin-bottom: 15px;">PORTABILIDADE</button>
+            <button id="btn-novo" class="binance-button" style="width: 100%;">NOVO</button>
+        </div>
+    </div>
+
+    <!-- Seção Principal (PORTABILIDADE) -->
     <div id="main-section" class="main-container" style="display: none;">
         <header class="header">
             <div class="logo-container">
@@ -36,6 +45,7 @@
             <div class="header-buttons">
                 <button id="logout-btn">Sair</button>
                 <button id="admin-panel-btn" style="display: none;">Painel Admin</button>
+                <button id="back-to-dashboard-from-port">← Voltar</button>
             </div>
         </header>
 
@@ -72,6 +82,55 @@
 
         <footer class="footer">
             <span id="logged-user"></span>
+        </footer>
+    </div>
+
+    <!-- Seção NOVO -->
+    <div id="novo-section" class="main-container" style="display: none;">
+        <header class="header">
+            <div class="logo-container">
+                <img src="/static/logo.png" alt="Logo da Empresa" style="height: 40px;">
+            </div>
+            <h1>Planilha de Vendas - NOVO</h1>
+            <div class="header-buttons">
+                <button id="logout-btn-novo">Sair</button>
+                <button id="admin-panel-btn-novo" style="display: none;">Painel Admin</button>
+                <button id="back-to-dashboard-from-novo">← Voltar</button>
+            </div>
+        </header>
+
+        <div class="spreadsheet-container">
+            <table id="spreadsheet-novo" class="spreadsheet-table">
+                <thead>
+                    <tr>
+                        <th>VENDEDOR</th>
+                        <th>SEGUNDA</th>
+                        <th>TERÇA</th>
+                        <th>QUARTA</th>
+                        <th>QUINTA</th>
+                        <th>SEXTA</th>
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody id="employee-rows-novo">
+                    <!-- Linhas dos funcionários serão inseridas aqui via JavaScript -->
+                </tbody>
+                <tfoot>
+                    <tr class="daily-totals highlight">
+                        <td><strong>TOTAL DIÁRIO</strong></td>
+                        <td id="monday-total-novo">R$ 0,00</td>
+                        <td id="tuesday-total-novo">R$ 0,00</td>
+                        <td id="wednesday-total-novo">R$ 0,00</td>
+                        <td id="thursday-total-novo">R$ 0,00</td>
+                        <td id="friday-total-novo">R$ 0,00</td>
+                        <td id="week-total-novo">R$ 0,00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <footer class="footer">
+            <span id="logged-user-novo"></span>
         </footer>
     </div>
 

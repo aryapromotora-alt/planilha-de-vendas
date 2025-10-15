@@ -1,5 +1,4 @@
-# routes/data.py (versão final segura)
-
+# routes/data.py
 from flask import Blueprint, jsonify, request, session
 from flask_cors import cross_origin
 from models.sales import Sale
@@ -7,11 +6,11 @@ from models.user import User, db
 
 data_bp = Blueprint('data', __name__)
 
-def load_data_from_db():
+def load_data_from_db(sheet_type='portabilidade'):
     spreadsheetData = {}
     employees = User.query.filter_by(role='user').all()
     for emp in employees:
-        sales = Sale.query.filter_by(employee_name=emp.username).all()
+        sales = Sale.query.filter_by(employee_name=emp.username, sheet_type=sheet_type).all()
         day_values = {sale.day: sale.value for sale in sales}
         spreadsheetData[emp.username] = {
             "monday": day_values.get("monday", 0),
@@ -25,16 +24,26 @@ def load_data_from_db():
         "spreadsheetData": spreadsheetData
     }
 
-def save_data_to_db(data):
+def save_data_to_db(data, sheet_type='portabilidade'):
     try:
-        for emp_name, days in data["spreadsheetData"].items():
+        spreadsheet_data = data.get("spreadsheetData", {})
+        for emp_name, days in spreadsheet_data.items():
             for day, value in days.items():
                 if day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
-                    sale = Sale.query.filter_by(employee_name=emp_name, day=day).first()
+                    sale = Sale.query.filter_by(
+                        employee_name=emp_name,
+                        day=day,
+                        sheet_type=sheet_type
+                    ).first()
                     if sale:
                         sale.value = value
                     else:
-                        sale = Sale(employee_name=emp_name, day=day, value=value)
+                        sale = Sale(
+                            employee_name=emp_name,
+                            day=day,
+                            value=value,
+                            sheet_type=sheet_type
+                        )
                         db.session.add(sale)
         db.session.commit()
         return True
@@ -43,19 +52,22 @@ def save_data_to_db(data):
         print(f"Erro ao salvar: {e}")
         return False
 
-# 🔑 FUNÇÕES PÚBLICAS PARA O archive.py
+# 🔑 FUNÇÕES PÚBLICAS PARA COMPATIBILIDADE (ex: archive.py)
 def load_data():
-    return load_data_from_db()
+    return load_data_from_db('portabilidade')
 
 def save_data(data):
-    return save_data_to_db(data)
+    return save_data_to_db(data, 'portabilidade')
 
 # Rotas da API
 @data_bp.route('/data', methods=['GET'])
 @cross_origin()
 def get_data():
     try:
-        return jsonify(load_data_from_db()), 200
+        sheet_type = request.args.get('type', 'portabilidade')
+        if sheet_type not in ['portabilidade', 'novo']:
+            sheet_type = 'portabilidade'
+        return jsonify(load_data_from_db(sheet_type)), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -68,10 +80,14 @@ def save_data_endpoint():
         data = request.get_json()
         if not data or 'spreadsheetData' not in data:
             return jsonify({"error": "Dados inválidos"}), 400
-        if save_data_to_db(data):
+        
+        sheet_type = data.get('sheet_type', 'portabilidade')
+        if sheet_type not in ['portabilidade', 'novo']:
+            sheet_type = 'portabilidade'
+
+        if save_data_to_db(data, sheet_type):
             return jsonify({"message": "Dados salvos"}), 200
         else:
             return jsonify({"error": "Erro ao salvar"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-

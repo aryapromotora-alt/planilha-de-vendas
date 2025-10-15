@@ -1,6 +1,7 @@
 import os
 from app import create_app
 from models.user import db, User
+from models.sales import Sale  # Importante: garantir que Sale seja importado
 from werkzeug.security import generate_password_hash
 from sqlalchemy import text
 
@@ -68,7 +69,32 @@ with app.app_context():
         print(f"❌ Erro ao verificar/criar coluna 'role': {e}")
         exit(1)
 
-    # 4. Cria o usuário admin se não existir
+    # 4. Garante que a coluna 'sheet_type' exista na tabela 'sales'
+    try:
+        # Tenta verificar via information_schema (PostgreSQL/MySQL)
+        result = db.session.execute(text("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'sales' AND column_name = 'sheet_type';
+        """))
+        if not result.fetchone():
+            raise Exception("Coluna 'sheet_type' não encontrada no information_schema")
+        print("✅ Coluna 'sheet_type' já existe na tabela 'sales'.")
+    except Exception as e_info:
+        # Se falhar (ex: SQLite), tenta acessar diretamente
+        try:
+            db.session.execute(text("SELECT sheet_type FROM sales LIMIT 1;"))
+            print("✅ Coluna 'sheet_type' já existe na tabela 'sales'.")
+        except Exception as e_sqlite:
+            print("⚠️ Coluna 'sheet_type' não encontrada na tabela 'sales'. Adicionando...")
+            try:
+                db.session.execute(text("ALTER TABLE sales ADD COLUMN sheet_type VARCHAR(20) DEFAULT 'portabilidade';"))
+                db.session.commit()
+                print("✅ Coluna 'sheet_type' adicionada à tabela 'sales'.")
+            except Exception as e_alter:
+                print(f"❌ Erro ao adicionar coluna 'sheet_type': {e_alter}")
+                exit(1)
+
+    # 5. Cria o usuário admin se não existir
     admin_user = User.query.filter_by(username=ADMIN_USERNAME).first()
     if not admin_user:
         try:
