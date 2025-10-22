@@ -5,6 +5,7 @@ from pytz import timezone
 # imports diretos sem src/
 from routes.data import load_data
 from models.user import db
+from models.sales import Sale
 
 # Scheduler global
 scheduler = BackgroundScheduler()
@@ -91,27 +92,12 @@ def salvar_resumo_diario(app):
 def reset_planilha_semanal(app):
     with app.app_context():
         try:
-            data = load_data()
-            spreadsheet = data.get("spreadsheetData", {})
 
-            for nome in spreadsheet:
-                spreadsheet[nome] = {
-                    "monday": 0,
-                    "tuesday": 0,
-                    "wednesday": 0,
-                    "thursday": 0,
-                    "friday": 0
-                }
-
-            from models.user import SpreadsheetData
-            for vendedor in spreadsheet:
-                record = SpreadsheetData.query.filter_by(vendedor=vendedor).first()
-                if record:
-                    record.monday = 0
-                    record.tuesday = 0
-                    record.wednesday = 0
-                    record.thursday = 0
-                    record.friday = 0
+            from models.sales import Sale
+            # Zera os valores de 'value' para todos os registros de vendas
+            # para os dias da semana 'monday' a 'friday'
+            Sale.query.filter(Sale.day.in_(["monday", "tuesday", "wednesday", "thursday", "friday"]))\
+                      .update({"value": 0}, synchronize_session=False)
 
             db.session.commit()
             print(f"[OK] Planilha semanal zerada em {datetime.now(timezone('America/Sao_Paulo'))}")
