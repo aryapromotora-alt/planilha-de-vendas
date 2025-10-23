@@ -77,30 +77,61 @@ function setCurrentSpreadsheetData(data) {
     }
 }
 
+async function saveCellToServer(employeeName, day, value, sheetType) {
+    try {
+        const dataToSave = {
+            employee_name: employeeName,
+            day: day,
+            value: value,
+            sheet_type: sheetType
+        };
+        
+        const response = await fetch(\'/api/data/cell\', {
+            method: \'POST\',
+            headers: {
+                \'Content-Type\': \'application/json\',
+            },
+            body: JSON.stringify(dataToSave),
+            credentials: \'include\'
+        });
+        
+        if (!response.ok) {
+            throw new Error(\'Erro ao salvar célula no servidor\');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error(\'Erro ao salvar célula:\', error);
+        showMessage(\'Erro ao salvar célula no servidor!\', \'error\');
+        return false;
+    }
+}
+
 async function saveDataToServer() {
+    // Esta função ainda é usada para salvamento completo (ex: ao adicionar/remover vendedor)
     try {
         const dataToSave = {
             sheet_type: currentSheet,
             spreadsheetData: getCurrentSpreadsheetData()
         };
         
-        const response = await fetch('/api/data', {
-            method: 'POST',
+        const response = await fetch(\'/api/data\', {
+            method: \'POST\',
             headers: {
-                'Content-Type': 'application/json',
+                \'Content-Type\': \'application/json\',
             },
             body: JSON.stringify(dataToSave),
-            credentials: 'include'
+            credentials: \'include\'
         });
         
         if (!response.ok) {
-            throw new Error('Erro ao salvar dados no servidor');
+            throw new Error(\'Erro ao salvar dados completos no servidor\');
         }
         
         return true;
     } catch (error) {
-        console.error('Erro ao salvar dados:', error);
-        showMessage('Erro ao salvar dados no servidor!', 'error');
+        console.error(\'Erro ao salvar dados completos:\', error);
+        showMessage(\'Erro ao salvar dados completos no servidor!\', \'error\');
         return false;
     }
 }
@@ -337,11 +368,8 @@ async function finishEditing(cell, input, sheetType) {
         spreadsheetDataPortabilidade = data;
     }
     
-    // Salva no servidor
-    const prevSheet = currentSheet;
-    currentSheet = sheetType;
-    await saveDataToServer();
-    currentSheet = prevSheet;
+    // Salva a célula individualmente no servidor
+    await saveCellToServer(employee, day, newValue, sheetType);
     
     updateTotals(sheetType);
 }
@@ -502,7 +530,12 @@ async function handleAddEmployee(e) {
         const data = await response.json();
         
         if (response.ok) {
-            await initializeApp(); // Recarrega todos os dados
+            // Não é mais necessário recarregar tudo, apenas atualizar a exibição
+            // O initializeApp() já é chamado no início para carregar o estado inicial.
+            // A adição de um novo funcionário não deve apagar os dados existentes.
+            // Apenas recarregar os dados do servidor para garantir que o novo funcionário apareça
+            // e, em seguida, renderizar as planilhas novamente.
+            await initializeApp();
             renderEmployeeManagement();
             if (currentSheet) {
                 showSheet(currentSheet); // Atualiza a planilha ativa
@@ -527,11 +560,15 @@ async function removeEmployee(employeeId, employeeName) {
             });
             
             if (response.ok) {
-                await initializeApp(); // Recarrega todos os dados
-                renderEmployeeManagement();
-                if (currentSheet) {
-                    showSheet(currentSheet); // Atualiza a planilha ativa
-                }
+            // Não é mais necessário recarregar tudo, apenas atualizar a exibição
+            // A remoção de um funcionário não deve apagar os dados existentes.
+            // Apenas recarregar os dados do servidor para garantir que o funcionário removido desapareça
+            // e, em seguida, renderizar as planilhas novamente.
+            await initializeApp();
+            renderEmployeeManagement();
+            if (currentSheet) {
+                showSheet(currentSheet); // Atualiza a planilha ativa
+            }
                 showMessage('Funcionário removido com sucesso!', 'success');
             } else {
                 const errorData = await response.json();
