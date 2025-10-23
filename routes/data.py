@@ -24,33 +24,7 @@ def load_data_from_db(sheet_type='portabilidade'):
         "spreadsheetData": spreadsheetData
     }
 
-def update_single_sale(employee_name, day, value, sheet_type):
-    try:
-        sale = Sale.query.filter_by(
-            employee_name=employee_name,
-            day=day,
-            sheet_type=sheet_type
-        ).first()
-        if sale:
-            sale.value = value
-        else:
-            sale = Sale(
-                employee_name=employee_name,
-                day=day,
-                value=value,
-                sheet_type=sheet_type
-            )
-            db.session.add(sale)
-        db.session.commit()
-        return True
-    except Exception as e:
-        db.session.rollback()
-        print(f"Erro ao atualizar venda única: {e}")
-        return False
-
 def save_data_to_db(data, sheet_type='portabilidade'):
-    # Esta função ainda é usada para compatibilidade e para o scheduler
-    # Mas o frontend agora usará update_single_sale para edições de célula única
     try:
         spreadsheet_data = data.get("spreadsheetData", {})
         for emp_name, days in spreadsheet_data.items():
@@ -85,32 +59,47 @@ def load_data():
 def save_data(data):
     return save_data_to_db(data, 'portabilidade')
 
-@data_bp.route("/data/cell", methods=["POST"])
-@cross_origin()
-def update_cell_endpoint():
-    if 'user' not in session:
-        return jsonify({"error": "Não autenticado"}), 401
+# === Nova função: salvar apenas uma célula ===
+def save_cell_to_db(sheet_type, employee_name, day, value):
+    """
+    Salva ou atualiza APENAS uma célula no banco de dados.
+    """
     try:
-        data = request.get_json()
-        employee_name = data.get("employee_name")
-        day = data.get("day")
-        value = data.get("value")
-        sheet_type = data.get("sheet_type", "portabilidade")
-
-        if not all([employee_name, day, value is not None]):
-            return jsonify({"error": "Dados inválidos para atualização de célula"}), 400
-
+        # Validações básicas
         if sheet_type not in ['portabilidade', 'novo']:
-            sheet_type = 'portabilidade'
+            return False, "Tipo de planilha inválido"
+        if day not in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']:
+            return False, "Dia da semana inválido"
+        if not isinstance(value, (int, float)):
+            value = float(value) if value else 0.0
 
-        if update_single_sale(employee_name, day, value, sheet_type):
-            return jsonify({"message": "Célula atualizada"}), 200
+        # Busca ou cria o registro
+        sale = Sale.query.filter_by(
+            employee_name=employee_name,
+            day=day,
+            sheet_type=sheet_type
+        ).first()
+
+        if sale:
+            sale.value = value
         else:
-            return jsonify({"error": "Erro ao atualizar célula"}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+            sale = Sale(
+                employee_name=employee_name,
+                day=day,
+                value=value,
+                sheet_type=sheet_type
+            )
+            db.session.add(sale)
 
-# Rotas da API
+        db.session.commit()
+        return True, "Célula salva com sucesso"
+    except Exception as e:
+        db.session.rollback()
+        print(f"Erro ao salvar célula: {e}")
+        return False, str(e)
+
+# === Rotas da API ===
+
 @data_bp.route('/data', methods=['GET'])
 @cross_origin()
 def get_data():
@@ -136,11 +125,36 @@ def save_data_endpoint():
         if sheet_type not in ['portabilidade', 'novo']:
             sheet_type = 'portabilidade'
 
-        # Este endpoint ainda é usado para o salvamento completo (ex: do scheduler ou outras partes)
-        # Para edições de célula única, o frontend agora usará /api/data/cell
         if save_data_to_db(data, sheet_type):
             return jsonify({"message": "Dados salvos"}), 200
         else:
             return jsonify({"error": "Erro ao salvar"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# === Nova rota: salvar uma única célula ===
+@data_bp.route('/cell', methods=['POST'])
+@cross_origin()
+def save_cell_endpoint():
+    if 'user' not in session:
+        return jsonify({"error": "Não autenticado"}), 401
+
+    try:
+        data = request.get_json()
+        sheet_type = data.get('sheet_type')
+        employee = data.get('employee')
+        day = data.get('day')
+        value = data.get('value', 0)
+
+        if not all([sheet_type, employee, day]):
+            return jsonify({"error": "Dados incompletos"}), 400
+
+        success, message = save_cell_to_db(sheet_type, employee, day, value)
+        if success:
+            return jsonify({"success": True, "message": message}), 200
+        else:
+            return jsonify({"error": message}), 500
+
+    except Exception as e:
+        print(f"Erro na rota /cell: {e}")
+        return jsonify({"error": "Erro interno do servidor"}), 500
