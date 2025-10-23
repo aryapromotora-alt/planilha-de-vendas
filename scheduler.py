@@ -92,7 +92,6 @@ def salvar_resumo_diario(app):
 def reset_planilha_semanal(app):
     with app.app_context():
         try:
-
             from models.sales import Sale
             # Zera os valores de 'value' para todos os registros de vendas
             # para os dias da semana 'monday' a 'friday'
@@ -120,10 +119,10 @@ def start_scheduler(app):
         scheduler.add_job(
             func=lambda: reset_planilha_semanal(app),
             trigger="cron",
-            day_of_week="mon",
-            hour=0,
-            minute=1,
+            day_of_week="sun",      # ← DOMINGO (mudança principal)
+            hour=23,                # ← 23h
+            minute=59,              # ← 59min
             timezone=timezone("America/Sao_Paulo")
         )
         scheduler.start()
-        print("[INFO] Scheduler iniciado: resumo diário às 18:20 e reset semanal às 00:01 de segunda")
+        print("[INFO] Scheduler iniciado: resumo diário às 18:20 e reset semanal aos domingos às 23:59")
