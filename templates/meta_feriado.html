@@ -17,10 +17,10 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); /* Tons de azul/cinza escuro */
             min-height: 100vh;
-            padding: 0; /* Removi padding para maximizar espaço vertical */
+            padding: 0;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Alinha ao topo */
+            align-items: center; /* Centraliza verticalmente */
             width: 100vw;
             height: 100vh;
             overflow: hidden;
@@ -32,10 +32,10 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 95%;
             width: 100%;
-            padding: 15px 30px; /* Reduzi o padding superior/inferior */
+            padding: 20px 30px; /* Espaçamento equilibrado */
             display: flex;
             flex-direction: column;
-            gap: 15px; /* Reduzi o gap entre elementos */
+            gap: 15px; /* Espaço entre seções */
             align-items: center;
             max-height: 95vh;
             overflow-y: auto;
@@ -44,42 +44,42 @@
         /* Seção de Cabeçalho */
         .header {
             text-align: center;
-            margin-bottom: 5px; /* Menos espaço abaixo do título */
+            margin-bottom: 5px;
             width: 100%;
         }
 
         .header h1 {
-            color: #FFD700; /* Amarelo dourado */
-            font-size: 36px; /* Fonte menor para economizar espaço */
+            color: #000000; /* Preto */
+            font-size: 36px;
             margin-bottom: 5px;
             font-weight: bold;
         }
 
         .header p {
-            display: none; /* Removido - não queremos mais "Acompanhamento de Vendas para Folga" */
+            display: none; /* Removido */
         }
 
         /* Grid de Vendedores */
         .sellers-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px; /* Reduzi o gap entre cards */
+            gap: 15px;
             width: 100%;
         }
 
         .seller-card {
             background: #2c3e50; /* Cinza Escuro - Caixa Externa */
             border-radius: 15px;
-            padding: 15px; /* Reduzi o padding interno */
+            padding: 15px;
             border: 2px solid #34495e;
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Reduzi o gap interno */
+            gap: 10px;
             align-items: center;
         }
 
         .seller-name {
-            font-size: 24px; /* Fonte um pouco menor */
+            font-size: 24px;
             font-weight: bold;
             color: #FFD700; /* Dourado */
             text-align: center;
@@ -93,16 +93,16 @@
 
         .stat-box {
             background: #000000; /* Preto - Caixa Interna */
-            padding: 15px 25px; /* Reduzi o padding */
+            padding: 15px 25px;
             border-radius: 10px;
             text-align: center;
             border: 1px solid #bdc3c7;
             width: 100%;
-            max-width: 280px; /* Reduzi um pouco a largura */
+            max-width: 280px;
         }
 
         .stat-label {
-            font-size: 16px; /* Menor */
+            font-size: 16px;
             color: #FFD700; /* Dourado */
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -111,7 +111,7 @@
         }
 
         .stat-value {
-            font-size: 36px; /* Menor, mas ainda impactante */
+            font-size: 36px;
             font-weight: bold;
             color: #FFD700; /* Dourado */
         }
@@ -120,7 +120,7 @@
         .meta-consolidada {
             background: linear-gradient(135deg, #1c1c1c 0%, #000000 100%);
             color: #FFD700; /* Dourado */
-            padding: 20px; /* Reduzi o padding */
+            padding: 20px;
             border-radius: 15px;
             text-align: center;
             width: 100%;
@@ -128,7 +128,7 @@
         }
 
         .meta-consolidada h2 {
-            font-size: 20px; /* Menor */
+            font-size: 20px;
             font-weight: 600;
             margin-bottom: 5px;
             opacity: 0.9;
@@ -137,26 +137,26 @@
         }
 
         .meta-consolidada .meta-value-principal {
-            font-size: 52px; /* Menor, mas ainda grande */
+            font-size: 52px;
             font-weight: bold;
             margin-bottom: 5px;
         }
 
         .meta-consolidada .meta-detalhe {
-            font-size: 16px; /* Menor */
+            font-size: 16px;
             opacity: 0.9;
             margin-bottom: 10px;
         }
 
         .meta-consolidada .meta-restante {
-            font-size: 20px; /* Menor */
+            font-size: 20px;
             opacity: 0.9;
             margin-bottom: 10px;
         }
 
         .progress-bar {
             width: 80%;
-            height: 10px; /* Mais fina */
+            height: 10px;
             background: rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             overflow: hidden;
@@ -209,7 +209,7 @@
         <!-- Content Section -->
         <div class="content-section" style="width: 100%;">
             <div class="header">
-                <h1>Meta Feriado 21/11</h1>
+                <h1>Meta Feriado</h1>
                 <!-- REMOVIDO: <p>Acompanhamento de Vendas para Folga</p> -->
             </div>
 
