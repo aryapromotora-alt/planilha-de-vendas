@@ -17,10 +17,10 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); /* Tons de azul/cinza escuro */
             min-height: 100vh;
-            padding: 20px;
+            padding: 0; /* Removi padding para maximizar espaço vertical */
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Alinha ao topo */
             width: 100vw;
             height: 100vh;
             overflow: hidden;
@@ -32,10 +32,10 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 95%;
             width: 100%;
-            padding: 30px;
+            padding: 15px 30px; /* Reduzi o padding superior/inferior */
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px; /* Reduzi o gap entre elementos */
             align-items: center;
             max-height: 95vh;
             overflow-y: auto;
@@ -44,52 +44,42 @@
         /* Seção de Cabeçalho */
         .header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px; /* Menos espaço abaixo do título */
+            width: 100%;
         }
 
         .header h1 {
-            color: #000000; /* Preto */
-            font-size: 48px;
+            color: #FFD700; /* Amarelo dourado */
+            font-size: 36px; /* Fonte menor para economizar espaço */
             margin-bottom: 5px;
+            font-weight: bold;
         }
 
         .header p {
-            color: #FF8C00; /* Laranja Escuro - Melhor visibilidade em TV */
-            font-size: 24px;
-        }
-
-        .date-info {
-            background: #ffffff; /* Branco */
-            padding: 15px 20px;
-            border-radius: 10px;
-            text-align: center;
-            color: #FF8C00; /* Laranja Escuro */
-            font-size: 20px;
-            border-left: 4px solid #FF8C00; /* Borda laranja escuro */
-            width: 100%;
+            display: none; /* Removido - não queremos mais "Acompanhamento de Vendas para Folga" */
         }
 
         /* Grid de Vendedores */
         .sellers-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 15px; /* Reduzi o gap entre cards */
             width: 100%;
         }
 
         .seller-card {
             background: #2c3e50; /* Cinza Escuro - Caixa Externa */
             border-radius: 15px;
-            padding: 20px;
-            border: 2px solid #34495e; /* Borda escura */
+            padding: 15px; /* Reduzi o padding interno */
+            border: 2px solid #34495e;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px; /* Reduzi o gap interno */
             align-items: center;
         }
 
         .seller-name {
-            font-size: 28px;
+            font-size: 24px; /* Fonte um pouco menor */
             font-weight: bold;
             color: #FFD700; /* Dourado */
             text-align: center;
@@ -103,25 +93,25 @@
 
         .stat-box {
             background: #000000; /* Preto - Caixa Interna */
-            padding: 20px 30px;
+            padding: 15px 25px; /* Reduzi o padding */
             border-radius: 10px;
             text-align: center;
             border: 1px solid #bdc3c7;
             width: 100%;
-            max-width: 300px;
+            max-width: 280px; /* Reduzi um pouco a largura */
         }
 
         .stat-label {
-            font-size: 18px;
+            font-size: 16px; /* Menor */
             color: #FFD700; /* Dourado */
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             font-weight: 600;
         }
 
         .stat-value {
-            font-size: 40px;
+            font-size: 36px; /* Menor, mas ainda impactante */
             font-weight: bold;
             color: #FFD700; /* Dourado */
         }
@@ -130,45 +120,45 @@
         .meta-consolidada {
             background: linear-gradient(135deg, #1c1c1c 0%, #000000 100%);
             color: #FFD700; /* Dourado */
-            padding: 30px;
+            padding: 20px; /* Reduzi o padding */
             border-radius: 15px;
             text-align: center;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .meta-consolidada h2 {
-            font-size: 24px;
+            font-size: 20px; /* Menor */
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             opacity: 0.9;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .meta-consolidada .meta-value-principal {
-            font-size: 64px;
+            font-size: 52px; /* Menor, mas ainda grande */
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .meta-consolidada .meta-detalhe {
-            font-size: 20px;
+            font-size: 16px; /* Menor */
             opacity: 0.9;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .meta-consolidada .meta-restante {
-            font-size: 24px;
+            font-size: 20px; /* Menor */
             opacity: 0.9;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .progress-bar {
             width: 80%;
-            height: 12px;
+            height: 10px; /* Mais fina */
             background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
             margin: 0 auto;
         }
@@ -176,12 +166,12 @@
         .progress-fill {
             height: 100%;
             background: #4ade80;
-            border-radius: 10px;
+            border-radius: 8px;
             transition: width 0.3s ease;
         }
 
         .progress-fill.warning {
-            background: #ff9200; /* Laranja vibrante - ideal para TVs */
+            background: #ff9200; /* Laranja vibrante */
         }
 
         .progress-fill.critical {
@@ -197,19 +187,16 @@
 
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
+                padding: 10px 20px;
             }
             .header h1 {
-                font-size: 36px;
-            }
-            .header p {
-                font-size: 18px;
+                font-size: 30px;
             }
             .meta-consolidada .meta-value-principal {
-                font-size: 48px;
+                font-size: 40px;
             }
             .meta-consolidada .meta-detalhe, .meta-consolidada .meta-restante {
-                font-size: 18px;
+                font-size: 14px;
             }
             .sellers-grid {
                 grid-template-columns: 1fr;
@@ -223,11 +210,7 @@
         <div class="content-section" style="width: 100%;">
             <div class="header">
                 <h1>Meta Feriado 21/11</h1>
-                <p>Acompanhamento de Vendas para Folga</p>
-            </div>
-
-            <div class="date-info">
-                📅 Período: Hoje até 19/11/2025 | 🎉 Folga: 21/11/2025
+                <!-- REMOVIDO: <p>Acompanhamento de Vendas para Folga</p> -->
             </div>
 
             <!-- Sellers Grid -->
