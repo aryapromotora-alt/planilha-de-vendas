@@ -21,26 +21,24 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Forçar o corpo a ocupar a tela inteira para TV */
             width: 100vw;
             height: 100vh;
-            overflow: hidden; /* Evitar barras de rolagem */
+            overflow: hidden;
         }
 
         .container {
-            background: #ecf0f1; /* Fundo do container cinza claro/pastel */
+            background: #ecf0f1; /* Fundo cinza claro original */
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 95%; /* Ajuste para TV */
+            max-width: 95%;
             width: 100%;
-            padding: 30px; /* Reduzir um pouco o padding */
-            display: flex; /* Mudar para flexbox para melhor controle */
+            padding: 30px;
+            display: flex;
             flex-direction: column;
             gap: 20px;
             align-items: center;
-            /* Ajuste para centralizar o conteúdo verticalmente na TV */
             max-height: 95vh;
-            overflow-y: auto; /* Permitir rolagem se necessário, mas tentar evitar */
+            overflow-y: auto;
         }
 
         /* Seção de Cabeçalho */
@@ -51,89 +49,87 @@
 
         .header h1 {
             color: #000000; /* Preto */
-            font-size: 48px; /* Aumentar para TV */
+            font-size: 48px;
             margin-bottom: 5px;
         }
 
         .header p {
-            color: #FFD700; /* Amarelo Dourado */
-            font-size: 24px; /* Aumentar para TV */
+            color: #FF8C00; /* Laranja Escuro - Melhor visibilidade em TV */
+            font-size: 24px;
         }
 
         .date-info {
-            background: #ffffff; /* Manter branco para contraste interno */
+            background: #ffffff; /* Branco */
             padding: 15px 20px;
             border-radius: 10px;
             text-align: center;
-            color: #FFD700; /* Amarelo Dourado */
-            font-size: 20px; /* Aumentar para TV */
-            border-left: 4px solid #FFD700; /* Amarelo Dourado */
+            color: #FF8C00; /* Laranja Escuro */
+            font-size: 20px;
+            border-left: 4px solid #FF8C00; /* Borda laranja escuro */
             width: 100%;
         }
 
         /* Grid de Vendedores */
         .sellers-grid {
             display: grid;
-            /* Ajustar para 3 colunas para melhor aproveitamento em TV */
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             width: 100%;
         }
 
         .seller-card {
-            background: #ffffff; /* Manter branco para contraste interno */
+            background: #000000; /* Caixa preta */
             border-radius: 15px;
             padding: 20px;
-            border: 2px solid #bdc3c7; /* Borda suave */
+            border: 2px solid #bdc3c7;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            /* Novo: Centralizar o conteúdo da caixa do vendedor */
             align-items: center;
         }
 
         .seller-name {
-            font-size: 28px; /* Aumentar para TV */
+            font-size: 28px;
             font-weight: bold;
-            color: #000000; /* Preto */
+            color: #FFD700; /* Dourado */
             text-align: center;
         }
 
         .seller-stats {
-            display: flex; /* Mudar para flex para centralizar melhor a única caixa */
+            display: flex;
             justify-content: center;
             width: 100%;
         }
 
         .stat-box {
-            background: #ecf0f1; /* Fundo do container cinza claro/pastel */
-            padding: 20px 30px; /* Aumentar o padding para destaque */
+            background: #000000; /* Caixa preta */
+            padding: 20px 30px;
             border-radius: 10px;
             text-align: center;
-            border: 1px solid #bdc3c7; /* Borda suave */
-            width: 100%; /* Ocupar a largura total dentro do seller-stats */
-            max-width: 300px; /* Limitar o tamanho para não ficar muito largo */
+            border: 1px solid #bdc3c7;
+            width: 100%;
+            max-width: 300px;
         }
 
         .stat-label {
-            font-size: 18px; /* Aumentar o tamanho da label */
-            color: #FFD700; /* Amarelo Dourado */
+            font-size: 18px;
+            color: #FFD700; /* Dourado */
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 10px; /* Aumentar margem */
+            margin-bottom: 10px;
             font-weight: 600;
         }
 
         .stat-value {
-            font-size: 40px; /* Aumentar bastante o valor para destaque */
+            font-size: 40px;
             font-weight: bold;
-            color: #000000; /* Preto */
+            color: #FFD700; /* Dourado */
         }
 
-        /* Seção de Meta Consolidada (Caixa Roxa Única) */
+        /* Seção de Meta Consolidada */
         .meta-consolidada {
-            background: linear-gradient(135deg, #1c1c1c 0%, #000000 100%); /* Preto para a meta consolidada */
-            color: #FFD700; /* Amarelo Dourado para texto na caixa preta */
+            background: linear-gradient(135deg, #1c1c1c 0%, #000000 100%);
+            color: #FFD700; /* Dourado */
             padding: 30px;
             border-radius: 15px;
             text-align: center;
@@ -142,7 +138,7 @@
         }
 
         .meta-consolidada h2 {
-            font-size: 24px; /* Aumentar para TV */
+            font-size: 24px;
             font-weight: 600;
             margin-bottom: 10px;
             opacity: 0.9;
@@ -151,30 +147,30 @@
         }
 
         .meta-consolidada .meta-value-principal {
-            font-size: 64px; /* Aumentar bastante para TV */
+            font-size: 64px;
             font-weight: bold;
             margin-bottom: 10px;
         }
 
         .meta-consolidada .meta-detalhe {
-            font-size: 20px; /* Aumentar para TV */
+            font-size: 20px;
             opacity: 0.9;
             margin-bottom: 15px;
         }
 
         .meta-consolidada .meta-restante {
-            font-size: 24px; /* Aumentar para TV */
+            font-size: 24px;
             opacity: 0.9;
             margin-bottom: 15px;
         }
 
         .progress-bar {
-            width: 80%; /* Reduzir um pouco a largura da barra */
-            height: 12px; /* Aumentar a altura da barra */
+            width: 80%;
+            height: 12px;
             background: rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             overflow: hidden;
-            margin: 0 auto; /* Centralizar */
+            margin: 0 auto;
         }
 
         .progress-fill {
@@ -185,14 +181,14 @@
         }
 
         .progress-fill.warning {
-            background: #facc15;
+            background: #ff9200; /* Laranja vibrante - ideal para TVs */
         }
 
         .progress-fill.critical {
             background: #ef4444;
         }
 
-        /* Media Query para telas menores (manter a responsividade, mas priorizar o layout de TV) */
+        /* Media Query para telas menores */
         @media (max-width: 1200px) {
             .sellers-grid {
                 grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -267,7 +263,7 @@
                 </div>
             </div>
 
-            <!-- Meta Consolidada (Substitui as duas caixas roxas) -->
+            <!-- Meta Consolidada -->
             <div class="meta-consolidada">
                 <h2>Meta Total da Equipe</h2>
                 <div class="meta-value-principal">R$ 1.500.000,00</div>
@@ -296,9 +292,9 @@
         if (progressPercentage >= 100) {
             progressFill.className = 'progress-fill'; // Verde
         } else if (progressPercentage >= 75) {
-            progressFill.className = 'progress-fill warning'; // Amarelo
+            progressFill.className = 'progress-fill warning'; // Laranja vibrante (melhor para TV)
         } else {
-            progressFill.className = 'progress-fill'; // Padrão
+            progressFill.className = 'progress-fill'; // Padrão (verde)
         }
     </script>
 </body>
