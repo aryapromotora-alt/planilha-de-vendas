@@ -193,8 +193,8 @@ def create_app():
             sellers_data = {}
             team_total = 0
             
-            # Buscar dados de JEMIMA, MAIANY e NADIA
-            for seller_name in ['jemima', 'maiany', 'nadia']:
+            # Buscar dados de Jemima, Maiany e Nadia (com capitalização correta!)
+            for seller_name in ['Jemima', 'Maiany', 'Nadia']:  # 👈 ALTERADO AQUI
                 # Buscar dados de Portabilidade
                 sales_port = Sale.query.filter_by(
                     employee_name=seller_name,
@@ -231,15 +231,15 @@ def create_app():
             
             return render_template(
                 'meta_feriado.html',
-                jemima_portabilidade=format_currency(sellers_data['jemima']['portabilidade']),
-                jemima_novo=format_currency(sellers_data['jemima']['novo']),
-                jemima_total=format_currency(sellers_data['jemima']['total']),
-                maiany_portabilidade=format_currency(sellers_data['maiany']['portabilidade']),
-                maiany_novo=format_currency(sellers_data['maiany']['novo']),
-                maiany_total=format_currency(sellers_data['maiany']['total']),
-                nadia_portabilidade=format_currency(sellers_data['nadia']['portabilidade']),
-                nadia_novo=format_currency(sellers_data['nadia']['novo']),
-                nadia_total=format_currency(sellers_data['nadia']['total']),
+                jemima_portabilidade=format_currency(sellers_data['Jemima']['portabilidade']),   # 👈 também corrigido aqui
+                jemima_novo=format_currency(sellers_data['Jemima']['novo']),
+                jemima_total=format_currency(sellers_data['Jemima']['total']),
+                maiany_portabilidade=format_currency(sellers_data['Maiany']['portabilidade']),
+                maiany_novo=format_currency(sellers_data['Maiany']['novo']),
+                maiany_total=format_currency(sellers_data['Maiany']['total']),
+                nadia_portabilidade=format_currency(sellers_data['Nadia']['portabilidade']),
+                nadia_novo=format_currency(sellers_data['Nadia']['novo']),
+                nadia_total=format_currency(sellers_data['Nadia']['total']),
                 team_total=format_currency(team_total),
                 meta_remaining=format_currency(meta_remaining),
                 progress_percentage=round(progress_percentage, 2)
