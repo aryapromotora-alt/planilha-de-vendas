@@ -88,6 +88,8 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            /* Novo: Centralizar o conteúdo da caixa do vendedor */
+            align-items: center;
         }
 
         .seller-name {
@@ -98,30 +100,32 @@
         }
 
         .seller-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            display: flex; /* Mudar para flex para centralizar melhor a única caixa */
+            justify-content: center;
+            width: 100%;
         }
 
         .stat-box {
             background: #ecf0f1; /* Fundo do container cinza claro/pastel */
-            padding: 10px;
+            padding: 20px 30px; /* Aumentar o padding para destaque */
             border-radius: 10px;
             text-align: center;
             border: 1px solid #bdc3c7; /* Borda suave */
+            width: 100%; /* Ocupar a largura total dentro do seller-stats */
+            max-width: 300px; /* Limitar o tamanho para não ficar muito largo */
         }
 
         .stat-label {
-            font-size: 14px;
+            font-size: 18px; /* Aumentar o tamanho da label */
             color: #7f8c8d; /* Cinza suave */
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 5px;
+            margin-bottom: 10px; /* Aumentar margem */
             font-weight: 600;
         }
 
         .stat-value {
-            font-size: 28px; /* Aumentar para TV */
+            font-size: 40px; /* Aumentar bastante o valor para destaque */
             font-weight: bold;
             color: #3498db; /* Azul mais suave */
         }
@@ -235,15 +239,7 @@
                 <div class="seller-card">
                     <div class="seller-name">👩‍💼 JEMIMA</div>
                     <div class="seller-stats">
-                        <div class="stat-box">
-                            <div class="stat-label">Vendido (Portabilidade)</div>
-                            <div class="stat-value">{{ jemima_portabilidade }}</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">Vendido (Novo)</div>
-                            <div class="stat-value">{{ jemima_novo }}</div>
-                        </div>
-                        <div class="stat-box" style="grid-column: span 2;">
+                        <div class="stat-box total-vendedor">
                             <div class="stat-label">Total Vendido</div>
                             <div class="stat-value">{{ jemima_total }}</div>
                         </div>
@@ -253,15 +249,7 @@
                 <div class="seller-card">
                     <div class="seller-name">👩‍💼 MAIANY</div>
                     <div class="seller-stats">
-                        <div class="stat-box">
-                            <div class="stat-label">Vendido (Portabilidade)</div>
-                            <div class="stat-value">{{ maiany_portabilidade }}</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">Vendido (Novo)</div>
-                            <div class="stat-value">{{ maiany_novo }}</div>
-                        </div>
-                        <div class="stat-box" style="grid-column: span 2;">
+                        <div class="stat-box total-vendedor">
                             <div class="stat-label">Total Vendido</div>
                             <div class="stat-value">{{ maiany_total }}</div>
                         </div>
@@ -271,15 +259,7 @@
                 <div class="seller-card">
                     <div class="seller-name">👩‍💼 NADIA</div>
                     <div class="seller-stats">
-                        <div class="stat-box">
-                            <div class="stat-label">Vendido (Portabilidade)</div>
-                            <div class="stat-value">{{ nadia_portabilidade }}</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">Vendido (Novo)</div>
-                            <div class="stat-value">{{ nadia_novo }}</div>
-                        </div>
-                        <div class="stat-box" style="grid-column: span 2;">
+                        <div class="stat-box total-vendedor">
                             <div class="stat-label">Total Vendido</div>
                             <div class="stat-value">{{ nadia_total }}</div>
                         </div>
