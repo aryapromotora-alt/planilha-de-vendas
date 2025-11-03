@@ -15,27 +15,28 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); /* Tons de azul/cinza escuro */
+            background: #ffffff; /* Fundo branco puro — remove o gradiente escuro */
             min-height: 100vh;
             padding: 0;
             display: flex;
             justify-content: center;
-            align-items: center; /* Centraliza verticalmente */
+            align-items: center;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
+            color: #FFD700; /* Dourado padrão para texto */
         }
 
         .container {
-            background: #ecf0f1; /* Fundo cinza claro original */
+            background: #ecf0f1; /* Fundo cinza claro original — MANTIDO */
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 95%;
             width: 100%;
-            padding: 20px 30px; /* Espaçamento equilibrado */
+            padding: 20px 30px;
             display: flex;
             flex-direction: column;
-            gap: 15px; /* Espaço entre seções */
+            gap: 15px;
             align-items: center;
             max-height: 95vh;
             overflow-y: auto;
@@ -50,7 +51,7 @@
 
         .header h1 {
             color: #000000; /* Preto */
-            font-size: 36px;
+            font-size: 56px; /* Muito maior para TV */
             margin-bottom: 5px;
             font-weight: bold;
         }
@@ -74,12 +75,12 @@
             border: 2px solid #34495e;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
         }
 
         .seller-name {
-            font-size: 24px;
+            font-size: 36px;
             font-weight: bold;
             color: #FFD700; /* Dourado */
             text-align: center;
@@ -93,16 +94,16 @@
 
         .stat-box {
             background: #000000; /* Preto - Caixa Interna */
-            padding: 15px 25px;
+            padding: 10px 15px;
             border-radius: 10px;
             text-align: center;
             border: 1px solid #bdc3c7;
             width: 100%;
-            max-width: 280px;
+            max-width: 260px;
         }
 
         .stat-label {
-            font-size: 16px;
+            font-size: 18px;
             color: #FFD700; /* Dourado */
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -111,7 +112,7 @@
         }
 
         .stat-value {
-            font-size: 36px;
+            font-size: 60px; /* MUITO MAIOR para TV */
             font-weight: bold;
             color: #FFD700; /* Dourado */
         }
@@ -120,7 +121,7 @@
         .meta-consolidada {
             background: linear-gradient(135deg, #1c1c1c 0%, #000000 100%);
             color: #FFD700; /* Dourado */
-            padding: 20px;
+            padding: 15px;
             border-radius: 15px;
             text-align: center;
             width: 100%;
@@ -128,7 +129,7 @@
         }
 
         .meta-consolidada h2 {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             margin-bottom: 5px;
             opacity: 0.9;
@@ -137,19 +138,19 @@
         }
 
         .meta-consolidada .meta-value-principal {
-            font-size: 52px;
+            font-size: 72px; /* ENORME para TV */
             font-weight: bold;
             margin-bottom: 5px;
         }
 
         .meta-consolidada .meta-detalhe {
-            font-size: 16px;
+            font-size: 20px;
             opacity: 0.9;
             margin-bottom: 10px;
         }
 
         .meta-consolidada .meta-restante {
-            font-size: 20px;
+            font-size: 24px;
             opacity: 0.9;
             margin-bottom: 10px;
         }
@@ -190,13 +191,19 @@
                 padding: 10px 20px;
             }
             .header h1 {
+                font-size: 48px;
+            }
+            .seller-name {
                 font-size: 30px;
             }
+            .stat-value {
+                font-size: 48px;
+            }
             .meta-consolidada .meta-value-principal {
-                font-size: 40px;
+                font-size: 60px;
             }
             .meta-consolidada .meta-detalhe, .meta-consolidada .meta-restante {
-                font-size: 14px;
+                font-size: 18px;
             }
             .sellers-grid {
                 grid-template-columns: 1fr;
@@ -210,7 +217,6 @@
         <div class="content-section" style="width: 100%;">
             <div class="header">
                 <h1>Meta Feriado</h1>
-                <!-- REMOVIDO: <p>Acompanhamento de Vendas para Folga</p> -->
             </div>
 
             <!-- Sellers Grid -->
