@@ -77,7 +77,6 @@
             flex-direction: column;
             gap: 5px;
             align-items: center;
-            /* Permitir que a caixa externa cresça com o conteúdo */
             min-height: auto;
         }
 
@@ -96,15 +95,13 @@
 
         .stat-box {
             background: #000000; /* Preto - Caixa Interna */
-            padding: 12px 15px; /* Ajustado para acomodar letras maiores */
+            padding: 12px 15px;
             border-radius: 8px;
             text-align: center;
             border: 1px solid #bdc3c7;
-            width: 100%; /* Ocupa toda a largura disponível */
-            /* REMOVIDO: max-width — agora a caixa cresce com o conteúdo */
-            /* Fonte aumentada para caber dentro da caixa */
-            font-size: 64px; /* MUITO GRANDE — mas dentro da caixa */
-            line-height: 1.1; /* Evita que o texto grude no topo/baixo */
+            width: 100%;
+            font-size: 64px;
+            line-height: 1.1;
         }
 
         .stat-label {
@@ -117,10 +114,10 @@
         }
 
         .stat-value {
-            font-size: 64px; /* Enorme — mas dentro da caixa preta */
+            font-size: 64px;
             font-weight: bold;
             color: #FFD700;
-            line-height: 1.1; /* Para não cortar */
+            line-height: 1.1;
         }
 
         /* Seção de Meta Consolidada */
@@ -155,9 +152,10 @@
         }
 
         .meta-consolidada .meta-restante {
-            font-size: 20px;
+            font-size: 28px; /* AUMENTADO — fica grande e visível em TV */
             opacity: 0.9;
-            margin-bottom: 8px;
+            margin-top: 8px; /* Posicionado abaixo da barra */
+            margin-bottom: 5px;
         }
 
         .progress-bar {
@@ -166,7 +164,7 @@
             background: rgba(255, 255, 255, 0.3);
             border-radius: 6px;
             overflow: hidden;
-            margin: 0 auto;
+            margin: 10px auto 5px; /* Espaço acima e abaixo */
         }
 
         .progress-fill {
@@ -208,7 +206,7 @@
                 font-size: 60px;
             }
             .meta-consolidada .meta-detalhe, .meta-consolidada .meta-restante {
-                font-size: 16px;
+                font-size: 18px;
             }
             .sellers-grid {
                 grid-template-columns: 1fr;
@@ -268,11 +266,12 @@
                 <h2>Total Vendido</h2>
                 <div class="meta-value-principal">{{ team_total }}</div>
                 
-                <div class="meta-restante">
-                    Meta Restante: <strong>{{ meta_remaining }}</strong>
-                </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill" style="width: {{ progress_percentage }}%"></div>
+                </div>
+                
+                <div class="meta-restante">
+                    Meta Restante: <strong>{{ meta_remaining }}</strong>
                 </div>
             </div>
         </div>
