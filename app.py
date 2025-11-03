@@ -178,6 +178,77 @@ def create_app():
             return f"Erro Interno do Servidor: {e}", 500
 
     # ---------------------------
+    # Rota pública /meta-feriado (META FERIADO 21/11)
+    # ---------------------------
+    @app.route("/meta-feriado")
+    def meta_feriado():
+        try:
+            from models.sales import Sale
+            from models.user import User
+            
+            META_TOTAL = 1500000
+            DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+            
+            # Dicionário para armazenar os dados dos vendedores
+            sellers_data = {}
+            team_total = 0
+            
+            # Buscar dados de JEMIMA, MAIANY e NADIA
+            for seller_name in ['jemima', 'maiany', 'nadia']:
+                # Buscar dados de Portabilidade
+                sales_port = Sale.query.filter_by(
+                    employee_name=seller_name,
+                    sheet_type='portabilidade'
+                ).all()
+                day_values_port = {s.day: s.value for s in sales_port}
+                total_port = sum(day_values_port.get(d, 0) for d in DAYS)
+                
+                # Buscar dados de Novo
+                sales_novo = Sale.query.filter_by(
+                    employee_name=seller_name,
+                    sheet_type='novo'
+                ).all()
+                day_values_novo = {s.day: s.value for s in sales_novo}
+                total_novo = sum(day_values_novo.get(d, 0) for d in DAYS)
+                
+                # Total geral do vendedor
+                total_geral = total_port + total_novo
+                team_total += total_geral
+                
+                sellers_data[seller_name] = {
+                    'portabilidade': total_port,
+                    'novo': total_novo,
+                    'total': total_geral
+                }
+            
+            # Calcular meta restante e percentual
+            meta_remaining = max(0, META_TOTAL - team_total)
+            progress_percentage = min(100, (team_total / META_TOTAL) * 100)
+            
+            # Formatar valores em moeda
+            def format_currency(value):
+                return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            
+            return render_template(
+                'meta_feriado.html',
+                jemima_portabilidade=format_currency(sellers_data['jemima']['portabilidade']),
+                jemima_novo=format_currency(sellers_data['jemima']['novo']),
+                jemima_total=format_currency(sellers_data['jemima']['total']),
+                maiany_portabilidade=format_currency(sellers_data['maiany']['portabilidade']),
+                maiany_novo=format_currency(sellers_data['maiany']['novo']),
+                maiany_total=format_currency(sellers_data['maiany']['total']),
+                nadia_portabilidade=format_currency(sellers_data['nadia']['portabilidade']),
+                nadia_novo=format_currency(sellers_data['nadia']['novo']),
+                nadia_total=format_currency(sellers_data['nadia']['total']),
+                team_total=format_currency(team_total),
+                meta_remaining=format_currency(meta_remaining),
+                progress_percentage=round(progress_percentage, 2)
+            )
+        except Exception as e:
+            print(f"Erro ao carregar dados para /meta-feriado: {e}")
+            return f"Erro Interno do Servidor: {e}", 500
+
+    # ---------------------------
     # Rota para extração de dados (PORTABILIDADE + NOVO)
     # ---------------------------
     @app.route("/export_table")
