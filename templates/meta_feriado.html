@@ -29,61 +29,62 @@
 
         .container {
             background: #ecf0f1; /* Fundo cinza claro original — MANTIDO */
-            /* Removido border-radius e box-shadow para evitar margens visuais */
             width: 100%;
             max-width: 100%;
-            padding: 0; /* Sem padding — ocupa toda a largura */
+            padding: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Espaço mínimo entre seções */
+            gap: 10px;
             align-items: center;
-            height: 100%; /* Ocupa toda a altura */
-            overflow-y: auto; /* Só se precisar — mas evitaremos corte */
+            height: 100%;
+            overflow-y: auto;
         }
 
         /* Seção de Cabeçalho */
         .header {
             text-align: center;
-            margin-top: 10px; /* Pequeno espaço do topo */
+            margin-top: 10px;
             width: 100%;
-            padding: 0 20px; /* Para não colar no lado */
+            padding: 0 20px;
         }
 
         .header h1 {
             color: #000000; /* Preto */
-            font-size: 60px; /* Enorme para TV */
+            font-size: 60px;
             margin-bottom: 5px;
             font-weight: bold;
         }
 
         .header p {
-            display: none; /* Removido */
+            display: none;
         }
 
         /* Grid de Vendedores */
         .sellers-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px; /* Espaço mínimo entre cards */
+            gap: 10px;
             width: 100%;
-            padding: 0 20px; /* Evita colar nos lados */
+            padding: 0 20px;
         }
 
         .seller-card {
             background: #2c3e50; /* Cinza Escuro - Caixa Externa */
-            border-radius: 10px; /* Leve arredondamento */
-            padding: 10px; /* Reduzido */
+            border-radius: 10px;
+            padding: 10px;
             border: 1px solid #34495e;
             display: flex;
             flex-direction: column;
-            gap: 5px; /* Espaço interno reduzido */
+            gap: 5px;
             align-items: center;
+            /* Permitir que a caixa externa cresça com o conteúdo */
+            min-height: auto;
         }
 
         .seller-name {
             font-size: 36px;
             font-weight: bold;
-            color: #FFD700; /* Dourado */
+            color: #FFD700;
             text-align: center;
         }
 
@@ -95,34 +96,38 @@
 
         .stat-box {
             background: #000000; /* Preto - Caixa Interna */
-            padding: 8px 12px; /* Mínimo */
+            padding: 12px 15px; /* Ajustado para acomodar letras maiores */
             border-radius: 8px;
             text-align: center;
             border: 1px solid #bdc3c7;
-            width: 100%;
-            max-width: 240px; /* Menor */
+            width: 100%; /* Ocupa toda a largura disponível */
+            /* REMOVIDO: max-width — agora a caixa cresce com o conteúdo */
+            /* Fonte aumentada para caber dentro da caixa */
+            font-size: 64px; /* MUITO GRANDE — mas dentro da caixa */
+            line-height: 1.1; /* Evita que o texto grude no topo/baixo */
         }
 
         .stat-label {
-            font-size: 16px;
-            color: #FFD700; /* Dourado */
+            font-size: 18px;
+            color: #FFD700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
             font-weight: 600;
         }
 
         .stat-value {
-            font-size: 56px; /* MUITO GRANDE para TV */
+            font-size: 64px; /* Enorme — mas dentro da caixa preta */
             font-weight: bold;
-            color: #FFD700; /* Dourado */
+            color: #FFD700;
+            line-height: 1.1; /* Para não cortar */
         }
 
         /* Seção de Meta Consolidada */
         .meta-consolidada {
             background: linear-gradient(135deg, #1c1c1c 0%, #000000 100%);
-            color: #FFD700; /* Dourado */
-            padding: 10px 20px; /* Espaço mínimo */
+            color: #FFD700;
+            padding: 10px 20px;
             width: 100%;
             margin-top: 10px;
             text-align: center;
@@ -138,7 +143,7 @@
         }
 
         .meta-consolidada .meta-value-principal {
-            font-size: 72px; /* ENORME para TV */
+            font-size: 72px;
             font-weight: bold;
             margin-bottom: 5px;
         }
@@ -172,7 +177,7 @@
         }
 
         .progress-fill.warning {
-            background: #ff9200; /* Laranja vibrante */
+            background: #ff9200;
         }
 
         .progress-fill.critical {
