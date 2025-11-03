@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="30">
+    <title>Meta Feriado - ARYA Promotora</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .meta-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .meta-info h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .meta-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .meta-info p {
+            font-size: 12px;
+            opacity: 0.85;
+            line-height: 1.6;
+        }
+
+        .content-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .date-info {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-left: 4px solid #667eea;
+        }
+
+        .sellers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .seller-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .seller-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .seller-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        .seller-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .total-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .total-section h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .total-value {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .remaining-meta {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4ade80;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.warning {
+            background: #facc15;
+        }
+
+        .progress-fill.critical {
+            background: #ef4444;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .logo-section {
+                flex-direction: row;
+                align-items: center;
+                gap: 30px;
+            }
+
+            .logo {
+                width: 150px;
+            }
+
+            .meta-info {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .sellers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .logo-section {
+                flex-direction: column;
+            }
+
+            .logo {
+                width: 180px;
+            }
+
+            .total-value {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo Section -->
+    <div class="container">
+        <div class="logo-section">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="ARYA Promotora" class="logo">
+            <div class="meta-info">
+                <h3>Meta Total da Equipe</h3>
+                <div class="meta-value">R$ 1.500.000,00</div>
+                <p>
+                    <strong>Por vendedor:</strong> R$ 500.000,00<br>
+                    <strong>Por dia:</strong> R$ 39.000,00
+                </p>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section">
+            <div class="header">
+                <h1>Meta Feriado 21/11</h1>
+                <p>Acompanhamento de Vendas para Folga</p>
+            </div>
+
+            <div class="date-info">
+                📅 Período: Hoje até 19/11/2025 | 🎉 Folga: 21/11/2025
+            </div>
+
+            <!-- Sellers Grid -->
+            <div class="sellers-grid">
+                <div class="seller-card">
+                    <div class="seller-name">👩‍💼 JEMIMA</div>
+                    <div class="seller-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Vendido (Portabilidade)</div>
+                            <div class="stat-value">{{ jemima_portabilidade }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Vendido (Novo)</div>
+                            <div class="stat-value">{{ jemima_novo }}</div>
+                        </div>
+                        <div class="stat-box" style="grid-column: span 2;">
+                            <div class="stat-label">Total Vendido</div>
+                            <div class="stat-value">{{ jemima_total }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="seller-card">
+                    <div class="seller-name">👩‍💼 MAIANY</div>
+                    <div class="seller-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Vendido (Portabilidade)</div>
+                            <div class="stat-value">{{ maiany_portabilidade }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Vendido (Novo)</div>
+                            <div class="stat-value">{{ maiany_novo }}</div>
+                        </div>
+                        <div class="stat-box" style="grid-column: span 2;">
+                            <div class="stat-label">Total Vendido</div>
+                            <div class="stat-value">{{ maiany_total }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="seller-card">
+                    <div class="seller-name">👩‍💼 NADIA</div>
+                    <div class="seller-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Vendido (Portabilidade)</div>
+                            <div class="stat-value">{{ nadia_portabilidade }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Vendido (Novo)</div>
+                            <div class="stat-value">{{ nadia_novo }}</div>
+                        </div>
+                        <div class="stat-box" style="grid-column: span 2;">
+                            <div class="stat-label">Total Vendido</div>
+                            <div class="stat-value">{{ nadia_total }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Section -->
+            <div class="total-section">
+                <h2>Total da Equipe</h2>
+                <div class="total-value">{{ team_total }}</div>
+                <div class="remaining-meta">
+                    Meta Restante: <strong>{{ meta_remaining }}</strong>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: {{ progress_percentage }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Script para atualizar a cor da barra de progresso
+        const progressPercentage = {{ progress_percentage }};
+        const progressFill = document.getElementById('progress-fill');
+        
+        if (progressPercentage >= 100) {
+            progressFill.className = 'progress-fill'; // Verde
+        } else if (progressPercentage >= 75) {
+            progressFill.className = 'progress-fill warning'; // Amarelo
+        } else {
+            progressFill.className = 'progress-fill'; // Padrão
+        }
+    </script>
+</body>
+</html>
