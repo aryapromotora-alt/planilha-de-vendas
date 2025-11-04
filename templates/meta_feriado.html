@@ -20,12 +20,16 @@
             --color-border: #343a40; /* Borda Escura Suave */
         }
 
-        /* Animação do Logo */
+        /* Animação do Logo — CORRIGIDA PARA PERCORRER TODA A BARRA EM 25S */
         @keyframes logo-slide {
-            0% { transform: translateX(-100%); opacity: 0; }
-            10% { transform: translateX(0); opacity: 1; }
-            90% { transform: translateX(0); opacity: 1; }
-            100% { transform: translateX(100%); opacity: 0; }
+            0% { 
+                transform: translateX(0); 
+                opacity: 1;
+            }
+            100% { 
+                transform: translateX(100%); /* 👈 VAI ATÉ O FIM DA BARRA */
+                opacity: 1;
+            }
         }
 
         /* Reset e Estilos Gerais */
@@ -80,21 +84,23 @@
             font-weight: 700;
             letter-spacing: 5px;
             text-transform: uppercase;
-            z-index: 10;
+            z-index: 10; /* Fica na frente do logo */
         }
 
         .logo-animation {
             position: absolute;
             height: 80%;
             left: 0;
-            animation: logo-slide 10s infinite ease-in-out; /* Animação de 10 segundos */
-            z-index: 5;
+            animation: logo-slide 25s linear infinite; /* 👈 25 segundos, ida só */
+            z-index: 5; /* Fica atrás do título */
+            pointer-events: none; /* Para não interferir */
         }
 
         .logo-animation img {
             height: 100%;
             width: auto;
-            opacity: 0.8;
+            opacity: 1; /* Totalmente visível */
+            filter: brightness(1.2); /* Leve brilho para destacar contra o preto */
         }
         /* FIM BARRA DE TÍTULO ANIMADA */
 
@@ -185,7 +191,7 @@
 
         .meta-consolidada .meta-detalhe {
             font-size: 1.2vw;
-            color: #ffffff; /* 👈 ALTERADO PARA BRANCO — como solicitado */
+            color: #ffffff; /* Texto em Branco — como solicitado */
             margin-bottom: 15px;
         }
 
