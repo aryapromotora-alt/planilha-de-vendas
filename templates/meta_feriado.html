@@ -20,14 +20,14 @@
             --color-border: #343a40; /* Borda Escura Suave */
         }
 
-        /* Animação do Logo — CORRIGIDA PARA PERCORRER TODA A BARRA EM 25S */
+        /* Animação do Logo — CORRIGIDA PARA IR DE PONTA A PONTA DA TELA EM 25S */
         @keyframes logo-slide {
             0% { 
-                transform: translateX(0); 
+                left: 0; 
                 opacity: 1;
             }
             100% { 
-                transform: translateX(100%); /* 👈 VAI ATÉ O FIM DA BARRA */
+                left: calc(100vw - 80px); /* 👈 VAI ATÉ A BORDA DIREITA DA TELA */
                 opacity: 1;
             }
         }
@@ -44,13 +44,13 @@
             background: var(--color-background);
             min-height: 100vh;
             display: flex;
-            flex-direction: column; /* Permite que o header fique no topo */
+            flex-direction: column;
             justify-content: flex-start;
             align-items: center;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            color: #000000; /* Texto principal em preto (mantido para o container) */
+            color: #000000;
         }
 
         .container {
@@ -61,16 +61,16 @@
             flex-direction: column;
             gap: 20px;
             align-items: center;
-            height: calc(100% - 80px); /* Ajusta a altura para a barra de título */
+            height: calc(100% - 80px);
             overflow-y: auto;
         }
 
-        /* BARRA DE TÍTULO ANIMADA (NOVO) */
+        /* BARRA DE TÍTULO ANIMADA */
         .animated-header-bar {
             width: 100%;
             height: 80px;
-            background: #000000; /* Preto */
-            border-bottom: 5px solid var(--color-primary); /* Linha Amarela */
+            background: #000000;
+            border-bottom: 5px solid var(--color-primary);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -79,30 +79,29 @@
         }
 
         .animated-header-bar h1 {
-            color: var(--color-primary); /* Amarelo */
+            color: var(--color-primary);
             font-size: 3.5vw;
             font-weight: 700;
             letter-spacing: 5px;
             text-transform: uppercase;
-            z-index: 10; /* Fica na frente do logo */
+            z-index: 10;
         }
 
         .logo-animation {
             position: absolute;
             height: 80%;
             left: 0;
-            animation: logo-slide 25s linear infinite; /* 👈 25 segundos, ida só */
-            z-index: 5; /* Fica atrás do título */
-            pointer-events: none; /* Para não interferir */
+            animation: logo-slide 25s linear infinite; /* 👈 25 segundos */
+            z-index: 5;
+            pointer-events: none;
         }
 
         .logo-animation img {
             height: 100%;
             width: auto;
-            opacity: 1; /* Totalmente visível */
-            filter: brightness(1.2); /* Leve brilho para destacar contra o preto */
+            opacity: 1;
+            filter: brightness(1.2);
         }
-        /* FIM BARRA DE TÍTULO ANIMADA */
 
         /* Grid de Vendedores */
         .sellers-grid {
@@ -111,11 +110,11 @@
             gap: 20px;
             width: 100%;
             padding: 0 20px;
-            margin-bottom: 20px; /* ESPAÇAMENTO ENTRE CARDS E META */
+            margin-bottom: 20px;
         }
 
         .seller-card {
-            background: var(--color-card-bg); /* Fundo do Card Escuro */
+            background: var(--color-card-bg);
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -129,7 +128,7 @@
         .seller-name {
             font-size: 2.5vw;
             font-weight: 500;
-            color: #ffffff; /* Nome em Branco */
+            color: #ffffff;
             text-align: center;
             margin-bottom: 5px;
         }
@@ -139,12 +138,12 @@
         }
 
         .stat-box {
-            background: var(--color-primary); /* Fundo do valor em Amarelo */
+            background: var(--color-primary);
             padding: 15px 20px;
             border-radius: 8px;
             text-align: center;
             width: 100%;
-            color: var(--color-text-light); /* Texto em Preto no fundo Amarelo */
+            color: var(--color-text-light);
         }
 
         .stat-label {
@@ -164,8 +163,8 @@
 
         /* Seção de Meta Consolidada */
         .meta-consolidada {
-            background: var(--color-card-bg); /* Fundo do Card Escuro */
-            color: #ffffff; /* Texto em Branco */
+            background: var(--color-card-bg);
+            color: #ffffff;
             padding: 30px 40px;
             width: 100%;
             border-radius: 12px;
@@ -177,7 +176,7 @@
             font-size: 1.8vw;
             font-weight: 400;
             margin-bottom: 10px;
-            color: #adb5bd; /* Cinza Claro para Texto Secundário */
+            color: #adb5bd;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -185,19 +184,19 @@
         .meta-consolidada .meta-value-principal {
             font-size: 5vw;
             font-weight: 700;
-            color: var(--color-primary); /* Valor Principal em Amarelo */
+            color: var(--color-primary);
             margin-bottom: 10px;
         }
 
         .meta-consolidada .meta-detalhe {
             font-size: 1.2vw;
-            color: #ffffff; /* Texto em Branco — como solicitado */
+            color: #ffffff;
             margin-bottom: 15px;
         }
 
         .meta-consolidada .meta-restante {
             font-size: 2vw;
-            color: #ffffff; /* Texto Branco */
+            color: #ffffff;
             margin-top: 15px;
             font-weight: 500;
         }
@@ -316,15 +315,14 @@
         const progressPercentage = {{ progress_percentage }};
         const progressFill = document.getElementById('progress-fill');
         
-        // Usando as cores da nova paleta
         if (progressPercentage >= 100) {
             progressFill.style.backgroundColor = 'var(--color-success)';
         } else if (progressPercentage >= 75) {
-            progressFill.style.backgroundColor = 'var(--color-warning)'; // Amarelo/Dourado
+            progressFill.style.backgroundColor = 'var(--color-warning)';
         } else if (progressPercentage >= 50) {
-            progressFill.style.backgroundColor = 'var(--color-primary)'; // Amarelo/Dourado
+            progressFill.style.backgroundColor = 'var(--color-primary)';
         } else {
-            progressFill.style.backgroundColor = 'var(--color-danger)'; // Vermelho
+            progressFill.style.backgroundColor = 'var(--color-danger)';
         }
         
         progressFill.className = 'progress-fill'; 
