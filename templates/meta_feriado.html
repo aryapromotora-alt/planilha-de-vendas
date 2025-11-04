@@ -4,8 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="120">
-    <title>Meta Feriado - Acompanhamento</title>
+    <title>Meta Feriado - Acompanhamento Profissional</title>
     <style>
+        /* Paleta de Cores Profissional: Preto e Amarelo/Dourado */
+        :root {
+            --color-primary: #FFC107; /* Amarelo/Dourado Vibrante (Destaque) */
+            --color-secondary: #adb5bd; /* Cinza Claro para Texto Secundário */
+            --color-success: #28a745; /* Verde para Sucesso */
+            --color-warning: #FFC107; /* Amarelo para Alerta (igual ao primário para consistência) */
+            --color-danger: #dc3545; /* Vermelho para Crítico */
+            --color-background: #f8f8f8; /* Cinza Claro (Fundo Principal) */
+            --color-card-bg: #1e1e1e; /* Fundo do Card Escuro */
+            --color-text-dark: #ffffff; /* Texto Branco Puro para Alto Contraste */
+            --color-text-light: #000000; /* Texto Preto (para usar em fundos amarelos) */
+            --color-border: #343a40; /* Borda Escura Suave */
+        }
+
+        /* Animação do Logo */
+        @keyframes logo-slide {
+            0% { transform: translateX(-100%); opacity: 0; }
+            10% { transform: translateX(0); opacity: 1; }
+            90% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+
         /* Reset e Estilos Gerais */
         * {
             margin: 0;
@@ -14,215 +36,221 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff; /* Fundo branco puro — remove qualquer borda escura */
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--color-background);
             min-height: 100vh;
-            padding: 0;
             display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Alinha ao topo — evita corte embaixo */
+            flex-direction: column; /* Permite que o header fique no topo */
+            justify-content: flex-start;
+            align-items: center;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            color: #FFD700; /* Dourado padrão para texto */
+            color: #000000; /* Texto principal em preto (mantido para o container) */
         }
 
         .container {
-            background: #ecf0f1; /* Fundo cinza claro original — MANTIDO */
             width: 100%;
             max-width: 100%;
-            padding: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 20px;
             align-items: center;
-            height: 100%;
+            height: calc(100% - 80px); /* Ajusta a altura para a barra de título */
             overflow-y: auto;
         }
 
-        /* Seção de Cabeçalho */
-        .header {
-            text-align: center;
-            margin-top: 10px;
+        /* BARRA DE TÍTULO ANIMADA (NOVO) */
+        .animated-header-bar {
             width: 100%;
-            padding: 0 20px;
+            height: 80px;
+            background: #000000; /* Preto */
+            border-bottom: 5px solid var(--color-primary); /* Linha Amarela */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .header h1 {
-            color: #000000; /* Preto */
-            font-size: 60px;
-            margin-bottom: 5px;
-            font-weight: bold;
+        .animated-header-bar h1 {
+            color: var(--color-primary); /* Amarelo */
+            font-size: 3.5vw;
+            font-weight: 700;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            z-index: 10;
         }
 
-        .header p {
-            display: none;
+        .logo-animation {
+            position: absolute;
+            height: 80%;
+            left: 0;
+            animation: logo-slide 10s infinite ease-in-out; /* Animação de 10 segundos */
+            z-index: 5;
         }
+
+        .logo-animation img {
+            height: 100%;
+            width: auto;
+            opacity: 0.8;
+        }
+        /* FIM BARRA DE TÍTULO ANIMADA */
 
         /* Grid de Vendedores */
         .sellers-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 20px;
             width: 100%;
             padding: 0 20px;
+            margin-bottom: 20px; /* ESPAÇAMENTO ENTRE CARDS E META */
         }
 
         .seller-card {
-            background: #2c3e50; /* Cinza Escuro - Caixa Externa */
-            border-radius: 10px;
-            padding: 10px;
-            border: 1px solid #34495e;
+            background: var(--color-card-bg); /* Fundo do Card Escuro */
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 15px;
             align-items: center;
-            min-height: auto;
+            border-left: 5px solid var(--color-primary);
         }
 
         .seller-name {
-            font-size: 36px;
-            font-weight: bold;
-            color: #FFD700;
+            font-size: 2.5vw;
+            font-weight: 500;
+            color: #ffffff; /* Nome em Branco */
             text-align: center;
+            margin-bottom: 5px;
         }
 
         .seller-stats {
-            display: flex;
-            justify-content: center;
             width: 100%;
         }
 
         .stat-box {
-            background: #000000; /* Preto - Caixa Interna */
-            padding: 12px 15px;
+            background: var(--color-primary); /* Fundo do valor em Amarelo */
+            padding: 15px 20px;
             border-radius: 8px;
             text-align: center;
-            border: 1px solid #bdc3c7;
             width: 100%;
-            font-size: 64px;
-            line-height: 1.1;
+            color: var(--color-text-light); /* Texto em Preto no fundo Amarelo */
         }
 
         .stat-label {
-            font-size: 18px;
-            color: #FFD700;
+            font-size: 1.2vw;
+            color: var(--color-text-light);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             margin-bottom: 5px;
-            font-weight: 600;
+            font-weight: 400;
         }
 
         .stat-value {
-            font-size: 64px;
-            font-weight: bold;
-            color: #FFD700;
+            font-size: 4vw;
+            font-weight: 700;
             line-height: 1.1;
         }
 
         /* Seção de Meta Consolidada */
         .meta-consolidada {
-            background: linear-gradient(135deg, #1c1c1c 0%, #000000 100%);
-            color: #FFD700;
-            padding: 10px 20px;
+            background: var(--color-card-bg); /* Fundo do Card Escuro */
+            color: #ffffff; /* Texto em Branco */
+            padding: 30px 40px;
             width: 100%;
-            margin-top: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             text-align: center;
         }
 
         .meta-consolidada h2 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            opacity: 0.9;
+            font-size: 1.8vw;
+            font-weight: 400;
+            margin-bottom: 10px;
+            color: #adb5bd; /* Cinza Claro para Texto Secundário */
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .meta-consolidada .meta-value-principal {
-            font-size: 72px;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-size: 5vw;
+            font-weight: 700;
+            color: var(--color-primary); /* Valor Principal em Amarelo */
+            margin-bottom: 10px;
         }
 
         .meta-consolidada .meta-detalhe {
-            font-size: 18px;
-            opacity: 0.9;
-            margin-bottom: 8px;
+            font-size: 1.2vw;
+            color: #ffffff; /* 👈 ALTERADO PARA BRANCO — como solicitado */
+            margin-bottom: 15px;
         }
 
         .meta-consolidada .meta-restante {
-            font-size: 28px; /* AUMENTADO — fica grande e visível em TV */
-            opacity: 0.9;
-            margin-top: 8px; /* Posicionado abaixo da barra */
-            margin-bottom: 5px;
+            font-size: 2vw;
+            color: #ffffff; /* Texto Branco */
+            margin-top: 15px;
+            font-weight: 500;
         }
 
         .progress-bar {
-            width: 80%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 6px;
+            width: 90%;
+            height: 15px;
+            background: var(--color-border);
+            border-radius: 8px;
             overflow: hidden;
-            margin: 10px auto 5px; /* Espaço acima e abaixo */
+            margin: 15px auto;
         }
 
         .progress-fill {
             height: 100%;
-            background: #4ade80;
-            border-radius: 6px;
+            background: var(--color-success);
+            border-radius: 8px;
             transition: width 0.3s ease;
-        }
-
-        .progress-fill.warning {
-            background: #ff9200;
-        }
-
-        .progress-fill.critical {
-            background: #ef4444;
         }
 
         /* Media Query para telas menores */
         @media (max-width: 1200px) {
-            .sellers-grid {
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            }
+            .animated-header-bar h1 { font-size: 40px; }
+            .seller-name { font-size: 30px; }
+            .stat-value { font-size: 48px; }
+            .meta-consolidada h2 { font-size: 24px; }
+            .meta-consolidada .meta-value-principal { font-size: 72px; }
+            .meta-consolidada .meta-detalhe { font-size: 18px; }
+            .meta-consolidada .meta-restante { font-size: 30px; }
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 0;
-            }
-            .header h1 {
-                font-size: 48px;
-            }
-            .seller-name {
-                font-size: 30px;
-            }
-            .stat-value {
-                font-size: 48px;
-            }
-            .meta-consolidada .meta-value-principal {
-                font-size: 60px;
-            }
-            .meta-consolidada .meta-detalhe, .meta-consolidada .meta-restante {
-                font-size: 18px;
-            }
-            .sellers-grid {
-                grid-template-columns: 1fr;
-            }
+            .container { padding: 10px; gap: 10px; }
+            .sellers-grid { grid-template-columns: 1fr; padding: 0 10px; }
+            .animated-header-bar h1 { font-size: 30px; }
+            .seller-name { font-size: 24px; }
+            .stat-value { font-size: 36px; }
+            .meta-consolidada { padding: 20px; }
+            .meta-consolidada h2 { font-size: 18px; }
+            .meta-consolidada .meta-value-principal { font-size: 50px; }
+            .meta-consolidada .meta-detalhe { font-size: 14px; }
+            .meta-consolidada .meta-restante { font-size: 20px; }
         }
     </style>
 </head>
 <body>
+    <!-- BARRA DE TÍTULO ANIMADA -->
+    <div class="animated-header-bar">
+        <h1>META FERIADO</h1>
+        <div class="logo-animation">
+            <img src="logo.png" alt="Logo da Empresa">
+        </div>
+    </div>
+    <!-- FIM BARRA DE TÍTULO ANIMADA -->
+
     <div class="container">
         <!-- Content Section -->
         <div class="content-section" style="width: 100%;">
-            <div class="header">
-                <h1>Meta Feriado</h1>
-            </div>
-
-            <!-- Sellers Grid -->
+            <!-- Grid de Vendedores -->
             <div class="sellers-grid">
                 <div class="seller-card">
                     <div class="seller-name">👩‍💼 JEMIMA</div>
@@ -282,13 +310,18 @@
         const progressPercentage = {{ progress_percentage }};
         const progressFill = document.getElementById('progress-fill');
         
+        // Usando as cores da nova paleta
         if (progressPercentage >= 100) {
-            progressFill.className = 'progress-fill'; // Verde
+            progressFill.style.backgroundColor = 'var(--color-success)';
         } else if (progressPercentage >= 75) {
-            progressFill.className = 'progress-fill warning'; // Laranja vibrante (melhor para TV)
+            progressFill.style.backgroundColor = 'var(--color-warning)'; // Amarelo/Dourado
+        } else if (progressPercentage >= 50) {
+            progressFill.style.backgroundColor = 'var(--color-primary)'; // Amarelo/Dourado
         } else {
-            progressFill.className = 'progress-fill'; // Padrão (verde)
+            progressFill.style.backgroundColor = 'var(--color-danger)'; // Vermelho
         }
+        
+        progressFill.className = 'progress-fill'; 
     </script>
 </body>
 </html>
