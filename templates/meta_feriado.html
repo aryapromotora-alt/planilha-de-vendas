@@ -27,7 +27,7 @@
                 opacity: 1;
             }
             100% { 
-                left: calc(100vw - 80px); /* 👈 VAI ATÉ A BORDA DIREITA DA TELA */
+                left: calc(100vw - 80px); /* VAI ATÉ A BORDA DIREITA DA TELA */
                 opacity: 1;
             }
         }
@@ -91,7 +91,7 @@
             position: absolute;
             height: 80%;
             left: 0;
-            animation: logo-slide 25s linear infinite; /* 👈 25 segundos */
+            animation: logo-slide 25s linear infinite;
             z-index: 5;
             pointer-events: none;
         }
@@ -208,13 +208,21 @@
             border-radius: 8px;
             overflow: hidden;
             margin: 15px auto;
+            position: relative;
         }
 
         .progress-fill {
             height: 100%;
-            background: var(--color-success);
             border-radius: 8px;
-            transition: width 0.3s ease;
+            transition: width 0.6s ease;
+            background: linear-gradient(to right, 
+                var(--color-danger) 0%, 
+                var(--color-warning) 50%, 
+                var(--color-success) 100%
+            );
+            background-size: 200% 100%;
+            background-position: left;
+            position: relative;
         }
 
         /* Media Query para telas menores */
@@ -258,7 +266,7 @@
             <!-- Grid de Vendedores -->
             <div class="sellers-grid">
                 <div class="seller-card">
-                    <div class="seller-name">👩‍💼 JEMIMA</div>
+                    <div class="seller-name">JEMIMA</div>
                     <div class="seller-stats">
                         <div class="stat-box total-vendedor">
                             <div class="stat-label">Total Vendido</div>
@@ -268,7 +276,7 @@
                 </div>
 
                 <div class="seller-card">
-                    <div class="seller-name">👩‍💼 MAIANY</div>
+                    <div class="seller-name">MAIANY</div>
                     <div class="seller-stats">
                         <div class="stat-box total-vendedor">
                             <div class="stat-label">Total Vendido</div>
@@ -278,7 +286,7 @@
                 </div>
 
                 <div class="seller-card">
-                    <div class="seller-name">👩‍💼 NADIA</div>
+                    <div class="seller-name">NADIA</div>
                     <div class="seller-stats">
                         <div class="stat-box total-vendedor">
                             <div class="stat-label">Total Vendido</div>
@@ -311,21 +319,15 @@
     </div>
 
     <script>
-        // Script para atualizar a cor da barra de progresso
+        // Script para ajustar o gradiente dinâmico na barra de progresso
         const progressPercentage = {{ progress_percentage }};
         const progressFill = document.getElementById('progress-fill');
+
+        // Ajusta a posição do gradiente para que a cor certa apareça no preenchimento
+        progressFill.style.backgroundPosition = `-${100 - progressPercentage}% 0`;
         
-        if (progressPercentage >= 100) {
-            progressFill.style.backgroundColor = 'var(--color-success)';
-        } else if (progressPercentage >= 75) {
-            progressFill.style.backgroundColor = 'var(--color-warning)';
-        } else if (progressPercentage >= 50) {
-            progressFill.style.backgroundColor = 'var(--color-primary)';
-        } else {
-            progressFill.style.backgroundColor = 'var(--color-danger)';
-        }
-        
-        progressFill.className = 'progress-fill'; 
+        // Opcional: adicionar borda suave para destacar
+        progressFill.style.boxShadow = '0 0 6px rgba(255, 215, 0, 0.3)';
     </script>
 </body>
 </html>
