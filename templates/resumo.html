@@ -207,50 +207,62 @@
     </section>
   </div>
 
-  <script>
-    const mesSelector = document.getElementById('mes-selector');
-    const anoSelector = document.getElementById('ano-selector');
-    const valorMensal = document.getElementById('valor-mensal');
+    <script>
+      const mesSelector = document.getElementById('mes-selector');
+      const anoSelector = document.getElementById('ano-selector');
+      const valorMensal = document.getElementById('valor-mensal');
 
-    // ✅ Correção: JSON seguro para evitar erro de sintaxe
-    const historico = {{ historico_mensal | tojson | safe }};
+      const historico = {{ historico_mensal | tojson | safe }};
 
-    function atualizarResumo() {
-      const mes = String(mesSelector.value).padStart(2, '0');
-      const ano = anoSelector.value;
-      const chave = `${ano}-${mes}`;
-      const valor = historico[chave] || 0;
+      function formatarBRL(valor) {
+        const num = parseFloat(valor) || 0;
+        return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
 
-      // Atualiza total mensal
-      valorMensal.textContent = "R$ " + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-      valorMensal.classList.remove("high", "low");
-      valorMensal.classList.add(valor >= 2000 ? "high" : "low");
+      function atualizarResumo() {
+        const mes = mesSelector.value;
+        const ano = anoSelector.value;
+        const chave = `${ano}-${String(mes).padStart(2, '0')}`;
+        const valor = historico[chave] || 0;
 
-      // Atualiza resumo semanal
-      fetch(`/api/semanas/${ano}/${mes}`)
-        .then(res => res.json())
-        .then(semanas => {
-          const container = document.querySelector('.medium-cards');
-          container.innerHTML = '';
+        valorMensal.textContent = "R$ " + formatarBRL(valor);
+        valorMensal.classList.remove("high", "low");
+        valorMensal.classList.add(valor >= 2000 ? "high" : "low");
 
-          semanas.forEach((valor, i) => {
-            const card = document.createElement('article');
-            card.className = 'card';
-            card.innerHTML = `
-              <h4>Semana ${i + 1}</h4>
-              <p class="valor">R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            `;
-            container.appendChild(card);
-          });
-        })
-        .catch(err => console.error("Erro ao carregar semanas:", err));
-    }
+        fetch(`/api/dias/${ano}/${mes}`)
+          .then(res => res.json())
+          .then(totaisDiarios => {
+              const cardsDiarios = document.querySelectorAll('#resumo-diario .card .valor');
+              cardsDiarios.forEach((valorElement, i) => {
+                  const valorDia = totaisDiarios[i] || 0;
+                  valorElement.textContent = `R$ ${formatarBRL(valorDia)}`;
+              });
+          })
+          .catch(err => console.error("Erro ao carregar dias:", err));
 
-    mesSelector.addEventListener('change', atualizarResumo);
-    anoSelector.addEventListener('change', atualizarResumo);
+        fetch(`/api/semanas/${ano}/${mes}`)
+          .then(res => res.json())
+          .then(semanas => {
+            const container = document.querySelector('#resumo-semanal .cards');
+            container.innerHTML = '';
 
-    // Inicializa ao carregar
-    atualizarResumo();
-  </script>
+            semanas.forEach((valor, i) => {
+              const card = document.createElement('article');
+              card.className = 'card';
+              card.innerHTML = `
+                <h4>Semana ${i + 1}</h4>
+                <p class="valor">R$ ${formatarBRL(valor)}</p>
+              `;
+              container.appendChild(card);
+            });
+          })
+          .catch(err => console.error("Erro ao carregar semanas:", err));
+      }
+
+      mesSelector.addEventListener('change', atualizarResumo);
+      anoSelector.addEventListener('change', atualizarResumo);
+
+      document.addEventListener('DOMContentLoaded', atualizarResumo);
+    </script>
 </body>
 </html>
