@@ -17,23 +17,28 @@ def get_daily_totals_for_month(ano, mes):
     ).all()
 
     # 2. Mapear os totais por dia da semana (0=Segunda, 4=Sexta)
-    daily_totals = {i: 0.0 for i in range(5)} # 0: Segunda, 1: Terça, ..., 4: Sexta
+    # Usamos 5 posições para Segunda a Sexta
+    daily_totals = [0.0] * 5 
     
     for r in registros_mes:
-        dia_semana = r.dia.weekday()
+        dia_semana = r.dia.weekday() # 0=Segunda, 4=Sexta
         
         # Considerar apenas dias úteis (Segunda a Sexta)
         if 0 <= dia_semana <= 4:
-            # Assumindo que r.total é o total de vendas daquele dia
+            # Assumindo que r.total é o total de vendas consolidadas daquele dia
             daily_totals[dia_semana] += r.total
             
     # 3. Retornar os totais na ordem correta (Segunda a Sexta)
-    return [daily_totals[i] for i in range(5)]
+    return daily_totals
 
 def get_weekly_totals_for_month(ano, mes):
     """Calcula os totais semanais para um determinado mês e ano."""
-    primeiro_dia = date(ano, mes, 1)
-    ultimo_dia = date(ano, mes, monthrange(ano, mes)[1])
+    try:
+        primeiro_dia = date(ano, mes, 1)
+        ultimo_dia = date(ano, mes, monthrange(ano, mes)[1])
+    except ValueError:
+        # Lida com meses/anos inválidos
+        return []
     
     # 1. Obter todos os registros do mês
     registros_mes = DailySales.query.filter(
@@ -41,24 +46,32 @@ def get_weekly_totals_for_month(ano, mes):
         DailySales.dia <= ultimo_dia
     ).all()
     
+    # Mapeia os totais diários para fácil acesso
+    daily_totals_map = {r.dia: r.total for r in registros_mes}
+    
     dias_no_mes = (ultimo_dia - primeiro_dia).days + 1
-    primeiro_dia_weekday = primeiro_dia.weekday()
+    primeiro_dia_weekday = primeiro_dia.weekday() # 0=Segunda, 6=Domingo
     
     # Calcula o número de semanas (lógica compatível com o frontend)
+    # A semana começa na segunda-feira (weekday 0)
     num_semanas = ((dias_no_mes + primeiro_dia_weekday) // 7)
     if (dias_no_mes + primeiro_dia_weekday) % 7 != 0:
          num_semanas += 1
     
     # Inicializa os totais semanais
-    totais_mes = [0.0 for _ in range(num_semanas)]
+    totais_mes = [0.0] * num_semanas
     
     # Preenche os totais semanais
-    for r in registros_mes:
+    for dia_do_mes in range(1, dias_no_mes + 1):
+        current_date = date(ano, mes, dia_do_mes)
+        
         # Calcula o índice da semana: (dia do mês + dia da semana do dia 1 - 1) // 7
-        semana_index = ((r.dia.day + primeiro_dia_weekday - 1) // 7)
+        semana_index = ((current_date.day + primeiro_dia_weekday - 1) // 7)
         
         if 0 <= semana_index < num_semanas:
-            totais_mes[semana_index] += r.total
+            # Adiciona o total do dia ao total da semana
+            total_do_dia = daily_totals_map.get(current_date, 0.0)
+            totais_mes[semana_index] += total_do_dia
             
     return totais_mes
 
@@ -69,7 +82,8 @@ def api_dias(ano, mes):
         totais_diarios = get_daily_totals_for_month(ano, mes)
         return jsonify(totais_diarios), 200
     except Exception as e:
-        print(f"Erro na API de dias: {e}")
+        # Adicionando um log mais detalhado para depuração
+        print(f"ERRO FATAL na API de dias ({ano}/{mes}): {e}")
         return jsonify({"error": "Erro ao carregar dados diários"}), 500
 
 @resumo_bp.route("/api/semanas/<int:ano>/<int:mes>")
@@ -79,7 +93,8 @@ def api_semanas(ano, mes):
         totais_semanais = get_weekly_totals_for_month(ano, mes)
         return jsonify(totais_semanais), 200
     except Exception as e:
-        print(f"Erro na API de semanas: {e}")
+        # Adicionando um log mais detalhado para depuração
+        print(f"ERRO FATAL na API de semanas ({ano}/{mes}): {e}")
         return jsonify({"error": "Erro ao carregar dados semanais"}), 500
 
 @resumo_bp.route("/resumo")
@@ -89,18 +104,17 @@ def resumo_page():
     mes = hoje.month
 
     # --- Carga inicial para a semana atual (resumo diário) ---
-    # O resumo diário na carga inicial deve mostrar os valores da semana atual.
-    inicio_semana = hoje - timedelta(days=hoje.weekday())
+    # Para garantir que a carga inicial reflita o mês/ano atual, usamos as novas funções.
+    historico_diario_semana_atual = get_daily_totals_for_month(ano, mes)
     
-    historico_diario_semana_atual = {}
-    dias_labels = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
-    
-    for i, label in enumerate(dias_labels):
-        dia_atual = inicio_semana + timedelta(days=i)
-        registros_dia = DailySales.query.filter_by(dia=dia_atual).all()
-        # Assumindo que r.total é o total de vendas do dia
-        valor_dia = sum(r.total for r in registros_dia)
-        historico_diario_semana_atual[label] = valor_dia
+    # Mapeia os totais para as variáveis do template
+    totais_diarios_map = {
+        "Segunda": historico_diario_semana_atual[0] if len(historico_diario_semana_atual) > 0 else 0,
+        "Terça": historico_diario_semana_atual[1] if len(historico_diario_semana_atual) > 1 else 0,
+        "Quarta": historico_diario_semana_atual[2] if len(historico_diario_semana_atual) > 2 else 0,
+        "Quinta": historico_diario_semana_atual[3] if len(historico_diario_semana_atual) > 3 else 0,
+        "Sexta": historico_diario_semana_atual[4] if len(historico_diario_semana_atual) > 4 else 0,
+    }
 
     # --- Carga inicial para o mês atual (resumo semanal) ---
     totais_mes = get_weekly_totals_for_month(ano, mes)
@@ -126,11 +140,11 @@ def resumo_page():
     return render_template(
         "resumo.html",
         hoje=hoje,
-        total_seg=historico_diario_semana_atual.get("Segunda", 0),
-        total_ter=historico_diario_semana_atual.get("Terça", 0),
-        total_qua=historico_diario_semana_atual.get("Quarta", 0),
-        total_qui=historico_diario_semana_atual.get("Quinta", 0),
-        total_sex=historico_diario_semana_atual.get("Sexta", 0),
+        total_seg=totais_diarios_map.get("Segunda", 0),
+        total_ter=totais_diarios_map.get("Terça", 0),
+        total_qua=totais_diarios_map.get("Quarta", 0),
+        total_qui=totais_diarios_map.get("Quinta", 0),
+        total_sex=totais_diarios_map.get("Sexta", 0),
         totais_mes=totais_mes,
         num_semanas=num_semanas,
         mes_nome=mes_nome,
