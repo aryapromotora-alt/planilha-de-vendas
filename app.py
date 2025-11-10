@@ -195,6 +195,7 @@ def create_app():
             team_total = 0
             
             # Importar DailySales e definir o período da meta
+            from models.sales import Sale # Adicionado para buscar dados em tempo real
             from models.archive import DailySales
             hoje = date.today()
             ano = hoje.year
@@ -205,14 +206,30 @@ def create_app():
             # Buscar dados de Jemima, Maiany e Nadia (com capitalização correta!)
             for seller_name in ['Jemima', 'Maiany', 'Nadia']:
                 # Consulta para somar todos os totais de DailySales no período
+                # 1. Buscar dados consolidados (DailySales) do período (excluindo o dia de hoje)
                 daily_sales = DailySales.query.filter(
                     DailySales.vendedor == seller_name,
                     DailySales.dia >= start_date,
-                    DailySales.dia <= end_date
+                    DailySales.dia < hoje # Exclui o dia de hoje
                 ).all()
                 
-                # O campo 'total' em DailySales já é a soma do dia para o vendedor
-                total_geral = sum(ds.total for ds in daily_sales)
+                total_consolidado = sum(ds.total for ds in daily_sales)
+                
+                # 2. Buscar dados em tempo real (Sale) para o dia de hoje
+                # O dia da semana de hoje (ex: 'monday')
+                today_weekday = hoje.strftime('%A').lower()
+                
+                # Busca a venda do dia de hoje para o vendedor
+                current_sale = Sale.query.filter_by(
+                    employee_name=seller_name,
+                    day=today_weekday,
+                    sheet_type='portabilidade' # Assumindo que a meta é baseada em portabilidade, como nas rotas /tv
+                ).first()
+                
+                valor_hoje = current_sale.value if current_sale else 0.0
+                
+                # 3. Total geral é a soma do consolidado + o valor em tempo real de hoje
+                total_geral = total_consolidado + valor_hoje
                 
                 # Para manter a compatibilidade com a estrutura original, definimos 0 para portabilidade e novo
                 # já que o DailySales armazena o total consolidado do dia para o vendedor.

@@ -56,17 +56,27 @@ def salvar_resumo_diario(app):
                 from models.archive import DailySales
                 for nome, valores in spreadsheet.items():
                     valor_dia = float(valores.get(campo_dia, 0) or 0)
-                    record = DailySales(
-                        vendedor=nome,
-                        dia=today,
-                        segunda=valor_dia if nome_dia == "segunda" else 0,
-                        terca=valor_dia if nome_dia == "terca" else 0,
-                        quarta=valor_dia if nome_dia == "quarta" else 0,
-                        quinta=valor_dia if nome_dia == "quinta" else 0,
-                        sexta=valor_dia if nome_dia == "sexta" else 0,
-                        total=valor_dia
-                    )
-                    db.session.add(record)
+                    
+                    # Tenta encontrar um registro existente para o vendedor e o dia
+                    record = DailySales.query.filter_by(vendedor=nome, dia=today).first()
+                    
+                    if record:
+                        # Atualiza o registro existente
+                        setattr(record, nome_dia, valor_dia)
+                        record.total = valor_dia
+                    else:
+                        # Cria um novo registro se não existir
+                        record = DailySales(
+                            vendedor=nome,
+                            dia=today,
+                            segunda=valor_dia if nome_dia == "segunda" else 0,
+                            terca=valor_dia if nome_dia == "terca" else 0,
+                            quarta=valor_dia if nome_dia == "quarta" else 0,
+                            quinta=valor_dia if nome_dia == "quinta" else 0,
+                            sexta=valor_dia if nome_dia == "sexta" else 0,
+                            total=valor_dia
+                        )
+                        db.session.add(record)
             except Exception as e:
                 print(f"[FALLBACK] Erro ao usar DailySales: {e}")
                 from models.archive import ResumoHistory
