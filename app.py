@@ -185,6 +185,7 @@ def create_app():
         try:
             from models.sales import Sale
             from models.user import User
+            from datetime import date
             
             META_TOTAL = 1500000
             DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
