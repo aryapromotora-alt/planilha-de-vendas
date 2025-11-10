@@ -193,26 +193,32 @@ def create_app():
             sellers_data = {}
             team_total = 0
             
+            # Importar DailySales e definir o período da meta
+            from models.archive import DailySales
+            hoje = date.today()
+            ano = hoje.year
+            mes = hoje.month
+            start_date = date(ano, mes, 3)
+            end_date = date(ano, mes, 20)
+            
             # Buscar dados de Jemima, Maiany e Nadia (com capitalização correta!)
-            for seller_name in ['Jemima', 'Maiany', 'Nadia']:  # 👈 ALTERADO AQUI
-                # Buscar dados de Portabilidade
-                sales_port = Sale.query.filter_by(
-                    employee_name=seller_name,
-                    sheet_type='portabilidade'
+            for seller_name in ['Jemima', 'Maiany', 'Nadia']:
+                # Consulta para somar todos os totais de DailySales no período
+                daily_sales = DailySales.query.filter(
+                    DailySales.vendedor == seller_name,
+                    DailySales.dia >= start_date,
+                    DailySales.dia <= end_date
                 ).all()
-                day_values_port = {s.day: s.value for s in sales_port}
-                total_port = sum(day_values_port.get(d, 0) for d in DAYS)
                 
-                # Buscar dados de Novo
-                sales_novo = Sale.query.filter_by(
-                    employee_name=seller_name,
-                    sheet_type='novo'
-                ).all()
-                day_values_novo = {s.day: s.value for s in sales_novo}
-                total_novo = sum(day_values_novo.get(d, 0) for d in DAYS)
+                # O campo 'total' em DailySales já é a soma do dia para o vendedor
+                total_geral = sum(ds.total for ds in daily_sales)
                 
-                # Total geral do vendedor
-                total_geral = total_port + total_novo
+                # Para manter a compatibilidade com a estrutura original, definimos 0 para portabilidade e novo
+                # já que o DailySales armazena o total consolidado do dia para o vendedor.
+                # A meta feriado usa o total geral.
+                total_port = total_geral 
+                total_novo = 0 
+                
                 team_total += total_geral
                 
                 sellers_data[seller_name] = {
