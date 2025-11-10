@@ -69,6 +69,22 @@ def create_app():
                 print("✅ Coluna 'password' já existe.")
         except Exception as e:
             print(f"⚠️ Erro ao verificar/criar coluna 'password': {e}")
+
+        # ✅ Garantir que a coluna 'date' exista em 'sale'
+        try:
+            result = db.session.execute(text("""
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_name = 'sale' AND column_name = 'date';
+            """))
+            if not result.fetchone():
+                db.session.execute(text('ALTER TABLE sale ADD COLUMN date DATE;'))
+                db.session.commit()
+                print("✅ Coluna 'date' adicionada à tabela 'sale'.")
+            else:
+                print("✅ Coluna 'date' já existe em 'sale'.")
+        except Exception as e:
+            print(f"⚠️ Erro ao verificar/criar coluna 'date' em 'sale': {e}")
+
         print("✅ Tabelas do banco verificadas/criadas com sucesso.")
 
     # ---------------------------
@@ -178,75 +194,56 @@ def create_app():
             return f"Erro Interno do Servidor: {e}", 500
 
     # ---------------------------
-    # Rota pública /meta-feriado (META FERIADO 21/11)
+    # Rota pública /meta-feriado (META FERIADO 03/11 a 20/11) — CORRIGIDA ✅
     # ---------------------------
     @app.route("/meta-feriado")
     def meta_feriado():
         try:
             from models.sales import Sale
-            from models.user import User
             from datetime import date
-            
+
             META_TOTAL = 1500000
-            DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
-            
-            # Dicionário para armazenar os dados dos vendedores
-            sellers_data = {}
-            team_total = 0
-            
-            # Importar DailySales e definir o período da meta
-            from models.archive import DailySales
+            SELLERS = ['Jemima', 'Maiany', 'Nadia']  # nomes exatos
+
             hoje = date.today()
             ano = hoje.year
             mes = hoje.month
             start_date = date(ano, mes, 3)
-            end_date = date(ano, mes, 20)
-            
-            # Buscar dados de Jemima, Maiany e Nadia (com capitalização correta!)
-            for seller_name in ['Jemima', 'Maiany', 'Nadia']:
-                # Consulta para somar todos os totais de DailySales no período
-                daily_sales = DailySales.query.filter(
-                    DailySales.vendedor == seller_name,
-                    DailySales.dia >= start_date,
-                    DailySales.dia <= end_date
-                ).all()
-                
-                # O campo 'total' em DailySales já é a soma do dia para o vendedor
-                total_geral = sum(ds.total for ds in daily_sales)
-                
-                # Para manter a compatibilidade com a estrutura original, definimos 0 para portabilidade e novo
-                # já que o DailySales armazena o total consolidado do dia para o vendedor.
-                # A meta feriado usa o total geral.
-                total_port = total_geral 
-                total_novo = 0 
-                
-                team_total += total_geral
-                
-                sellers_data[seller_name] = {
-                    'portabilidade': total_port,
-                    'novo': total_novo,
-                    'total': total_geral
-                }
-            
-            # Calcular meta restante e percentual
+            end_of_meta = date(ano, mes, 20)
+            effective_end = min(hoje, end_of_meta)  # não ultrapassa 20/11
+
+            # Buscar todas as vendas no intervalo de datas reais
+            all_sales = Sale.query.filter(
+                Sale.date >= start_date,
+                Sale.date <= effective_end
+            ).all()
+
+            seller_totals = {seller: 0.0 for seller in SELLERS}
+            team_total = 0.0
+
+            for sale in all_sales:
+                name = sale.employee_name
+                if name in seller_totals:
+                    seller_totals[name] += sale.value
+
+            team_total = sum(seller_totals.values())
             meta_remaining = max(0, META_TOTAL - team_total)
             progress_percentage = min(100, (team_total / META_TOTAL) * 100)
-            
-            # Formatar valores em moeda
+
             def format_currency(value):
                 return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-            
+
             return render_template(
                 'meta_feriado.html',
-                jemima_portabilidade=format_currency(sellers_data['Jemima']['portabilidade']),   # 👈 também corrigido aqui
-                jemima_novo=format_currency(sellers_data['Jemima']['novo']),
-                jemima_total=format_currency(sellers_data['Jemima']['total']),
-                maiany_portabilidade=format_currency(sellers_data['Maiany']['portabilidade']),
-                maiany_novo=format_currency(sellers_data['Maiany']['novo']),
-                maiany_total=format_currency(sellers_data['Maiany']['total']),
-                nadia_portabilidade=format_currency(sellers_data['Nadia']['portabilidade']),
-                nadia_novo=format_currency(sellers_data['Nadia']['novo']),
-                nadia_total=format_currency(sellers_data['Nadia']['total']),
+                jemima_portabilidade=format_currency(seller_totals['Jemima']),
+                jemima_novo=format_currency(0),
+                jemima_total=format_currency(seller_totals['Jemima']),
+                maiany_portabilidade=format_currency(seller_totals['Maiany']),
+                maiany_novo=format_currency(0),
+                maiany_total=format_currency(seller_totals['Maiany']),
+                nadia_portabilidade=format_currency(seller_totals['Nadia']),
+                nadia_novo=format_currency(0),
+                nadia_total=format_currency(seller_totals['Nadia']),
                 team_total=format_currency(team_total),
                 meta_remaining=format_currency(meta_remaining),
                 progress_percentage=round(progress_percentage, 2)
