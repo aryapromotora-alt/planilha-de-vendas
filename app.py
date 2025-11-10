@@ -69,22 +69,6 @@ def create_app():
                 print("✅ Coluna 'password' já existe.")
         except Exception as e:
             print(f"⚠️ Erro ao verificar/criar coluna 'password': {e}")
-
-        # ✅ Garantir que a coluna 'date' exista em 'sale'
-        try:
-            result = db.session.execute(text("""
-                SELECT column_name FROM information_schema.columns 
-                WHERE table_name = 'sale' AND column_name = 'date';
-            """))
-            if not result.fetchone():
-                db.session.execute(text('ALTER TABLE sale ADD COLUMN date DATE;'))
-                db.session.commit()
-                print("✅ Coluna 'date' adicionada à tabela 'sale'.")
-            else:
-                print("✅ Coluna 'date' já existe em 'sale'.")
-        except Exception as e:
-            print(f"⚠️ Erro ao verificar/criar coluna 'date' em 'sale': {e}")
-
         print("✅ Tabelas do banco verificadas/criadas com sucesso.")
 
     # ---------------------------
@@ -194,37 +178,23 @@ def create_app():
             return f"Erro Interno do Servidor: {e}", 500
 
     # ---------------------------
-    # Rota pública /meta-feriado (META FERIADO 03/11 a 20/11) — CORRIGIDA ✅
+    # Rota pública /meta-feriado (META FERIADO - SOMA CONTÍNUA A PARTIR DE 03/11)
     # ---------------------------
     @app.route("/meta-feriado")
     def meta_feriado():
         try:
             from models.sales import Sale
-            from datetime import date
 
             META_TOTAL = 1500000
-            SELLERS = ['Jemima', 'Maiany', 'Nadia']  # nomes exatos
+            SELLERS = ['Jemima', 'Maiany', 'Nadia']
 
-            hoje = date.today()
-            ano = hoje.year
-            mes = hoje.month
-            start_date = date(ano, mes, 3)
-            end_of_meta = date(ano, mes, 20)
-            effective_end = min(hoje, end_of_meta)  # não ultrapassa 20/11
+            # Somar TODAS as vendas desses vendedores (assumindo que tudo é a partir de 03/11)
+            all_sales = Sale.query.filter(Sale.employee_name.in_(SELLERS)).all()
 
-            # Buscar todas as vendas no intervalo de datas reais
-            all_sales = Sale.query.filter(
-                Sale.date >= start_date,
-                Sale.date <= effective_end
-            ).all()
-
-            seller_totals = {seller: 0.0 for seller in SELLERS}
-            team_total = 0.0
-
+            seller_totals = {s: 0.0 for s in SELLERS}
             for sale in all_sales:
-                name = sale.employee_name
-                if name in seller_totals:
-                    seller_totals[name] += sale.value
+                if sale.employee_name in seller_totals:
+                    seller_totals[sale.employee_name] += sale.value
 
             team_total = sum(seller_totals.values())
             meta_remaining = max(0, META_TOTAL - team_total)
@@ -235,14 +205,8 @@ def create_app():
 
             return render_template(
                 'meta_feriado.html',
-                jemima_portabilidade=format_currency(seller_totals['Jemima']),
-                jemima_novo=format_currency(0),
                 jemima_total=format_currency(seller_totals['Jemima']),
-                maiany_portabilidade=format_currency(seller_totals['Maiany']),
-                maiany_novo=format_currency(0),
                 maiany_total=format_currency(seller_totals['Maiany']),
-                nadia_portabilidade=format_currency(seller_totals['Nadia']),
-                nadia_novo=format_currency(0),
                 nadia_total=format_currency(seller_totals['Nadia']),
                 team_total=format_currency(team_total),
                 meta_remaining=format_currency(meta_remaining),
