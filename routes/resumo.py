@@ -15,20 +15,24 @@ def get_daily_totals_for_month(ano, mes):
         extract("month", DailySales.dia) == mes,
         extract("year", DailySales.dia) == ano
     ).all()
-
-    # 2. Mapear os totais por dia da semana (0=Segunda, 4=Sexta)
+    
+    # 2. Agrupar e somar os totais de todos os vendedores por dia
+    daily_totals_map = defaultdict(float)
+    for r in registros_mes:
+        daily_totals_map[r.dia] += r.total
+        
+    # 3. Mapear os totais por dia da semana (0=Segunda, 4=Sexta)
     # Usamos 5 posições para Segunda a Sexta
     daily_totals = [0.0] * 5 
     
-    for r in registros_mes:
-        dia_semana = r.dia.weekday() # 0=Segunda, 4=Sexta
+    for dia, total_dia in daily_totals_map.items():
+        dia_semana = dia.weekday() # 0=Segunda, 4=Sexta
         
         # Considerar apenas dias úteis (Segunda a Sexta)
         if 0 <= dia_semana <= 4:
-            # Assumindo que r.total é o total de vendas consolidadas daquele dia
-            daily_totals[dia_semana] += r.total
+            daily_totals[dia_semana] += total_dia
             
-    # 3. Retornar os totais na ordem correta (Segunda a Sexta)
+    # 4. Retornar os totais na ordem correta (Segunda a Sexta)
     return daily_totals
 
 def get_weekly_totals_for_month(ano, mes):
@@ -46,8 +50,10 @@ def get_weekly_totals_for_month(ano, mes):
         DailySales.dia <= ultimo_dia
     ).all()
     
-    # Mapeia os totais diários para fácil acesso
-    daily_totals_map = {r.dia: r.total for r in registros_mes}
+    # Mapeia os totais diários para fácil acesso, somando os totais de todos os vendedores para o mesmo dia
+    daily_totals_map = defaultdict(float)
+    for r in registros_mes:
+        daily_totals_map[r.dia] += r.total
     
     dias_no_mes = (ultimo_dia - primeiro_dia).days + 1
     primeiro_dia_weekday = primeiro_dia.weekday() # 0=Segunda, 6=Domingo
