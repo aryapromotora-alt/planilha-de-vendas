@@ -4,10 +4,9 @@
   <meta charset="UTF-8">
   <title>Visão TV - Resumo de Vendas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="60"> <!-- Atualiza a cada 60 segundos -->
+  <meta http-equiv="refresh" content="60">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* Reset e configurações gerais */
     * {
         margin: 0;
         padding: 0;
@@ -20,7 +19,7 @@
     }
 
     body {
-        font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Roboto', sans-serif;
         background-color: #121212;
         color: #ffffff;
         line-height: 1.6;
@@ -30,9 +29,6 @@
     }
 
     .spreadsheet-container {
-        overflow: hidden;
-        padding: 0;
-        margin: 0;
         width: 100vw;
         height: 100vh;
         display: flex;
@@ -87,10 +83,6 @@
         background-color: #1d1d1d;
     }
 
-    table.spreadsheet-table tbody tr:hover {
-        background-color: #2a2a2a;
-    }
-
     .employee-name {
         background-color: #2c3e50 !important;
         color: #FFD700 !important;
@@ -119,15 +111,21 @@
         font-weight: 600;
     }
 
-    /* === DESTAQUES DIÁRIOS === */
-    .highlight-level-1 { color: #FFA500 !important; }
-    .highlight-level-2 { color: #FF8C00 !important; }
-    .highlight-level-3 {
+    /* === DESTAQUES DIÁRIOS (nas células de valor) === */
+    .daily-highlight-1 {
+        color: #FFA500 !important;
+    }
+
+    .daily-highlight-2 {
+        color: #FF8C00 !important;
+    }
+
+    .daily-highlight-3 {
         color: #FF4500 !important;
         animation: pulse-orange 1.2s infinite;
     }
 
-    /* === DESTAQUE SEMANAL (SÓ SEXTA) === */
+    /* === DESTAQUE SEMANAL (sexta-feira) === */
     @keyframes gold-orange-pulse {
         0%, 100% {
             color: #FFD700;
@@ -147,7 +145,6 @@
         font-weight: 700 !important;
     }
 
-    /* Animação reutilizada para destaque diário nível 3 */
     @keyframes pulse-orange {
         0%, 100% {
             text-shadow: 0 0 8px rgba(255, 69, 0, 0.9);
@@ -187,7 +184,6 @@
         </tr>
         {% endfor %}
 
-        <!-- Linha de Total Diário -->
         <tr class="daily-totals">
           <td><strong>Total Diário</strong></td>
           <td>R$ {{ totais_diarios.seg | format_brl }}</td>
@@ -204,7 +200,6 @@
   </div>
 
   <script>
-    // Converte "R$ 123.456,78" para número
     function parseBRL(text) {
         return parseFloat(
             text
@@ -213,7 +208,6 @@
         ) || 0;
     }
 
-    // Destaque DIÁRIO (seg a sex)
     function applyDailyHighlight() {
         const thresholds = { level1: 100000, level2: 200000, level3: 300000 };
         const today = new Date();
@@ -223,24 +217,23 @@
         if (!todayDataDay) return;
 
         document.querySelectorAll('tbody tr:not(.daily-totals)').forEach(row => {
-            const nameCell = row.querySelector('.employee-name');
             const dailyCell = row.querySelector(`td[data-dia="${todayDataDay}"]`);
 
-            nameCell.classList.remove('highlight-level-1', 'highlight-level-2', 'highlight-level-3');
+            // Remove destaques anteriores
+            dailyCell.classList.remove('daily-highlight-1', 'daily-highlight-2', 'daily-highlight-3');
 
             if (dailyCell) {
                 const value = parseBRL(dailyCell.textContent);
-                if (value >= thresholds.level3) nameCell.classList.add('highlight-level-3');
-                else if (value >= thresholds.level2) nameCell.classList.add('highlight-level-2');
-                else if (value >= thresholds.level1) nameCell.classList.add('highlight-level-1');
+                if (value >= thresholds.level3) dailyCell.classList.add('daily-highlight-3');
+                else if (value >= thresholds.level2) dailyCell.classList.add('daily-highlight-2');
+                else if (value >= thresholds.level1) dailyCell.classList.add('daily-highlight-1');
             }
         });
     }
 
-    // Destaque SEMANAL (só na sexta): campeão pisca dourado/laranja
     function applyWeeklyChampionHighlight() {
         const today = new Date();
-        if (today.getDay() !== 5) return; // 5 = sexta-feira
+        if (today.getDay() !== 5) return;
 
         const rows = document.querySelectorAll('tbody tr:not(.daily-totals)');
         let maxTotal = -1;
@@ -257,12 +250,10 @@
             }
         });
 
-        // Remove destaque anterior
         document.querySelectorAll('.weekly-champion-name, .weekly-champion-total').forEach(el => {
             el.classList.remove('weekly-champion-name', 'weekly-champion-total');
         });
 
-        // Aplica ao campeão
         if (championRow) {
             const nameCell = championRow.querySelector('.employee-name');
             const totalCell = championRow.querySelector('.total-cell');
@@ -271,7 +262,6 @@
         }
     }
 
-    // Executa ao carregar
     document.addEventListener('DOMContentLoaded', () => {
         applyDailyHighlight();
         applyWeeklyChampionHighlight();
