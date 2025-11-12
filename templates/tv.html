@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <title>Visão TV - Resumo de Vendas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="60">
+  <meta http-equiv="refresh" content="60"> <!-- Atualiza a cada 60 segundos -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    /* Reset e configurações gerais */
     * {
         margin: 0;
         padding: 0;
@@ -19,7 +20,7 @@
     }
 
     body {
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background-color: #121212;
         color: #ffffff;
         line-height: 1.6;
@@ -29,6 +30,9 @@
     }
 
     .spreadsheet-container {
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
         width: 100vw;
         height: 100vh;
         display: flex;
@@ -41,7 +45,7 @@
         width: 100%;
         height: 100%;
         border-collapse: collapse;
-        font-size: 1.8rem;
+        font-size: 1.8rem; /* Levemente ajustado para caber melhor */
         font-weight: 500;
         color: #ffffff;
         margin: 0 auto;
@@ -50,11 +54,11 @@
     table.spreadsheet-table th {
         background-color: #2c3e50;
         color: #FFD700;
-        padding: 1.0rem 0.5rem;
+        padding: 1.0rem 0.5rem; /* AJUSTADO: Padding vertical e horizontal reduzido */
         text-align: center;
         font-weight: 700;
         text-transform: uppercase;
-        font-size: 1.5rem;
+        font-size: 1.5rem; /* Levemente ajustado */
         letter-spacing: 0.8px;
         border-bottom: 2px solid #FFD700;
         position: sticky;
@@ -63,14 +67,14 @@
     }
 
     table.spreadsheet-table td {
-        padding: 1.0rem 0.5rem;
+        padding: 1.0rem 0.5rem; /* AJUSTADO: Padding vertical e horizontal reduzido */
         text-align: center;
         border-bottom: 1px solid #333;
         transition: background-color 0.2s;
         font-weight: 500;
     }
     
-    table.spreadsheet-table td:nth-child(n+2):nth-child(-n+6) {
+    table.spreadsheet-table td:nth-child(n+2 ):nth-child(-n+6) {
         border-left: 1px solid #FFD700;
         border-right: 1px solid #FFD700;
     }
@@ -83,12 +87,16 @@
         background-color: #1d1d1d;
     }
 
+    table.spreadsheet-table tbody tr:hover {
+        background-color: #2a2a2a;
+    }
+
     .employee-name {
         background-color: #2c3e50 !important;
         color: #FFD700 !important;
         font-weight: 700;
         text-align: left;
-        padding-left: 1.0rem;
+        padding-left: 1.0rem; /* AJUSTADO */
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         text-transform: uppercase;
     }
@@ -110,51 +118,6 @@
         color: #FFD700 !important;
         font-weight: 600;
     }
-
-    /* === DESTAQUES DIÁRIOS (nas células de valor) === */
-    .daily-highlight-1 {
-        color: #FFA500 !important;
-    }
-
-    .daily-highlight-2 {
-        color: #FF8C00 !important;
-    }
-
-    .daily-highlight-3 {
-        color: #FF4500 !important;
-        animation: pulse-orange 1.2s infinite;
-    }
-
-    /* === DESTAQUE SEMANAL (sexta-feira) === */
-    @keyframes gold-orange-pulse {
-        0%, 100% {
-            color: #FFD700;
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
-            transform: scale(1);
-        }
-        50% {
-            color: #FF4500;
-            text-shadow: 0 0 20px rgba(255, 69, 0, 1);
-            transform: scale(1.03);
-        }
-    }
-
-    .weekly-champion-name,
-    .weekly-champion-total {
-        animation: gold-orange-pulse 1.4s infinite;
-        font-weight: 700 !important;
-    }
-
-    @keyframes pulse-orange {
-        0%, 100% {
-            text-shadow: 0 0 8px rgba(255, 69, 0, 0.9);
-            transform: scale(1);
-        }
-        50% {
-            text-shadow: 0 0 20px rgba(255, 69, 0, 1);
-            transform: scale(1.03);
-        }
-    }
   </style>
 </head>
 <body>
@@ -173,17 +136,18 @@
       </thead>
       <tbody>
         {% for linha in dados %}
-        <tr data-vendedor="{{ linha.nome }}">
+        <tr>
           <td class="employee-name">{{ linha.nome }}</td>
-          <td data-dia="seg">R$ {{ linha.seg | format_brl }}</td>
-          <td data-dia="ter">R$ {{ linha.ter | format_brl }}</td>
-          <td data-dia="qua">R$ {{ linha.qua | format_brl }}</td>
-          <td data-dia="qui">R$ {{ linha.qui | format_brl }}</td>
-          <td data-dia="sex">R$ {{ linha.sex | format_brl }}</td>
+          <td>R$ {{ linha.seg | format_brl }}</td>
+          <td>R$ {{ linha.ter | format_brl }}</td>
+          <td>R$ {{ linha.qua | format_brl }}</td>
+          <td>R$ {{ linha.qui | format_brl }}</td>
+          <td>R$ {{ linha.sex | format_brl }}</td>
           <td class="total-cell">R$ {{ linha.total | format_brl }}</td>
         </tr>
         {% endfor %}
 
+        <!-- Linha de Total Diário -->
         <tr class="daily-totals">
           <td><strong>Total Diário</strong></td>
           <td>R$ {{ totais_diarios.seg | format_brl }}</td>
@@ -198,74 +162,5 @@
       </tbody>
     </table>
   </div>
-
-  <script>
-    function parseBRL(text) {
-        return parseFloat(
-            text
-                .replace(/[^0-9,-]/g, '')
-                .replace(',', '.')
-        ) || 0;
-    }
-
-    function applyDailyHighlight() {
-        const thresholds = { level1: 100000, level2: 200000, level3: 300000 };
-        const today = new Date();
-        const dayMap = { 1: 'seg', 2: 'ter', 3: 'qua', 4: 'qui', 5: 'sex' };
-        const todayDataDay = dayMap[today.getDay()];
-
-        if (!todayDataDay) return;
-
-        document.querySelectorAll('tbody tr:not(.daily-totals)').forEach(row => {
-            const dailyCell = row.querySelector(`td[data-dia="${todayDataDay}"]`);
-
-            // Remove destaques anteriores
-            dailyCell.classList.remove('daily-highlight-1', 'daily-highlight-2', 'daily-highlight-3');
-
-            if (dailyCell) {
-                const value = parseBRL(dailyCell.textContent);
-                if (value >= thresholds.level3) dailyCell.classList.add('daily-highlight-3');
-                else if (value >= thresholds.level2) dailyCell.classList.add('daily-highlight-2');
-                else if (value >= thresholds.level1) dailyCell.classList.add('daily-highlight-1');
-            }
-        });
-    }
-
-    function applyWeeklyChampionHighlight() {
-        const today = new Date();
-        if (today.getDay() !== 5) return;
-
-        const rows = document.querySelectorAll('tbody tr:not(.daily-totals)');
-        let maxTotal = -1;
-        let championRow = null;
-
-        rows.forEach(row => {
-            const totalCell = row.querySelector('.total-cell');
-            if (totalCell) {
-                const totalValue = parseBRL(totalCell.textContent);
-                if (totalValue > maxTotal) {
-                    maxTotal = totalValue;
-                    championRow = row;
-                }
-            }
-        });
-
-        document.querySelectorAll('.weekly-champion-name, .weekly-champion-total').forEach(el => {
-            el.classList.remove('weekly-champion-name', 'weekly-champion-total');
-        });
-
-        if (championRow) {
-            const nameCell = championRow.querySelector('.employee-name');
-            const totalCell = championRow.querySelector('.total-cell');
-            if (nameCell) nameCell.classList.add('weekly-champion-name');
-            if (totalCell) totalCell.classList.add('weekly-champion-total');
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        applyDailyHighlight();
-        applyWeeklyChampionHighlight();
-    });
-  </script>
 </body>
 </html>
