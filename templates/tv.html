@@ -45,7 +45,7 @@
         width: 100%;
         height: 100%;
         border-collapse: collapse;
-        font-size: 1.8rem; /* Levemente ajustado para caber melhor */
+        font-size: 1.8rem;
         font-weight: 500;
         color: #ffffff;
         margin: 0 auto;
@@ -54,11 +54,11 @@
     table.spreadsheet-table th {
         background-color: #2c3e50;
         color: #FFD700;
-        padding: 1.0rem 0.5rem; /* AJUSTADO: Padding vertical e horizontal reduzido */
+        padding: 1.0rem 0.5rem;
         text-align: center;
         font-weight: 700;
         text-transform: uppercase;
-        font-size: 1.5rem; /* Levemente ajustado */
+        font-size: 1.5rem;
         letter-spacing: 0.8px;
         border-bottom: 2px solid #FFD700;
         position: sticky;
@@ -67,14 +67,14 @@
     }
 
     table.spreadsheet-table td {
-        padding: 1.0rem 0.5rem; /* AJUSTADO: Padding vertical e horizontal reduzido */
+        padding: 1.0rem 0.5rem;
         text-align: center;
         border-bottom: 1px solid #333;
         transition: background-color 0.2s;
         font-weight: 500;
     }
     
-    table.spreadsheet-table td:nth-child(n+2 ):nth-child(-n+6) {
+    table.spreadsheet-table td:nth-child(n+2):nth-child(-n+6) {
         border-left: 1px solid #FFD700;
         border-right: 1px solid #FFD700;
     }
@@ -96,7 +96,7 @@
         color: #FFD700 !important;
         font-weight: 700;
         text-align: left;
-        padding-left: 1.0rem; /* AJUSTADO */
+        padding-left: 1.0rem;
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         text-transform: uppercase;
     }
@@ -118,6 +118,46 @@
         color: #FFD700 !important;
         font-weight: 600;
     }
+
+    /* === DESTAQUES DIÁRIOS === */
+    .highlight-level-1 { color: #FFA500 !important; }
+    .highlight-level-2 { color: #FF8C00 !important; }
+    .highlight-level-3 {
+        color: #FF4500 !important;
+        animation: pulse-orange 1.2s infinite;
+    }
+
+    /* === DESTAQUE SEMANAL (SÓ SEXTA) === */
+    @keyframes gold-orange-pulse {
+        0%, 100% {
+            color: #FFD700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+            transform: scale(1);
+        }
+        50% {
+            color: #FF4500;
+            text-shadow: 0 0 20px rgba(255, 69, 0, 1);
+            transform: scale(1.03);
+        }
+    }
+
+    .weekly-champion-name,
+    .weekly-champion-total {
+        animation: gold-orange-pulse 1.4s infinite;
+        font-weight: 700 !important;
+    }
+
+    /* Animação reutilizada para destaque diário nível 3 */
+    @keyframes pulse-orange {
+        0%, 100% {
+            text-shadow: 0 0 8px rgba(255, 69, 0, 0.9);
+            transform: scale(1);
+        }
+        50% {
+            text-shadow: 0 0 20px rgba(255, 69, 0, 1);
+            transform: scale(1.03);
+        }
+    }
   </style>
 </head>
 <body>
@@ -136,13 +176,13 @@
       </thead>
       <tbody>
         {% for linha in dados %}
-        <tr>
+        <tr data-vendedor="{{ linha.nome }}">
           <td class="employee-name">{{ linha.nome }}</td>
-          <td>R$ {{ linha.seg | format_brl }}</td>
-          <td>R$ {{ linha.ter | format_brl }}</td>
-          <td>R$ {{ linha.qua | format_brl }}</td>
-          <td>R$ {{ linha.qui | format_brl }}</td>
-          <td>R$ {{ linha.sex | format_brl }}</td>
+          <td data-dia="seg">R$ {{ linha.seg | format_brl }}</td>
+          <td data-dia="ter">R$ {{ linha.ter | format_brl }}</td>
+          <td data-dia="qua">R$ {{ linha.qua | format_brl }}</td>
+          <td data-dia="qui">R$ {{ linha.qui | format_brl }}</td>
+          <td data-dia="sex">R$ {{ linha.sex | format_brl }}</td>
           <td class="total-cell">R$ {{ linha.total | format_brl }}</td>
         </tr>
         {% endfor %}
@@ -162,5 +202,80 @@
       </tbody>
     </table>
   </div>
+
+  <script>
+    // Converte "R$ 123.456,78" para número
+    function parseBRL(text) {
+        return parseFloat(
+            text
+                .replace(/[^0-9,-]/g, '')
+                .replace(',', '.')
+        ) || 0;
+    }
+
+    // Destaque DIÁRIO (seg a sex)
+    function applyDailyHighlight() {
+        const thresholds = { level1: 100000, level2: 200000, level3: 300000 };
+        const today = new Date();
+        const dayMap = { 1: 'seg', 2: 'ter', 3: 'qua', 4: 'qui', 5: 'sex' };
+        const todayDataDay = dayMap[today.getDay()];
+
+        if (!todayDataDay) return;
+
+        document.querySelectorAll('tbody tr:not(.daily-totals)').forEach(row => {
+            const nameCell = row.querySelector('.employee-name');
+            const dailyCell = row.querySelector(`td[data-dia="${todayDataDay}"]`);
+
+            nameCell.classList.remove('highlight-level-1', 'highlight-level-2', 'highlight-level-3');
+
+            if (dailyCell) {
+                const value = parseBRL(dailyCell.textContent);
+                if (value >= thresholds.level3) nameCell.classList.add('highlight-level-3');
+                else if (value >= thresholds.level2) nameCell.classList.add('highlight-level-2');
+                else if (value >= thresholds.level1) nameCell.classList.add('highlight-level-1');
+            }
+        });
+    }
+
+    // Destaque SEMANAL (só na sexta): campeão pisca dourado/laranja
+    function applyWeeklyChampionHighlight() {
+        const today = new Date();
+        if (today.getDay() !== 5) return; // 5 = sexta-feira
+
+        const rows = document.querySelectorAll('tbody tr:not(.daily-totals)');
+        let maxTotal = -1;
+        let championRow = null;
+
+        rows.forEach(row => {
+            const totalCell = row.querySelector('.total-cell');
+            if (totalCell) {
+                const totalValue = parseBRL(totalCell.textContent);
+                if (totalValue > maxTotal) {
+                    maxTotal = totalValue;
+                    championRow = row;
+                }
+            }
+        });
+
+        // Remove destaque anterior
+        document.querySelectorAll('.weekly-champion-name, .weekly-champion-total').forEach(el => {
+            el.classList.remove('weekly-champion-name', 'weekly-champion-total');
+        });
+
+        // Aplica ao campeão
+        if (championRow) {
+            const nameCell = championRow.querySelector('.employee-name');
+            const totalCell = championRow.querySelector('.total-cell');
+            if (nameCell) nameCell.classList.add('weekly-champion-name');
+            if (totalCell) totalCell.classList.add('weekly-champion-total');
+        }
+    }
+
+    // Executa ao carregar
+    document.addEventListener('DOMContentLoaded', () => {
+        applyDailyHighlight();
+        applyWeeklyChampionHighlight();
+    });
+  </script>
 </body>
 </html>
