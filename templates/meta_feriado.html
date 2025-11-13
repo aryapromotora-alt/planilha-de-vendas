@@ -204,7 +204,7 @@
         .progress-bar {
             width: 90%;
             height: 15px;
-            background: var(--color-border);
+            background: #2c2c2c; /* Corrigido: fundo cinza escuro, como na imagem */
             border-radius: 8px;
             overflow: hidden;
             margin: 15px auto;
@@ -220,8 +220,7 @@
                 var(--color-warning) 50%, 
                 var(--color-success) 100%
             );
-            background-size: 200% 100%;
-            background-position: left;
+            /* REMOVIDO: background-size e background-position */
             position: relative;
         }
 
@@ -323,8 +322,7 @@
         const progressPercentage = {{ progress_percentage }};
         const progressFill = document.getElementById('progress-fill');
 
-        // Ajusta a posição do gradiente para que a cor certa apareça no preenchimento
-        progressFill.style.backgroundPosition = `-${100 - progressPercentage}% 0`;
+        // REMOVIDO: progressFill.style.backgroundPosition = `-${100 - progressPercentage}% 0`;
         
         // Opcional: adicionar borda suave para destacar
         progressFill.style.boxShadow = '0 0 6px rgba(255, 215, 0, 0.3)';
