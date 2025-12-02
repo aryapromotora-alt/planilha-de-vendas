@@ -1,7 +1,7 @@
 import os
 import logging
 import urllib.parse
-from flask import Flask, send_from_directory, render_template
+from flask import Flask, send_from_directory, render_template, session
 from flask_cors import CORS
 
 # Imports dos blueprints
@@ -194,8 +194,6 @@ def create_app():
             sellers_data = {}
             team_total = 0
             
-            # Importar DailySales e definir o período da meta
-            from models.sales import Sale # Adicionado para buscar dados em tempo real
             from models.archive import DailySales
             hoje = date.today()
             ano = hoje.year
@@ -203,37 +201,26 @@ def create_app():
             start_date = date(ano, mes, 3)
             end_date = date(ano, mes, 20)
             
-            # Buscar dados de Jemima, Maiany e Nadia (com capitalização correta!)
             for seller_name in ['Jemima', 'Maiany', 'Nadia']:
-                # Consulta para somar todos os totais de DailySales no período
-                # 1. Buscar dados consolidados (DailySales) do período (excluindo o dia de hoje)
                 daily_sales = DailySales.query.filter(
                     DailySales.vendedor == seller_name,
                     DailySales.dia >= start_date,
-                    DailySales.dia < hoje # Exclui o dia de hoje
+                    DailySales.dia < hoje
                 ).all()
                 
                 total_consolidado = sum(ds.total for ds in daily_sales)
                 
-                # 2. Buscar dados em tempo real (Sale) para o dia de hoje
-                # O dia da semana de hoje (ex: 'monday')
                 today_weekday = hoje.strftime('%A').lower()
                 
-                # Busca a venda do dia de hoje para o vendedor
                 current_sale = Sale.query.filter_by(
                     employee_name=seller_name,
                     day=today_weekday,
-                    sheet_type='portabilidade' # Assumindo que a meta é baseada em portabilidade, como nas rotas /tv
+                    sheet_type='portabilidade'
                 ).first()
                 
                 valor_hoje = current_sale.value if current_sale else 0.0
-                
-                # 3. Total geral é a soma do consolidado + o valor em tempo real de hoje
                 total_geral = total_consolidado + valor_hoje
                 
-                # Para manter a compatibilidade com a estrutura original, definimos 0 para portabilidade e novo
-                # já que o DailySales armazena o total consolidado do dia para o vendedor.
-                # A meta feriado usa o total geral.
                 total_port = total_geral 
                 total_novo = 0 
                 
@@ -245,17 +232,15 @@ def create_app():
                     'total': total_geral
                 }
             
-            # Calcular meta restante e percentual
             meta_remaining = max(0, META_TOTAL - team_total)
             progress_percentage = min(100, (team_total / META_TOTAL) * 100)
             
-            # Formatar valores em moeda
             def format_currency(value):
                 return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
             
             return render_template(
                 'meta_feriado.html',
-                jemima_portabilidade=format_currency(sellers_data['Jemima']['portabilidade']),   # 👈 também corrigido aqui
+                jemima_portabilidade=format_currency(sellers_data['Jemima']['portabilidade']),
                 jemima_novo=format_currency(sellers_data['Jemima']['novo']),
                 jemima_total=format_currency(sellers_data['Jemima']['total']),
                 maiany_portabilidade=format_currency(sellers_data['Maiany']['portabilidade']),
@@ -282,7 +267,6 @@ def create_app():
             from models.user import User
             employees = User.query.filter_by(role='user').all()
 
-            # --- PORTABILIDADE ---
             dados_port = []
             for emp in employees:
                 nome = emp.username
@@ -301,7 +285,6 @@ def create_app():
 
             totais_port = {d: sum(l[d] for l in dados_port) for d in ["seg", "ter", "qua", "qui", "sex"]}
 
-            # --- NOVO ---
             dados_novo = []
             for emp in employees:
                 nome = emp.username
@@ -330,6 +313,38 @@ def create_app():
         except Exception as e:
             print(f"Erro ao carregar dados para /export_table: {e}")
             return f"Erro Interno do Servidor: {e}", 500
+
+    # ---------------------------
+    # 🔧 ROTA TEMPORÁRIA PARA CORRIGIR A TABELA 'sales' — NOVO
+    # ---------------------------
+    @app.route("/fix-sales-table")
+    def fix_sales_table():
+        if 'user' not in session:
+            return "❌ Acesso negado: faça login primeiro.", 403
+
+        from sqlalchemy import text
+        try:
+            db.session.execute(text("""
+                ALTER TABLE sales ADD COLUMN IF NOT EXISTS sheet_type VARCHAR(20) DEFAULT 'portabilidade';
+            """))
+            db.session.execute(text("""
+                ALTER TABLE sales DROP CONSTRAINT IF EXISTS uq_employee_day;
+            """))
+            db.session.execute(text("""
+                ALTER TABLE sales ADD CONSTRAINT uq_employee_day_sheet 
+                UNIQUE (employee_name, day, sheet_type);
+            """))
+            db.session.commit()
+            return """
+            ✅ Sucesso! A tabela 'sales' foi atualizada.<br>
+            • Coluna 'sheet_type' adicionada.<br>
+            • Restrição única corrigida.<br>
+            Agora a planilha 'NOVO' vai persistir os dados!<br>
+            <a href="/">← Voltar</a>
+            """, 200
+        except Exception as e:
+            db.session.rollback()
+            return f"❌ Erro ao corrigir a tabela: {str(e)}", 500
 
     # ---------------------------
     # Rotas estáticas / SPA
