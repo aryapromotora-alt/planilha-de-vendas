@@ -69,8 +69,8 @@ def change_employee_password():
 
 @user_bp.route('/users', methods=['GET'])
 def get_users():
-    # Retorna apenas usuários com role 'user' para o painel de funcionários
-    users = User.query.filter_by(role='user').all()
+    # Retorna apenas usuários com role 'user' para o painel de funcionários, ordenados
+    users = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()
     return jsonify([user.to_dict() for user in users])
 
 @user_bp.route('/users', methods=['POST'])
@@ -91,7 +91,10 @@ def create_user():
     if User.query.filter_by(username=username).first():
         return jsonify({"message": "Nome de usuário já existe"}), 409
 
-    user = User(username=username, email=email, role=role)
+    # Obter a maior ordem atual para colocar o novo usuário por último
+    max_order = db.session.query(db.func.max(User.order)).scalar() or 0
+    
+    user = User(username=username, email=email, role=role, order=max_order + 1)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()

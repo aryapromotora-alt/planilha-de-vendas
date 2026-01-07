@@ -8,7 +8,7 @@ data_bp = Blueprint('data', __name__)
 
 def load_data_from_db(sheet_type='portabilidade'):
     spreadsheetData = {}
-    employees = User.query.filter_by(role='user').all()
+    employees = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()
     for emp in employees:
         sales = Sale.query.filter_by(employee_name=emp.username, sheet_type=sheet_type).all()
         day_values = {sale.day: sale.value for sale in sales}
