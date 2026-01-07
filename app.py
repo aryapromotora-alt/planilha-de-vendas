@@ -109,7 +109,7 @@ def create_app():
         try:
             from models.sales import Sale
             from models.user import User
-            employees = User.query.filter_by(role='user').all()
+            employees = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()
             dados = []
             for emp in employees:
                 nome = emp.username
@@ -147,7 +147,7 @@ def create_app():
         try:
             from models.sales import Sale
             from models.user import User
-            employees = User.query.filter_by(role='user').all()
+            employees = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()
             dados = []
             for emp in employees:
                 nome = emp.username
@@ -265,7 +265,7 @@ def create_app():
         try:
             from models.sales import Sale
             from models.user import User
-            employees = User.query.filter_by(role='user').all()
+            employees = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()
 
             dados_port = []
             for emp in employees:

@@ -67,6 +67,23 @@ with app.app_context():
         print(f"❌ Erro ao verificar/criar coluna 'role': {e}")
         exit(1)
 
+    # 3.1 Garante que a coluna 'order' exista
+    try:
+        result = db.session.execute(text("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'user' AND column_name = 'order';
+        """))
+        if not result.fetchone():
+            print("⚠️ Coluna 'order' não encontrada. Adicionando...")
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN "order" INTEGER DEFAULT 0;'))
+            db.session.commit()
+            print("✅ Coluna 'order' adicionada.")
+        else:
+            print("✅ Coluna 'order' já existe.")
+    except Exception as e:
+        print(f"❌ Erro ao verificar/criar coluna 'order': {e}")
+        exit(1)
+
     # 4. Garante que a coluna 'sheet_type' exista na tabela 'sales'
     sheet_type_exists = False
     try:
