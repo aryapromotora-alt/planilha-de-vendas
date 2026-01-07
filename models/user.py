@@ -9,6 +9,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=True)
     password = db.Column(db.String(256), nullable=False)  # ← ALTERADO DE 128 PARA 256
     role = db.Column(db.String(20), default="user")  # "user" ou "admin"
+    order = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -24,5 +25,6 @@ class User(db.Model):
             'id': self.id,
             'username': self.username,
             'email': self.email,
-            'role': self.role
+            'role': self.role,
+            'order': self.order
         }
