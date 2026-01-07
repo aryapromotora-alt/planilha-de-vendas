@@ -6,6 +6,9 @@ let spreadsheetDataPortabilidade = {};
 let spreadsheetDataNovo = {};
 let currentSheet = null; // 'portabilidade' ou 'novo'
 
+// ✅ Nova variável: controla a ordem de exibição (frontend-only)
+let employeeDisplayOrder = []; // Array de usernames na ordem desejada
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
@@ -19,7 +22,25 @@ async function initializeApp() {
             fetch('/api/data?type=novo', { credentials: 'include' }).then(r => r.json())
         ]);
 
-        employees = dataPort.employees || dataNovo.employees || [];
+        const incomingEmployees = dataPort.employees || dataNovo.employees || [];
+
+        // ✅ Preserva ordem existente e adiciona novos no final
+        if (employeeDisplayOrder.length === 0) {
+            // Primeira carga: inicializa com a ordem recebida (ordem atual é mantida!)
+            employeeDisplayOrder = incomingEmployees.map(emp => emp.username);
+        } else {
+            // Recarga (ex: após adicionar vendedor): mantém ordem atual + novos no final
+            const existingSet = new Set(employeeDisplayOrder);
+            const newOnly = incomingEmployees.filter(emp => !existingSet.has(emp.username));
+            employeeDisplayOrder.push(...newOnly.map(emp => emp.username));
+        }
+
+        // ✅ Reordena employees para bater com employeeDisplayOrder
+        const empMap = {};
+        incomingEmployees.forEach(emp => empMap[emp.username] = emp);
+        employees = employeeDisplayOrder
+            .map(username => empMap[username])
+            .filter(Boolean); // remove undefined (caso algum tenha sido removido)
 
         spreadsheetDataPortabilidade = dataPort.spreadsheetData || {};
         spreadsheetDataNovo = dataNovo.spreadsheetData || {};
@@ -36,6 +57,7 @@ async function initializeApp() {
     } catch (error) {
         console.error('Erro ao carregar dados do servidor:', error);
         employees = [];
+        employeeDisplayOrder = [];
         spreadsheetDataPortabilidade = {};
         spreadsheetDataNovo = {};
     }
@@ -73,6 +95,19 @@ async function pollServerData() {
 
         if (response.ok) {
             const newData = await response.json();
+            const incomingEmployees = newData.employees || [];
+
+            // ✅ Mantém ordem existente e adiciona novos no final
+            const existingSet = new Set(employeeDisplayOrder);
+            const newOnly = incomingEmployees.filter(emp => !existingSet.has(emp.username));
+            employeeDisplayOrder.push(...newOnly.map(emp => emp.username));
+
+            // ✅ Atualiza employees na ordem correta
+            const empMap = {};
+            incomingEmployees.forEach(emp => empMap[emp.username] = emp);
+            employees = employeeDisplayOrder
+                .map(username => empMap[username])
+                .filter(Boolean);
 
             if (currentSheet === 'novo') {
                 spreadsheetDataNovo = newData.spreadsheetData || {};
@@ -189,6 +224,7 @@ async function handleLogout() {
     currentUser = null;
     isAdmin = false;
     currentSheet = null;
+    employeeDisplayOrder = []; // ✅ Limpa ao sair
     document.getElementById('login-section').style.display = 'flex';
     document.getElementById('dashboard-section').style.display = 'none';
     document.getElementById('main-section').style.display = 'none';
@@ -390,7 +426,7 @@ function formatCurrency(value) {
     });
 }
 
-// ====== Funções de Admin (sem alterações críticas) ======
+// ====== Funções de Admin ======
 async function showAdminPanel() {
     await loadEmployeesForAdmin();
     document.getElementById('admin-section').style.display = 'block';
@@ -413,8 +449,15 @@ async function loadEmployeesForAdmin() {
     try {
         const response = await fetch('/api/users', { credentials: 'include' });
         if (response.ok) {
-            adminEmployees = await response.json();
-            adminEmployees = adminEmployees.filter(emp => emp.role === 'user');
+            const allUsers = await response.json();
+            adminEmployees = allUsers.filter(emp => emp.role === 'user');
+
+            // ✅ Reordena adminEmployees para bater com employeeDisplayOrder
+            const empMap = {};
+            adminEmployees.forEach(emp => empMap[emp.username] = emp);
+            adminEmployees = employeeDisplayOrder
+                .map(username => empMap[username])
+                .filter(Boolean);
         } else {
             adminEmployees = [];
         }
@@ -469,7 +512,7 @@ async function handleAddEmployee(e) {
         });
         const data = await response.json();
         if (response.ok) {
-            await initializeApp();
+            await initializeApp(); // ← Recarrega mantendo ordem + novo no final
             renderEmployeeManagement();
             if (currentSheet) showSheet(currentSheet);
             document.getElementById('add-employee-form').reset();
@@ -491,6 +534,11 @@ async function removeEmployee(employeeId, employeeName) {
                 credentials: 'include'
             });
             if (response.ok) {
+                // ✅ Remove do employeeDisplayOrder também
+                const index = employeeDisplayOrder.indexOf(employeeName);
+                if (index !== -1) {
+                    employeeDisplayOrder.splice(index, 1);
+                }
                 await initializeApp();
                 renderEmployeeManagement();
                 if (currentSheet) showSheet(currentSheet);
