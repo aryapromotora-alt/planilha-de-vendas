@@ -2,12 +2,12 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Visão TV - Resumo de Vendas</title>
+  <title>Visão TV - NOVO</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="60"> <!-- Atualiza a cada 60 segundos -->
+  <meta http-equiv="refresh" content="60">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* Reset e configurações gerais */
+    /* Seu CSS, sem alterações */
     * {
         margin: 0;
         padding: 0;
@@ -45,7 +45,7 @@
         width: 100%;
         height: 100%;
         border-collapse: collapse;
-        font-size: 1.8rem; /* Levemente ajustado para caber melhor */
+        font-size: 1.8rem;
         font-weight: 500;
         color: #ffffff;
         margin: 0 auto;
@@ -54,11 +54,11 @@
     table.spreadsheet-table th {
         background-color: #2c3e50;
         color: #FFD700;
-        padding: 1.0rem 0.5rem; /* AJUSTADO: Padding vertical e horizontal reduzido */
+        padding: 1.0rem 0.5rem;
         text-align: center;
         font-weight: 700;
         text-transform: uppercase;
-        font-size: 1.5rem; /* Levemente ajustado */
+        font-size: 1.5rem;
         letter-spacing: 0.8px;
         border-bottom: 2px solid #FFD700;
         position: sticky;
@@ -67,14 +67,14 @@
     }
 
     table.spreadsheet-table td {
-        padding: 1.0rem 0.5rem; /* AJUSTADO: Padding vertical e horizontal reduzido */
+        padding: 1.0rem 0.5rem;
         text-align: center;
         border-bottom: 1px solid #333;
         transition: background-color 0.2s;
         font-weight: 500;
     }
     
-    table.spreadsheet-table td:nth-child(n+2 ):nth-child(-n+6) {
+    table.spreadsheet-table td:nth-child(n+2):nth-child(-n+6) {
         border-left: 1px solid #FFD700;
         border-right: 1px solid #FFD700;
     }
@@ -96,7 +96,7 @@
         color: #FFD700 !important;
         font-weight: 700;
         text-align: left;
-        padding-left: 1.0rem; /* AJUSTADO */
+        padding-left: 1.0rem;
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         text-transform: uppercase;
     }
@@ -134,33 +134,114 @@
           <th>Total</th>
         </tr>
       </thead>
-      <tbody>
-        {% for linha in dados %}
-        <tr>
-          <td class="employee-name">{{ linha.nome }}</td>
-          <td>R$ {{ linha.seg | format_brl }}</td>
-          <td>R$ {{ linha.ter | format_brl }}</td>
-          <td>R$ {{ linha.qua | format_brl }}</td>
-          <td>R$ {{ linha.qui | format_brl }}</td>
-          <td>R$ {{ linha.sex | format_brl }}</td>
-          <td class="total-cell">R$ {{ linha.total | format_brl }}</td>
-        </tr>
-        {% endfor %}
-
-        <!-- Linha de Total Diário -->
-        <tr class="daily-totals">
-          <td><strong>Total Diário</strong></td>
-          <td>R$ {{ totais_diarios.seg | format_brl }}</td>
-          <td>R$ {{ totais_diarios.ter | format_brl }}</td>
-          <td>R$ {{ totais_diarios.qua | format_brl }}</td>
-          <td>R$ {{ totais_diarios.qui | format_brl }}</td>
-          <td>R$ {{ totais_diarios.sex | format_brl }}</td>
-          <td class="total-cell">R$ {{
-            (totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex) | format_brl
-          }}</td>
-        </tr>
+      <tbody id="tv-tbody">
+        <!-- Dados carregados via JS -->
       </tbody>
     </table>
   </div>
+
+  <script>
+    // ✅ Ordem desejada — mantenha esta lista atualizada
+    // Coloque os vendedores na ordem EXATA que você quer (ex: como está hoje na TV)
+    // Novos devem ser adicionados no FINAL
+    const employeeDisplayOrder = [
+      "Vendedor1",
+      "Vendedor2",
+      "Vendedor3",
+      "Vendedor4"
+      // ⚠️ ATUALIZE ESTA LISTA quando adicionar/remover vendedores
+    ];
+
+    // Formatação BRL
+    function formatBRL(value) {
+      return parseFloat(value || 0).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    // Carrega e renderiza dados da aba "NOVO"
+    async function loadAndRenderData() {
+      try {
+        // ✅ Busca só os dados de "novo"
+        const response = await fetch('/api/data?type=novo', { credentials: 'include' });
+        if (!response.ok) throw new Error('Falha ao carregar dados');
+        
+        const data = await response.json();
+        const employees = data.employees || [];
+        const spreadsheetData = data.spreadsheetData || {};
+
+        // ✅ Prepara dados por vendedor
+        const dados = {};
+        employees.forEach(emp => {
+          const user = emp.username;
+          const vals = spreadsheetData[user] || {};
+          dados[user] = {
+            nome: user,
+            seg: vals.monday || 0,
+            ter: vals.tuesday || 0,
+            qua: vals.wednesday || 0,
+            qui: vals.thursday || 0,
+            sex: vals.friday || 0
+          };
+          dados[user].total = dados[user].seg + dados[user].ter +
+                             dados[user].qua + dados[user].qui + dados[user].sex;
+        });
+
+        // ✅ Calcula totais diários
+        const dias = ['seg', 'ter', 'qua', 'qui', 'sex'];
+        const totais = { seg: 0, ter: 0, qua: 0, qui: 0, sex: 0 };
+        dias.forEach(dia => {
+          totais[dia] = employees.reduce((sum, emp) => {
+            return sum + (dados[emp.username]?.[dia] || 0);
+          }, 0);
+        });
+
+        // ✅ Renderiza na ordem de employeeDisplayOrder
+        const tbody = document.getElementById('tv-tbody');
+        tbody.innerHTML = '';
+
+        employeeDisplayOrder.forEach(username => {
+          const linha = dados[username];
+          if (!linha) return;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="employee-name">${linha.nome}</td>
+            <td>R$ ${formatBRL(linha.seg)}</td>
+            <td>R$ ${formatBRL(linha.ter)}</td>
+            <td>R$ ${formatBRL(linha.qua)}</td>
+            <td>R$ ${formatBRL(linha.qui)}</td>
+            <td>R$ ${formatBRL(linha.sex)}</td>
+            <td class="total-cell">R$ ${formatBRL(linha.total)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // ✅ Linha de total
+        const totalGeral = totais.seg + totais.ter + totais.qua + totais.qui + totais.sex;
+        const totalRow = document.createElement('tr');
+        totalRow.className = 'daily-totals';
+        totalRow.innerHTML = `
+          <td><strong>Total Diário</strong></td>
+          <td>R$ ${formatBRL(totais.seg)}</td>
+          <td>R$ ${formatBRL(totais.ter)}</td>
+          <td>R$ ${formatBRL(totais.qua)}</td>
+          <td>R$ ${formatBRL(totais.qui)}</td>
+          <td>R$ ${formatBRL(totais.sex)}</td>
+          <td class="total-cell">R$ ${formatBRL(totalGeral)}</td>
+        `;
+        tbody.appendChild(totalRow);
+
+      } catch (error) {
+        console.error('Erro ao carregar dados para TV (NOVO):', error);
+        setTimeout(loadAndRenderData, 5000); // tenta novamente
+      }
+    }
+
+    // Inicia e agenda atualizações
+    loadAndRenderData();
+    setInterval(loadAndRenderData, 60000); // a cada 60s
+  </script>
 </body>
 </html>

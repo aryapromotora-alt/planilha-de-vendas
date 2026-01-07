@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <title>Visão TV - Resumo de Vendas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="60"> <!-- Atualiza a cada 60 segundos -->
+  <meta http-equiv="refresh" content="60"> <!-- Mantém atualização automática -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* Reset e configurações gerais */
+    /* ... seu CSS igual, sem alterações ... */
     * {
         margin: 0;
         padding: 0;
@@ -64,7 +64,6 @@
         position: sticky;
         top: 0;
         z-index: 5;
-        /* Brilho nível 2 */
         text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
     }
 
@@ -100,7 +99,6 @@
         text-align: left;
         padding-left: 1.0rem;
         text-transform: uppercase;
-        /* Brilho nível 2 */
         text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
     }
 
@@ -109,7 +107,6 @@
         font-weight: 600;
         color: #FFB347 !important;
         border-left: 2px solid #FFB347;
-        /* Brilho nível 2 */
         text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
     }
 
@@ -123,7 +120,6 @@
         color: #FFB347 !important;
         font-weight: 600;
         background-color: #0A0A0A !important;
-        /* Brilho nível 2 */
         text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
     }
   </style>
@@ -142,33 +138,119 @@
           <th>Total</th>
         </tr>
       </thead>
-      <tbody>
-        {% for linha in dados %}
-        <tr>
-          <td class="employee-name">{{ linha.nome }}</td>
-          <td>R$ {{ linha.seg | format_brl }}</td>
-          <td>R$ {{ linha.ter | format_brl }}</td>
-          <td>R$ {{ linha.qua | format_brl }}</td>
-          <td>R$ {{ linha.qui | format_brl }}</td>
-          <td>R$ {{ linha.sex | format_brl }}</td>
-          <td class="total-cell">R$ {{ linha.total | format_brl }}</td>
-        </tr>
-        {% endfor %}
-
-        <!-- Linha de Total Diário -->
-        <tr class="daily-totals">
-          <td><strong>Total Diário</strong></td>
-          <td>R$ {{ totais_diarios.seg | format_brl }}</td>
-          <td>R$ {{ totais_diarios.ter | format_brl }}</td>
-          <td>R$ {{ totais_diarios.qua | format_brl }}</td>
-          <td>R$ {{ totais_diarios.qui | format_brl }}</td>
-          <td>R$ {{ totais_diarios.sex | format_brl }}</td>
-          <td class="total-cell">R$ {{
-            (totais_diarios.seg + totais_diarios.ter + totais_diarios.qua + totais_diarios.qui + totais_diarios.sex) | format_brl
-          }}</td>
-        </tr>
+      <tbody id="tv-tbody">
+        <!-- Dados serão inseridos aqui via JS -->
       </tbody>
     </table>
   </div>
+
+  <script>
+    // ✅ Configurações: ordem inicial dos vendedores (mantém a ordem atual da sua TV)
+    // Substitua esta lista pela ordem que você quer (ex: como está hoje na TV)
+    // ⚠️ IMPORTANTE: atualize esta lista quando adicionar/remover vendedores
+    const employeeDisplayOrder = [
+      "Vendedor1",
+      "Vendedor2",
+      "Vendedor3",
+      "Vendedor4"
+      // ... adicione todos os vendedores na ordem desejada
+      // Novos devem ser adicionados no final
+    ];
+
+    // Função para formatar moeda (igual ao seu filtro Jinja2)
+    function formatBRL(value) {
+      return parseFloat(value || 0).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    // Função para carregar e renderizar dados
+    async function loadAndRenderData() {
+      try {
+        // ✅ Busca dados das duas abas (portabilidade e novo) e combina
+        const [dataPort, dataNovo] = await Promise.all([
+          fetch('/api/data?type=portabilidade', { credentials: 'include' }).then(r => r.json()),
+          fetch('/api/data?type=novo', { credentials: 'include' }).then(r => r.json())
+        ]);
+
+        const employees = dataPort.employees || dataNovo.employees || [];
+        const portData = dataPort.spreadsheetData || {};
+        const novoData = dataNovo.spreadsheetData || {};
+
+        // ✅ Cria mapa de dados combinados (soma PORTABILIDADE + NOVO por vendedor)
+        const combinedData = {};
+        employees.forEach(emp => {
+          const user = emp.username;
+          const port = portData[user] || {};
+          const novo = novoData[user] || {};
+          combinedData[user] = {
+            nome: user,
+            seg: (port.monday || 0) + (novo.monday || 0),
+            ter: (port.tuesday || 0) + (novo.tuesday || 0),
+            qua: (port.wednesday || 0) + (novo.wednesday || 0),
+            qui: (port.thursday || 0) + (novo.thursday || 0),
+            sex: (port.friday || 0) + (novo.friday || 0)
+          };
+          combinedData[user].total = combinedData[user].seg + combinedData[user].ter +
+                                   combinedData[user].qua + combinedData[user].qui + combinedData[user].sex;
+        });
+
+        // ✅ Calcula totais diários (soma de todos os vendedores)
+        const dias = ['seg', 'ter', 'qua', 'qui', 'sex'];
+        const totais = { seg: 0, ter: 0, qua: 0, qui: 0, sex: 0 };
+        dias.forEach(dia => {
+          totais[dia] = employees.reduce((sum, emp) => {
+            return sum + (combinedData[emp.username]?.[dia] || 0);
+          }, 0);
+        });
+
+        // ✅ Renderiza linhas na ordem de employeeDisplayOrder
+        const tbody = document.getElementById('tv-tbody');
+        tbody.innerHTML = '';
+
+        employeeDisplayOrder.forEach(username => {
+          const linha = combinedData[username];
+          if (!linha) return; // ignora se removido
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="employee-name">${linha.nome}</td>
+            <td>R$ ${formatBRL(linha.seg)}</td>
+            <td>R$ ${formatBRL(linha.ter)}</td>
+            <td>R$ ${formatBRL(linha.qua)}</td>
+            <td>R$ ${formatBRL(linha.qui)}</td>
+            <td>R$ ${formatBRL(linha.sex)}</td>
+            <td class="total-cell">R$ ${formatBRL(linha.total)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // ✅ Linha de total diário
+        const totalGeral = totais.seg + totais.ter + totais.qua + totais.qui + totais.sex;
+        const totalRow = document.createElement('tr');
+        totalRow.className = 'daily-totals';
+        totalRow.innerHTML = `
+          <td><strong>Total Diário</strong></td>
+          <td>R$ ${formatBRL(totais.seg)}</td>
+          <td>R$ ${formatBRL(totais.ter)}</td>
+          <td>R$ ${formatBRL(totais.qua)}</td>
+          <td>R$ ${formatBRL(totais.qui)}</td>
+          <td>R$ ${formatBRL(totais.sex)}</td>
+          <td class="total-cell">R$ ${formatBRL(totalGeral)}</td>
+        `;
+        tbody.appendChild(totalRow);
+
+      } catch (error) {
+        console.error('Erro ao carregar dados para TV:', error);
+        // Em caso de falha, recarrega em 5s (evita tela vazia)
+        setTimeout(loadAndRenderData, 5000);
+      }
+    }
+
+    // Carrega dados imediatamente e a cada 60s (mantém <meta refresh> como fallback)
+    loadAndRenderData();
+    setInterval(loadAndRenderData, 60000); // 60s
+  </script>
 </body>
 </html>
