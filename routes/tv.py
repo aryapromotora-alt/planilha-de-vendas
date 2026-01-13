@@ -1,6 +1,8 @@
+# routes/tv.py
+
 from flask import Blueprint, render_template
 from models.user import User
-from models.sales import Sale  # Usa o modelo Sale (com sheet_type)
+from models.sales import Sale
 from datetime import date
 
 tv_bp = Blueprint('tv', __name__)
@@ -8,7 +10,7 @@ tv_bp = Blueprint('tv', __name__)
 @tv_bp.route('/tv')
 def tv_view():
     """Exibe a planilha PORTABILIDADE na TV (sem login)"""
-    employees = User.query.filter_by(role='user').all()
+    employees = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()
     dados = []
     totais_diarios = {"seg": 0.0, "ter": 0.0, "qua": 0.0, "qui": 0.0, "sex": 0.0}
 
@@ -48,14 +50,14 @@ def tv_view():
 @tv_bp.route('/tv/novo')
 def tv_novo_view():
     """Exibe a planilha NOVO na TV (sem login)"""
-    employees = User.query.filter_by(role='user').all()
+    employees = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()  # ← AQUI TAMBÉM!
     dados = []
     totais_diarios = {"seg": 0.0, "ter": 0.0, "qua": 0.0, "qui": 0.0, "sex": 0.0}
 
     for emp in employees:
         sales = Sale.query.filter_by(
             employee_name=emp.username,
-            sheet_type='novo'  # ← Apenas muda aqui!
+            sheet_type='novo'
         ).all()
         day_values = {sale.day: sale.value for sale in sales}
 
