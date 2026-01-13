@@ -136,31 +136,37 @@
 
     <script>
         function updateClock() {
-            const now = new Date();
+            try {
+                const now = new Date();
 
-            // Converter para UTC e aplicar offset fixo de -3h (Horário de Brasília sem DST)
-            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const brasiliaTime = new Date(utc + (-3 * 3600000)); // -3 horas em milissegundos
+                // Converter para UTC e aplicar offset fixo de -3h (Horário de Brasília sem DST)
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const brasiliaTime = new Date(utc + (-3 * 3600000)); // -3 horas em milissegundos
 
-            const hours = String(brasiliaTime.getUTCH hours()).padStart(2, '0');
-            const minutes = String(brasiliaTime.getUTCMinutes()).padStart(2, '0');
-            const seconds = String(brasiliaTime.getUTCSeconds()).padStart(2, '0');
-            const timeString = `${hours}:${minutes}:${seconds}`;
+                const hours = String(brasiliaTime.getUTCHours()).padStart(2, '0');
+                const minutes = String(brasiliaTime.getUTCMinutes()).padStart(2, '0');
+                const seconds = String(brasiliaTime.getUTCSeconds()).padStart(2, '0');
+                const timeString = `${hours}:${minutes}:${seconds}`;
 
-            // Formatar a data em português, usando a data ajustada
-            const weekdays = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
-            const months = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+                // Formatar data manualmente (evitar problemas com toLocaleDateString em TVs)
+                const weekdays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+                const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
-            const day = brasiliaTime.getUTCDate();
-            const month = months[brasiliaTime.getUTCMonth()];
-            const year = brasiliaTime.getUTCFullYear();
-            const weekday = weekdays[brasiliaTime.getUTCDay()];
+                const day = brasiliaTime.getUTCDate();
+                const month = months[brasiliaTime.getUTCMonth()];
+                const year = brasiliaTime.getUTCFullYear();
+                const weekday = weekdays[brasiliaTime.getUTCDay()];
 
-            const dateString = `${weekday}, ${day} de ${month} de ${year}`;
-            const capitalizedDate = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+                const dateString = `${weekday}, ${day} de ${month} de ${year}`;
 
-            document.getElementById('time').textContent = timeString;
-            document.getElementById('date').textContent = capitalizedDate;
+                document.getElementById('time').textContent = timeString;
+                document.getElementById('date').textContent = dateString;
+
+            } catch (error) {
+                console.error("Erro ao atualizar relógio:", error);
+                document.getElementById('time').textContent = "ERRO";
+                document.getElementById('date').textContent = "Verifique configurações";
+            }
         }
 
         async function updateWeather() {
