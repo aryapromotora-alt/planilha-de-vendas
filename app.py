@@ -10,6 +10,7 @@ from routes.user import user_bp
 from routes.data import data_bp
 from routes.archive import archive_bp
 from routes.resumo import resumo_bp  # dashboard
+from routes.tv import tv_bp
 
 
 def create_app():
@@ -83,6 +84,7 @@ def create_app():
     app.register_blueprint(data_bp, url_prefix="/api")
     app.register_blueprint(archive_bp, url_prefix="/archive")
     app.register_blueprint(resumo_bp)
+    app.register_blueprint(tv_bp)
 
     # ---------------------------
     # Filtro Jinja moeda brasileira
@@ -177,12 +179,7 @@ def create_app():
             print(f"Erro ao carregar dados para /tv/novo: {e}")
             return f"Erro Interno do Servidor: {e}", 500
 
-    # ---------------------------
-    # Rota pública /tv/clima (INFORMATIVO)
-    # ---------------------------
-    @app.route("/tv/clima")
-    def tv_clima():
-        return render_template("clima.html")
+
 
     # ---------------------------
     # Rota pública /meta-feriado (META FERIADO 21/11)
