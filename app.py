@@ -178,6 +178,13 @@ def create_app():
             return f"Erro Interno do Servidor: {e}", 500
 
     # ---------------------------
+    # Rota pública /tv/clima (INFORMATIVO)
+    # ---------------------------
+    @app.route("/tv/clima")
+    def tv_clima():
+        return render_template("clima.html")
+
+    # ---------------------------
     # Rota pública /meta-feriado (META FERIADO 21/11)
     # ---------------------------
     @app.route("/meta-feriado")
