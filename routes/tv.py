@@ -83,3 +83,9 @@ def tv_novo_view():
         totais_diarios["sex"] += sex
 
     return render_template('tv_novo.html', dados=dados, totais_diarios=totais_diarios)
+
+
+@tv_bp.route('/tv/clima')
+def tv_clima_view():
+    """Exibe o clima na TV (sem login)"""
+    return render_template('clima.html')
