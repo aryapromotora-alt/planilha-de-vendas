@@ -136,36 +136,37 @@
 
     <script>
         function updateClock() {
+            const now = new Date();
+
             try {
-                const now = new Date();
+                const timeString = now.toLocaleTimeString('pt-BR', {
+                    timeZone: 'America/Sao_Paulo',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
 
-                // Converter para UTC e aplicar offset fixo de -3h (Horário de Brasília sem DST)
-                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-                const brasiliaTime = new Date(utc + (-3 * 3600000)); // -3 horas em milissegundos
+                let dateString = now.toLocaleDateString('pt-BR', {
+                    timeZone: 'America/Sao_Paulo',
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
 
-                const hours = String(brasiliaTime.getUTCHours()).padStart(2, '0');
-                const minutes = String(brasiliaTime.getUTCMinutes()).padStart(2, '0');
-                const seconds = String(brasiliaTime.getUTCSeconds()).padStart(2, '0');
-                const timeString = `${hours}:${minutes}:${seconds}`;
-
-                // Formatar data manualmente (evitar problemas com toLocaleDateString em TVs)
-                const weekdays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-                const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
-                const day = brasiliaTime.getUTCDate();
-                const month = months[brasiliaTime.getUTCMonth()];
-                const year = brasiliaTime.getUTCFullYear();
-                const weekday = weekdays[brasiliaTime.getUTCDay()];
-
-                const dateString = `${weekday}, ${day} de ${month} de ${year}`;
+                // Capitaliza a primeira letra (ex: "quarta-feira" → "Quarta-feira")
+                dateString = dateString.charAt(0).toUpperCase() + dateString.slice(1);
 
                 document.getElementById('time').textContent = timeString;
                 document.getElementById('date').textContent = dateString;
-
-            } catch (error) {
-                console.error("Erro ao atualizar relógio:", error);
-                document.getElementById('time').textContent = "ERRO";
-                document.getElementById('date').textContent = "Verifique configurações";
+            } catch (e) {
+                // Fallback para dispositivos MUITO antigos (sem suporte a timeZone)
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                const s = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('time').textContent = `${h}:${m}:${s}`;
+                document.getElementById('date').textContent = "Horário local (sem fuso)";
             }
         }
 
@@ -214,12 +215,11 @@
             }
         }
 
-        // Inicializa e agenda atualizações
         updateClock();
         setInterval(updateClock, 1000);
         updateWeather();
-        setInterval(updateWeather, 600000); // a cada 10 minutos
-        setTimeout(() => { window.location.reload(); }, 300000); // recarrega a cada 5 minutos
+        setInterval(updateWeather, 600000);
+        setTimeout(() => { window.location.reload(); }, 300000);
     </script>
 </body>
 </html>
