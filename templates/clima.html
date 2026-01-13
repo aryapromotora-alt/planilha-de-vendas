@@ -23,91 +23,101 @@
             justify-content: space-between;
             align-items: center;
             overflow: hidden;
-            padding: 40px;
+            padding: 30px;
         }
 
         .top-section {
             text-align: center;
             width: 100%;
+            max-width: 1200px;
         }
 
         .logo {
-            max-width: 400px;
-            margin-bottom: 20px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(255, 179, 71, 0.2);
+            max-width: 220px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(255, 179, 71, 0.2);
         }
 
         .clock-container {
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         #time {
-            font-size: 12rem;
+            font-size: 8rem;
             font-weight: 700;
             color: #FFB347;
             line-height: 1;
-            text-shadow: 0 0 30px rgba(255, 179, 71, 0.4);
+            text-shadow: 0 0 20px rgba(255, 179, 71, 0.4);
         }
 
         #date {
-            font-size: 3.5rem;
+            font-size: 2.4rem;
             font-weight: 300;
             color: #cccccc;
             text-transform: capitalize;
+            margin-top: 8px;
         }
 
         .weather-container {
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 30px;
-            padding: 40px 60px;
+            border-radius: 24px;
+            padding: 28px 40px;
             width: 90%;
-            max-width: 1200px;
+            max-width: 1000px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             border: 1px solid rgba(255, 179, 71, 0.3);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
         }
 
         .weather-item {
             text-align: center;
+            min-width: 280px;
         }
 
         .temp-main {
-            font-size: 8rem;
+            font-size: 5.5rem;
             font-weight: 700;
             color: #ffffff;
         }
 
         .weather-desc {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: #FFB347;
             text-transform: capitalize;
-            margin-top: -10px;
+            margin-top: -6px;
         }
 
         .weather-details {
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: #aaaaaa;
             text-align: left;
+            line-height: 1.6;
         }
 
         .location {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: #FFB347;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 700;
         }
 
-        .weather-icon {
-            width: 150px;
-            height: 150px;
+        #loading {
+            font-size: 1.8rem;
+            color: #FFB347;
         }
 
-        #loading {
-            font-size: 2rem;
-            color: #FFB347;
+        @media (max-width: 1920px) {
+            #time { font-size: 8rem; }
+            .temp-main { font-size: 5.5rem; }
+        }
+
+        @media (max-width: 1366px) {
+            #time { font-size: 6rem; }
+            .temp-main { font-size: 4.5rem; }
+            .logo { max-width: 180px; }
         }
     </style>
 </head>
@@ -122,37 +132,31 @@
 
     <div class="weather-container" id="weather-box">
         <div id="loading">Carregando previsão do tempo...</div>
-        <!-- Conteúdo será inserido via JS -->
     </div>
 
     <script>
         function updateClock() {
             const now = new Date();
-            
-            // Hora
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             
-            // Data
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('date').textContent = now.toLocaleDateString('pt-BR', options);
         }
 
         async function updateWeather() {
-            const lat = -23.5333; // Vila Matilde aprox
+            const lat = -23.5333;
             const lon = -46.5333;
             
             try {
-                // Usando a API do Open-Meteo (gratuita e sem chave)
                 const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code&timezone=America%2FSao_Paulo`);
                 const data = await response.json();
                 
                 const current = data.current;
                 const weatherBox = document.getElementById('weather-box');
                 
-                // Mapeamento simplificado de códigos de clima para descrições em PT-BR
                 const weatherCodes = {
                     0: "Céu Limpo",
                     1: "Principalmente Limpo", 2: "Parcialmente Nublado", 3: "Nublado",
@@ -174,25 +178,23 @@
                         <div class="weather-desc">${desc}</div>
                     </div>
                     <div class="weather-details">
-                        <p>Sensação: ${Math.round(current.apparent_temperature)}°C</p>
-                        <p>Umidade: ${current.relative_humidity_2m}%</p>
-                        <p style="color: ${isRaining ? '#ff4444' : '#44ff44'}; margin-top: 10px;">${rainText}</p>
+                        <p style="font-size: 2rem; color: #ffffff; margin: 0 0 5px 0;">Sensação: ${Math.round(current.apparent_temperature)}°C</p>
+                        <p style="font-size: 2rem; color: #ffffff; margin: 0 0 10px 0;">Umidade: ${current.relative_humidity_2m}%</p>
+                        <p style="color: ${isRaining ? '#ff4444' : '#44ff44'}; font-size: 1.8rem; margin: 0; font-weight: 700;">
+                            ${rainText}
+                        </p>
                     </div>
                 `;
             } catch (error) {
                 console.error("Erro ao buscar clima:", error);
-                document.getElementById('loading').textContent = "Erro ao carregar clima. Verifique a conexão.";
+                document.getElementById('loading').textContent = "Erro ao carregar clima.";
             }
         }
 
-        // Inicialização
         setInterval(updateClock, 1000);
         updateClock();
-        
         updateWeather();
-        setInterval(updateWeather, 600000); // Atualiza clima a cada 10 min
-        
-        // Recarrega a página a cada 5 minutos para manter sincronia com o servidor
+        setInterval(updateWeather, 600000);
         setTimeout(() => { window.location.reload(); }, 300000);
     </script>
 </body>
