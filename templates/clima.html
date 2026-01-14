@@ -3,122 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="300"> <!-- Atualiza a cada 5 minutos -->
     <title>Informativo - Arya Promotora</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #0a0a0a;
-            color: #ffffff;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            overflow: hidden;
-            padding: 30px;
-        }
-
-        .top-section {
-            text-align: center;
-            width: 100%;
-            max-width: 1200px;
-        }
-
-        .logo {
-            max-width: 220px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(255, 179, 71, 0.2);
-        }
-
-        .clock-container {
-            margin-top: 15px;
-        }
-
-        #time {
-            font-size: 8rem;
-            font-weight: 700;
-            color: #FFB347;
-            line-height: 1;
-            text-shadow: 0 0 20px rgba(255, 179, 71, 0.4);
-        }
-
-        #date {
-            font-size: 2.4rem;
-            font-weight: 300;
-            color: #cccccc;
-            text-transform: capitalize;
-            margin-top: 8px;
-        }
-
-        .weather-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            padding: 28px 40px;
-            width: 90%;
-            max-width: 1000px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border: 1px solid rgba(255, 179, 71, 0.3);
-            backdrop-filter: blur(8px);
-        }
-
-        .weather-item {
-            text-align: center;
-            min-width: 280px;
-        }
-
-        .temp-main {
-            font-size: 5.5rem;
-            font-weight: 700;
-            color: #ffffff;
-        }
-
-        .weather-desc {
-            font-size: 2rem;
-            color: #FFB347;
-            text-transform: capitalize;
-            margin-top: -6px;
-        }
-
-        .weather-details {
-            font-size: 1.8rem;
-            color: #aaaaaa;
-            text-align: left;
-            line-height: 1.6;
-        }
-
-        .location {
-            font-size: 1.6rem;
-            color: #FFB347;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        #loading {
-            font-size: 1.8rem;
-            color: #FFB347;
-        }
-
-        @media (max-width: 1920px) {
-            #time { font-size: 8rem; }
-            .temp-main { font-size: 5.5rem; }
-        }
-
-        @media (max-width: 1366px) {
-            #time { font-size: 6rem; }
-            .temp-main { font-size: 4.5rem; }
-            .logo { max-width: 180px; }
-        }
+        /* Seu CSS original permanece aqui, sem alterações */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: #0a0a0a; color: #ffffff; height: 100vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center; overflow: hidden; padding: 30px; }
+        .top-section { text-align: center; width: 100%; max-width: 1200px; }
+        .logo { max-width: 220px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 179, 71, 0.2 ); }
+        .clock-container { margin-top: 15px; }
+        #time { font-size: 8rem; font-weight: 700; color: #FFB347; line-height: 1; text-shadow: 0 0 20px rgba(255, 179, 71, 0.4); }
+        #date { font-size: 2.4rem; font-weight: 300; color: #cccccc; text-transform: capitalize; margin-top: 8px; }
+        .weather-container { background: rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 28px 40px; width: 90%; max-width: 1000px; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255, 179, 71, 0.3); backdrop-filter: blur(8px); }
+        .weather-item { text-align: center; min-width: 280px; }
+        .temp-main { font-size: 5.5rem; font-weight: 700; color: #ffffff; }
+        .weather-desc { font-size: 2rem; color: #FFB347; text-transform: capitalize; margin-top: -6px; }
+        .weather-details { font-size: 1.8rem; color: #aaaaaa; text-align: left; line-height: 1.6; }
+        .location { font-size: 1.6rem; color: #FFB347; margin-bottom: 8px; font-weight: 700; }
+        #loading { font-size: 1.8rem; color: #FFB347; }
+        @media (max-width: 1920px) { #time { font-size: 8rem; } .temp-main { font-size: 5.5rem; } }
+        @media (max-width: 1366px) { #time { font-size: 6rem; } .temp-main { font-size: 4.5rem; } .logo { max-width: 180px; } }
     </style>
 </head>
 <body>
@@ -137,17 +41,12 @@
     <script>
         function updateClock() {
             const now = new Date();
-
-            // Força o horário de São Paulo (UTC-3)
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const saoPauloTime = new Date(utc - (3 * 3600000)); // UTC-3
-
+            const saoPauloTime = new Date(utc - (3 * 3600000));
             const h = String(saoPauloTime.getHours()).padStart(2, '0');
             const m = String(saoPauloTime.getMinutes()).padStart(2, '0');
             const s = String(saoPauloTime.getSeconds()).padStart(2, '0');
-
             document.getElementById('time').textContent = `${h}:${m}:${s}`;
-
             const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             let dateString = saoPauloTime.toLocaleDateString('pt-BR', options);
             dateString = dateString.charAt(0).toUpperCase() + dateString.slice(1);
@@ -157,59 +56,81 @@
         async function updateWeather() {
             const lat = -23.5333;
             const lon = -46.5333;
-            
+            // Chave da API OpenWeatherMap já adicionada
+            const apiKey = 'ee60a5b81a7eb26554d26d3892694d8e'; 
+            const weatherBox = document.getElementById('weather-box');
+
             try {
-                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code&timezone=America%2FSao_Paulo`);
+                // 1. Tenta usar a API OpenWeatherMap (mais precisa para chuva em tempo real)
+                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br` );
+                if (!response.ok) throw new Error('OpenWeatherMap falhou, tentando backup.');
+                
                 const data = await response.json();
                 
-                const current = data.current;
-                const weatherBox = document.getElementById('weather-box');
-                
-                const weatherCodes = {
-                    0: "Céu Limpo",
-                    1: "Principalmente Limpo", 2: "Parcialmente Nublado", 3: "Nublado",
-                    45: "Nevoeiro", 48: "Nevoeiro com geada",
-                    51: "Drizzle Leve", 53: "Drizzle Moderado", 55: "Drizzle Denso",
-                    61: "Chuva Leve", 63: "Chuva Moderada", 65: "Chuva Forte",
-                    80: "Pancadas de Chuva Leves", 81: "Pancadas de Chuva Moderadas", 82: "Pancadas de Chuva Fortes",
-                    95: "Trovoada", 96: "Trovoada com Granizo Leve", 99: "Trovoada com Granizo Forte"
-                };
-
-                const desc = weatherCodes[current.weather_code] || "Tempo Estável";
-
-                // Nova lógica: considera precipitação OU códigos de chuva/trovoada
-                const rainingCodes = [61,63,65,80,81,82,95,96,99];
-                const isRaining = current.precipitation > 0 || rainingCodes.includes(current.weather_code);
-
-                const rainText = isRaining 
-                    ? `⚠️ Chuva detectada (${current.precipitation}mm)` 
-                    : "Sem previsão de chuva agora";
+                const isRaining = data.weather[0].main.toLowerCase().includes('rain') || data.weather[0].main.toLowerCase().includes('drizzle') || data.weather[0].main.toLowerCase().includes('thunderstorm');
+                const rainText = isRaining ? `⚠️ Chuva detectada` : "Sem previsão de chuva agora";
 
                 weatherBox.innerHTML = `
                     <div class="weather-item">
                         <div class="location">VILA MATILDE, SP</div>
-                        <div class="temp-main">${Math.round(current.temperature_2m)}°C</div>
-                        <div class="weather-desc">${desc}</div>
+                        <div class="temp-main">${Math.round(data.main.temp)}°C</div>
+                        <div class="weather-desc">${data.weather[0].description}</div>
                     </div>
                     <div class="weather-details">
-                        <p style="font-size: 2rem; color: #ffffff; margin: 0 0 5px 0;">Sensação: ${Math.round(current.apparent_temperature)}°C</p>
-                        <p style="font-size: 2rem; color: #ffffff; margin: 0 0 10px 0;">Umidade: ${current.relative_humidity_2m}%</p>
+                        <p style="font-size: 2rem; color: #ffffff; margin: 0 0 5px 0;">Sensação: ${Math.round(data.main.feels_like)}°C</p>
+                        <p style="font-size: 2rem; color: #ffffff; margin: 0 0 10px 0;">Umidade: ${data.main.humidity}%</p>
                         <p style="color: ${isRaining ? '#ff4444' : '#44ff44'}; font-size: 1.8rem; margin: 0; font-weight: 700;">
-                            ${rainText}
+                            ${rainText} <span style="font-size: 0.8em; color: #999;">(OWM)</span>
                         </p>
                     </div>
                 `;
+
             } catch (error) {
-                console.error("Erro ao buscar clima:", error);
-                document.getElementById('loading').textContent = "Erro ao carregar clima.";
+                console.warn(error.message); // Avisa sobre a falha e continua para o backup
+                // 2. Se OpenWeatherMap falhar, usa a Open-Meteo como backup
+                try {
+                    const backupResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code&timezone=America%2FSao_Paulo` );
+                    const data = await backupResponse.json();
+                    
+                    const current = data.current;
+                    const weatherCodes = { 0: "Céu Limpo", 1: "Principalmente Limpo", 2: "Parcialmente Nublado", 3: "Nublado", 45: "Nevoeiro", 48: "Nevoeiro com geada", 51: "Garoa Leve", 53: "Garoa Moderada", 55: "Garoa Densa", 61: "Chuva Leve", 63: "Chuva Moderada", 65: "Chuva Forte", 80: "Pancadas Leves", 81: "Pancadas Moderadas", 82: "Pancadas Fortes", 95: "Trovoada", 96: "Trovoada com Granizo Leve", 99: "Trovoada com Granizo Forte" };
+                    const desc = weatherCodes[current.weather_code] || "Tempo Estável";
+
+                    const rainingCodes = [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99];
+                    const isRaining = current.precipitation > 0 || rainingCodes.includes(current.weather_code);
+                    const rainText = isRaining ? `⚠️ Chuva detectada (${current.precipitation}mm)` : "Sem previsão de chuva agora";
+
+                    weatherBox.innerHTML = `
+                        <div class="weather-item">
+                            <div class="location">VILA MATILDE, SP</div>
+                            <div class="temp-main">${Math.round(current.temperature_2m)}°C</div>
+                            <div class="weather-desc">${desc}</div>
+                        </div>
+                        <div class="weather-details">
+                            <p style="font-size: 2rem; color: #ffffff; margin: 0 0 5px 0;">Sensação: ${Math.round(current.apparent_temperature)}°C</p>
+                            <p style="font-size: 2rem; color: #ffffff; margin: 0 0 10px 0;">Umidade: ${current.relative_humidity_2m}%</p>
+                            <p style="color: ${isRaining ? '#ff4444' : '#44ff44'}; font-size: 1.8rem; margin: 0; font-weight: 700;">
+                                ${rainText} <span style="font-size: 0.8em; color: #999;">(OM)</span>
+                            </p>
+                        </div>
+                    `;
+                } catch (backupError) {
+                    console.error("Erro ao buscar clima em ambas as APIs:", backupError);
+                    weatherBox.innerHTML = `<div id="loading">Erro ao carregar o clima. Verifique a conexão.</div>`;
+                }
             }
         }
 
+        // --- Inicialização ---
         updateClock();
         setInterval(updateClock, 1000);
+        
         updateWeather();
-        setInterval(updateWeather, 600000);
-        setTimeout(() => { window.location.reload(); }, 300000);
+        // Atualiza o clima a cada 5 minutos (300.000 ms)
+        setInterval(updateWeather, 300000); 
+        
+        // Recarrega a página a cada 1 hora (3.600.000 ms) para evitar problemas de memória
+        setTimeout(() => { window.location.reload(); }, 3600000);
     </script>
 </body>
 </html>
