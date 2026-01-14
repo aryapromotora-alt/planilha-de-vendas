@@ -176,8 +176,14 @@
                 };
 
                 const desc = weatherCodes[current.weather_code] || "Tempo Estável";
-                const isRaining = current.precipitation > 0;
-                const rainText = isRaining ? `⚠️ Possibilidade de Chuva (${current.precipitation}mm)` : "Sem previsão de chuva agora";
+
+                // Nova lógica: considera precipitação OU códigos de chuva/trovoada
+                const rainingCodes = [61,63,65,80,81,82,95,96,99];
+                const isRaining = current.precipitation > 0 || rainingCodes.includes(current.weather_code);
+
+                const rainText = isRaining 
+                    ? `⚠️ Chuva detectada (${current.precipitation}mm)` 
+                    : "Sem previsão de chuva agora";
 
                 weatherBox.innerHTML = `
                     <div class="weather-item">
