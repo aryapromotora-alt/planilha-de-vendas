@@ -132,8 +132,8 @@ function setupEventListeners() {
     document.getElementById('btn-novo')?.addEventListener('click', () => showSheet('novo'));
     document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
     document.getElementById('logout-btn-novo')?.addEventListener('click', handleLogout);
-    // document.getElementById('back-to-dashboard-from-port')?.addEventListener('click', showDashboard);
-    // document.getElementById('back-to-dashboard-from-novo')?.addEventListener('click', showDashboard);
+    document.getElementById('back-to-dashboard-from-port')?.addEventListener('click', showDashboard);
+    document.getElementById('back-to-dashboard-from-novo')?.addEventListener('click', showDashboard);
     document.getElementById('admin-panel-btn')?.addEventListener('click', showAdminPanel);
     document.getElementById('admin-panel-btn-novo')?.addEventListener('click', showAdminPanel);
     document.getElementById('back-to-main')?.addEventListener('click', () => {
@@ -207,6 +207,7 @@ function showDashboard() {
 
 function showSheet(sheetType) {
     currentSheet = sheetType;
+    document.getElementById('login-section').style.display = 'none';
     document.getElementById('dashboard-section').style.display = 'none';
     document.getElementById('admin-section').style.display = 'none';
 
