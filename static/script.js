@@ -47,7 +47,7 @@ async function initializeApp() {
             if (sessionData.logged_in) {
                 currentUser = sessionData.user;
                 isAdmin = sessionData.is_admin;
-                showDashboard();
+                showSheet('portabilidade');
                 return;
             }
         }
@@ -132,8 +132,8 @@ function setupEventListeners() {
     document.getElementById('btn-novo')?.addEventListener('click', () => showSheet('novo'));
     document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
     document.getElementById('logout-btn-novo')?.addEventListener('click', handleLogout);
-    document.getElementById('back-to-dashboard-from-port')?.addEventListener('click', showDashboard);
-    document.getElementById('back-to-dashboard-from-novo')?.addEventListener('click', showDashboard);
+    // document.getElementById('back-to-dashboard-from-port')?.addEventListener('click', showDashboard);
+    // document.getElementById('back-to-dashboard-from-novo')?.addEventListener('click', showDashboard);
     document.getElementById('admin-panel-btn')?.addEventListener('click', showAdminPanel);
     document.getElementById('admin-panel-btn-novo')?.addEventListener('click', showAdminPanel);
     document.getElementById('back-to-main')?.addEventListener('click', () => {
@@ -169,7 +169,7 @@ async function handleLogin(e) {
         if (data.success) {
             currentUser = data.user;
             isAdmin = data.is_admin;
-            showDashboard();
+            showSheet('portabilidade');
         } else {
             showMessage(data.message || 'Erro no login', 'error');
         }
