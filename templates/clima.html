@@ -6,7 +6,7 @@
     <title>Informativo - Arya Promotora</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* Seu CSS original permanece aqui, sem alterações */
+        /* Estilos originais mantidos */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Roboto', sans-serif; background-color: #0a0a0a; color: #ffffff; height: 100vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center; overflow: hidden; padding: 30px; }
         .top-section { text-align: center; width: 100%; max-width: 1200px; }
@@ -56,19 +56,42 @@
         async function updateWeather() {
             const lat = -23.5333;
             const lon = -46.5333;
-            // Chave da API OpenWeatherMap já adicionada
             const apiKey = 'ee60a5b81a7eb26554d26d3892694d8e'; 
             const weatherBox = document.getElementById('weather-box');
 
             try {
-                // 1. Tenta usar a API OpenWeatherMap (mais precisa para chuva em tempo real)
-                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br` );
-                if (!response.ok) throw new Error('OpenWeatherMap falhou, tentando backup.');
+                // Tenta OpenWeatherMap primeiro
+                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br`);
+                if (!response.ok) throw new Error('OpenWeatherMap indisponível');
                 
                 const data = await response.json();
                 
-                const isRaining = data.weather[0].main.toLowerCase().includes('rain') || data.weather[0].main.toLowerCase().includes('drizzle') || data.weather[0].main.toLowerCase().includes('thunderstorm');
+                // Lógica de detecção de chuva aprimorada
+                // 1. Pelo código/descrição principal
+                let isRaining = data.weather[0].main.toLowerCase().includes('rain') || 
+                                data.weather[0].main.toLowerCase().includes('drizzle') || 
+                                data.weather[0].main.toLowerCase().includes('thunderstorm');
+                
+                // 2. Pelo volume de chuva (se existir o objeto 'rain')
+                let rainVolume = 0;
+                if (data.rain) {
+                    rainVolume = data.rain['1h'] || data.rain['3h'] || 0;
+                    if (rainVolume > 0) isRaining = true;
+                }
+
+                // 3. Cruzamento com Open-Meteo (Backup em tempo real)
+                // Se o OWM disser que não chove, mas o usuário diz que sim, vamos conferir a precipitação na Open-Meteo
+                const backupResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=precipitation,weather_code&timezone=America%2FSao_Paulo`);
+                if (backupResponse.ok) {
+                    const backupData = await backupResponse.json();
+                    if (backupData.current.precipitation > 0 || [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(backupData.current.weather_code)) {
+                        isRaining = true;
+                        if (rainVolume === 0) rainVolume = backupData.current.precipitation;
+                    }
+                }
+
                 const rainText = isRaining ? `⚠️ Chuva detectada` : "Sem previsão de chuva agora";
+                const rainColor = isRaining ? '#ff4444' : '#44ff44';
 
                 weatherBox.innerHTML = `
                     <div class="weather-item">
@@ -79,57 +102,52 @@
                     <div class="weather-details">
                         <p style="font-size: 2rem; color: #ffffff; margin: 0 0 5px 0;">Sensação: ${Math.round(data.main.feels_like)}°C</p>
                         <p style="font-size: 2rem; color: #ffffff; margin: 0 0 10px 0;">Umidade: ${data.main.humidity}%</p>
-                        <p style="color: ${isRaining ? '#ff4444' : '#44ff44'}; font-size: 1.8rem; margin: 0; font-weight: 700;">
-                            ${rainText} <span style="font-size: 0.8em; color: #999;">(OWM)</span>
+                        <p style="color: ${rainColor}; font-size: 1.8rem; margin: 0; font-weight: 700;">
+                            ${rainText} ${rainVolume > 0 ? `(${rainVolume}mm)` : ''}
                         </p>
                     </div>
                 `;
 
             } catch (error) {
-                console.warn(error.message); // Avisa sobre a falha e continua para o backup
-                // 2. Se OpenWeatherMap falhar, usa a Open-Meteo como backup
-                try {
-                    const backupResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code&timezone=America%2FSao_Paulo` );
-                    const data = await backupResponse.json();
-                    
-                    const current = data.current;
-                    const weatherCodes = { 0: "Céu Limpo", 1: "Principalmente Limpo", 2: "Parcialmente Nublado", 3: "Nublado", 45: "Nevoeiro", 48: "Nevoeiro com geada", 51: "Garoa Leve", 53: "Garoa Moderada", 55: "Garoa Densa", 61: "Chuva Leve", 63: "Chuva Moderada", 65: "Chuva Forte", 80: "Pancadas Leves", 81: "Pancadas Moderadas", 82: "Pancadas Fortes", 95: "Trovoada", 96: "Trovoada com Granizo Leve", 99: "Trovoada com Granizo Forte" };
-                    const desc = weatherCodes[current.weather_code] || "Tempo Estável";
-
-                    const rainingCodes = [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99];
-                    const isRaining = current.precipitation > 0 || rainingCodes.includes(current.weather_code);
-                    const rainText = isRaining ? `⚠️ Chuva detectada (${current.precipitation}mm)` : "Sem previsão de chuva agora";
-
-                    weatherBox.innerHTML = `
-                        <div class="weather-item">
-                            <div class="location">VILA MATILDE, SP</div>
-                            <div class="temp-main">${Math.round(current.temperature_2m)}°C</div>
-                            <div class="weather-desc">${desc}</div>
-                        </div>
-                        <div class="weather-details">
-                            <p style="font-size: 2rem; color: #ffffff; margin: 0 0 5px 0;">Sensação: ${Math.round(current.apparent_temperature)}°C</p>
-                            <p style="font-size: 2rem; color: #ffffff; margin: 0 0 10px 0;">Umidade: ${current.relative_humidity_2m}%</p>
-                            <p style="color: ${isRaining ? '#ff4444' : '#44ff44'}; font-size: 1.8rem; margin: 0; font-weight: 700;">
-                                ${rainText} <span style="font-size: 0.8em; color: #999;">(OM)</span>
-                            </p>
-                        </div>
-                    `;
-                } catch (backupError) {
-                    console.error("Erro ao buscar clima em ambas as APIs:", backupError);
-                    weatherBox.innerHTML = `<div id="loading">Erro ao carregar o clima. Verifique a conexão.</div>`;
-                }
+                console.error("Erro na atualização do clima:", error);
+                // Se tudo falhar, tenta o fallback completo da Open-Meteo
+                fetchOpenMeteoFallback(lat, lon, weatherBox);
             }
         }
 
-        // --- Inicialização ---
+        async function fetchOpenMeteoFallback(lat, lon, container) {
+            try {
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code&timezone=America%2FSao_Paulo`);
+                const data = await response.json();
+                const current = data.current;
+                
+                const weatherCodes = { 0: "Céu Limpo", 1: "Principalmente Limpo", 2: "Parcialmente Nublado", 3: "Nublado", 45: "Nevoeiro", 48: "Nevoeiro com geada", 51: "Garoa Leve", 53: "Garoa Moderada", 55: "Garoa Densa", 61: "Chuva Leve", 63: "Chuva Moderada", 65: "Chuva Forte", 80: "Pancadas Leves", 81: "Pancadas Moderadas", 82: "Pancadas Fortes", 95: "Trovoada", 96: "Trovoada com Granizo Leve", 99: "Trovoada com Granizo Forte" };
+                const desc = weatherCodes[current.weather_code] || "Tempo Estável";
+                const isRaining = current.precipitation > 0 || [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(current.weather_code);
+                
+                container.innerHTML = `
+                    <div class="weather-item">
+                        <div class="location">VILA MATILDE, SP</div>
+                        <div class="temp-main">${Math.round(current.temperature_2m)}°C</div>
+                        <div class="weather-desc">${desc}</div>
+                    </div>
+                    <div class="weather-details">
+                        <p style="font-size: 2rem; color: #ffffff; margin: 0 0 5px 0;">Sensação: ${Math.round(current.apparent_temperature)}°C</p>
+                        <p style="font-size: 2rem; color: #ffffff; margin: 0 0 10px 0;">Umidade: ${current.relative_humidity_2m}%</p>
+                        <p style="color: ${isRaining ? '#ff4444' : '#44ff44'}; font-size: 1.8rem; margin: 0; font-weight: 700;">
+                            ${isRaining ? '⚠️ Chuva detectada' : 'Sem previsão de chuva agora'} ${current.precipitation > 0 ? `(${current.precipitation}mm)` : ''}
+                        </p>
+                    </div>
+                `;
+            } catch (e) {
+                container.innerHTML = `<div id="loading">Erro ao carregar clima.</div>`;
+            }
+        }
+
         updateClock();
         setInterval(updateClock, 1000);
-        
         updateWeather();
-        // Atualiza o clima a cada 5 minutos (300.000 ms)
         setInterval(updateWeather, 300000); 
-        
-        // Recarrega a página a cada 1 hora (3.600.000 ms) para evitar problemas de memória
         setTimeout(() => { window.location.reload(); }, 3600000);
     </script>
 </body>
