@@ -37,6 +37,7 @@ class DailySales(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vendedor = db.Column(db.String(100), nullable=False)
     dia = db.Column(db.Date, default=date.today, nullable=False)
+    sheet_type = db.Column(db.String(20), default='portabilidade')
 
     segunda = db.Column(db.Float, default=0.0)
     terca = db.Column(db.Float, default=0.0)
@@ -55,6 +56,7 @@ class DailySales(db.Model):
             "id": self.id,
             "vendedor": self.vendedor,
             "dia": self.dia.isoformat(),
+            "sheet_type": self.sheet_type,
             "segunda": self.segunda,
             "terca": self.terca,
             "quarta": self.quarta,
