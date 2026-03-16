@@ -57,19 +57,35 @@ def create_app():
     with app.app_context():
         db.create_all()
         from sqlalchemy import text
-        try:
-            result = db.session.execute(text("""
-                SELECT column_name FROM information_schema.columns 
-                WHERE table_name = 'user' AND column_name = 'password';
-            """))
-            if not result.fetchone():
-                db.session.execute(text('ALTER TABLE "user" ADD COLUMN password VARCHAR(128) NOT NULL DEFAULT \'\';'))
-                db.session.commit()
-                print("✅ Coluna 'password' adicionada à tabela 'user'.")
-            else:
-                print("✅ Coluna 'password' já existe.")
-        except Exception as e:
-            print(f"⚠️ Erro ao verificar/criar coluna 'password': {e}")
+        
+        def add_column_if_not_exists(table, column, type_def):
+            try:
+                # Verifica se a coluna existe (compatível com SQLite e PostgreSQL)
+                if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
+                    result = db.session.execute(text(f"PRAGMA table_info({table})"))
+                    columns = [row[1] for row in result.fetchall()]
+                else:
+                    result = db.session.execute(text(f"""
+                        SELECT column_name FROM information_schema.columns 
+                        WHERE table_name = '{table}' AND column_name = '{column}';
+                    """))
+                    columns = [row[0] for row in result.fetchall()]
+                
+                if column not in columns:
+                    db.session.execute(text(f'ALTER TABLE "{table}" ADD COLUMN {column} {type_def};'))
+                    db.session.commit()
+                    print(f"✅ Coluna '{column}' adicionada à tabela '{table}'.")
+                else:
+                    print(f"✅ Coluna '{column}' já existe na tabela '{table}'.")
+            except Exception as e:
+                db.session.rollback()
+                print(f"⚠️ Erro ao adicionar coluna '{column}' em '{table}': {e}")
+
+        # Migrações necessárias
+        add_column_if_not_exists('user', 'password', "VARCHAR(128) NOT NULL DEFAULT ''")
+        add_column_if_not_exists('sales', 'sheet_type', "VARCHAR(20) DEFAULT 'portabilidade'")
+        add_column_if_not_exists('daily_sales', 'sheet_type', "VARCHAR(20) DEFAULT 'portabilidade'")
+        
         print("✅ Tabelas do banco verificadas/criadas com sucesso.")
 
     # ---------------------------
@@ -279,20 +295,24 @@ def create_app():
             employees = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()
             
             # Buscar todas as semanas disponíveis no histórico
-            available_weeks_raw = db.session.query(DailySales.dia).distinct().order_by(DailySales.dia.desc()).all()
             available_weeks = []
-            seen_weeks = set()
-            
-            for d in available_weeks_raw:
-                # Encontrar a segunda-feira daquela semana
-                monday = d[0] - timedelta(days=d[0].weekday())
-                if monday not in seen_weeks:
-                    friday = monday + timedelta(days=4)
-                    available_weeks.append({
-                        "start": monday.isoformat(),
-                        "label": f"{monday.strftime('%d/%m/%Y')} a {friday.strftime('%d/%m/%Y')}"
-                    })
-                    seen_weeks.add(monday)
+            try:
+                available_weeks_raw = db.session.query(DailySales.dia).distinct().order_by(DailySales.dia.desc()).all()
+                seen_weeks = set()
+                
+                for d in available_weeks_raw:
+                    # Encontrar a segunda-feira daquela semana
+                    monday = d[0] - timedelta(days=d[0].weekday())
+                    if monday not in seen_weeks:
+                        friday = monday + timedelta(days=4)
+                        available_weeks.append({
+                            "start": monday.isoformat(),
+                            "label": f"{monday.strftime('%d/%m/%Y')} a {friday.strftime('%d/%m/%Y')}"
+                        })
+                        seen_weeks.add(monday)
+            except Exception as e:
+                db.session.rollback()
+                print(f"Erro ao carregar semanas disponíveis: {e}")
 
             is_history = False
             selected_week_label = "Semana Atual"
