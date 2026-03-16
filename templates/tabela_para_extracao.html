@@ -164,8 +164,25 @@
 <body>
   <div class="header-info">
     <h1>📊 Resumo de Vendas por Vendedor</h1>
-    <div class="date-info">Período: Segunda a Sexta-feira</div>
+    <div class="date-info">Período: {{ selected_week_label }}</div>
     <div class="date-info">Gerado em: <span id="current-date"></span></div>
+    
+    <div style="margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; display: inline-block; border: 1px solid #dee2e6;">
+      <label for="week-selector" style="font-weight: bold; margin-right: 10px;">Selecionar Histórico Semanal:</label>
+      <select id="week-selector" onchange="changeWeek(this.value)" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px;">
+        <option value="">Semana Atual (Tempo Real)</option>
+        {% for week in available_weeks %}
+        <option value="{{ week.start }}" {% if current_week == week.start %}selected{% endif %}>
+          {{ week.label }}
+        </option>
+        {% endfor %}
+      </select>
+      {% if is_history %}
+      <div style="margin-top: 8px; color: #dc3545; font-size: 12px; font-weight: bold;">
+        ⚠️ Visualizando dados históricos (não editáveis)
+      </div>
+      {% endif %}
+    </div>
   </div>
 
   <!-- Seção PORTABILIDADE -->
@@ -273,6 +290,16 @@
 
   <script>
     document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR');
+
+    function changeWeek(week) {
+        const url = new URL(window.location.href);
+        if (week) {
+            url.searchParams.set('week', week);
+        } else {
+            url.searchParams.delete('week');
+        }
+        window.location.href = url.toString();
+    }
 
     function exportTable(tableId, sheetName) {
         const table = document.getElementById(tableId).cloneNode(true);
