@@ -85,10 +85,9 @@ def resumo_archive():
 def daily_save():
     """
     Salva o estado atual da planilha no banco (DailySales).
-    Salva apenas o valor do dia atual da semana.
+    Salva apenas o valor do dia atual da semana para ambas as planilhas.
     """
-    data = load_data()
-    spreadsheet = data.get("spreadsheetData", {})
+    from routes.data import load_data_from_db
     
     # Mapeamento de dias da semana (0=segunda, 4=sexta)
     dias_semana = ["monday", "tuesday", "wednesday", "thursday", "friday"]
@@ -109,29 +108,50 @@ def daily_save():
     
     print(f"[INFO] Salvando daily-save para {nome_dia} ({today})")
     
-    total_dia = 0
-    for nome, valores in spreadsheet.items():
-        valor_dia = float(valores.get(campo_dia, 0) or 0)
-        total_dia += valor_dia
+    total_geral = 0
+    for sheet_type in ['portabilidade', 'novo']:
+        data = load_data_from_db(sheet_type)
+        spreadsheet = data.get("spreadsheetData", {})
         
-        record = DailySales(
-            vendedor=nome,
-            dia=today,
-            segunda=valor_dia if nome_dia == "segunda" else 0,
-            terca=valor_dia if nome_dia == "terca" else 0,
-            quarta=valor_dia if nome_dia == "quarta" else 0,
-            quinta=valor_dia if nome_dia == "quinta" else 0,
-            sexta=valor_dia if nome_dia == "sexta" else 0,
-            total=valor_dia
-        )
-        db.session.add(record)
+        for nome, valores in spreadsheet.items():
+            valor_dia = float(valores.get(campo_dia, 0) or 0)
+            total_geral += valor_dia
+            
+            # Verifica se já existe registro para este vendedor, dia e tipo de planilha
+            record = DailySales.query.filter_by(
+                vendedor=nome, 
+                dia=today, 
+                sheet_type=sheet_type
+            ).first()
+            
+            if record:
+                # Atualiza o valor do dia correspondente
+                if nome_dia == "segunda": record.segunda = valor_dia
+                elif nome_dia == "terca": record.terca = valor_dia
+                elif nome_dia == "quarta": record.quarta = valor_dia
+                elif nome_dia == "quinta": record.quinta = valor_dia
+                elif nome_dia == "sexta": record.sexta = valor_dia
+                record.total = valor_dia
+            else:
+                record = DailySales(
+                    vendedor=nome,
+                    dia=today,
+                    sheet_type=sheet_type,
+                    segunda=valor_dia if nome_dia == "segunda" else 0,
+                    terca=valor_dia if nome_dia == "terca" else 0,
+                    quarta=valor_dia if nome_dia == "quarta" else 0,
+                    quinta=valor_dia if nome_dia == "quinta" else 0,
+                    sexta=valor_dia if nome_dia == "sexta" else 0,
+                    total=valor_dia
+                )
+                db.session.add(record)
 
     db.session.commit()
     return jsonify({
         "status": "ok", 
         "date": today.isoformat(),
         "day": nome_dia,
-        "total": format_brl(total_dia)
+        "total": format_brl(total_geral)
     })
 
 # ---------------------------
