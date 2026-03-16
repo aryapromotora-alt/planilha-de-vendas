@@ -269,42 +269,108 @@ def create_app():
         try:
             from models.sales import Sale
             from models.user import User
-            employees = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()
+            from models.archive import DailySales
+            from flask import request
+            from datetime import datetime, timedelta
 
-            dados_port = []
-            for emp in employees:
-                nome = emp.username
-                sales = Sale.query.filter_by(employee_name=nome, sheet_type='portabilidade').all()
-                day_values = {s.day: s.value for s in sales}
-                linha = {
-                    "nome": nome,
-                    "seg": day_values.get("monday", 0),
-                    "ter": day_values.get("tuesday", 0),
-                    "qua": day_values.get("wednesday", 0),
-                    "qui": day_values.get("thursday", 0),
-                    "sex": day_values.get("friday", 0),
-                    "total": sum(day_values.get(d, 0) for d in ["monday", "tuesday", "wednesday", "thursday", "friday"])
-                }
-                dados_port.append(linha)
+            # Parâmetro de semana (formato YYYY-MM-DD da segunda-feira)
+            week_start_str = request.args.get('week')
+            
+            employees = User.query.filter_by(role='user').order_by(User.order.asc(), User.id.asc()).all()
+            
+            # Buscar todas as semanas disponíveis no histórico
+            available_weeks_raw = db.session.query(DailySales.dia).distinct().order_by(DailySales.dia.desc()).all()
+            available_weeks = []
+            seen_weeks = set()
+            
+            for d in available_weeks_raw:
+                # Encontrar a segunda-feira daquela semana
+                monday = d[0] - timedelta(days=d[0].weekday())
+                if monday not in seen_weeks:
+                    friday = monday + timedelta(days=4)
+                    available_weeks.append({
+                        "start": monday.isoformat(),
+                        "label": f"{monday.strftime('%d/%m/%Y')} a {friday.strftime('%d/%m/%Y')}"
+                    })
+                    seen_weeks.add(monday)
+
+            is_history = False
+            selected_week_label = "Semana Atual"
+
+            if week_start_str:
+                try:
+                    week_start = datetime.strptime(week_start_str, '%Y-%m-%d').date()
+                    week_end = week_start + timedelta(days=4)
+                    is_history = True
+                    selected_week_label = f"{week_start.strftime('%d/%m/%Y')} a {week_end.strftime('%d/%m/%Y')}"
+                    
+                    # Carregar dados do histórico (DailySales)
+                    def get_history_data(s_type):
+                        history_dados = []
+                        for emp in employees:
+                            # Buscar registros da semana para este vendedor e tipo
+                            records = DailySales.query.filter(
+                                DailySales.vendedor == emp.username,
+                                DailySales.sheet_type == s_type,
+                                DailySales.dia >= week_start,
+                                DailySales.dia <= week_end
+                            ).all()
+                            
+                            # Consolidar valores da semana (pode haver múltiplos registros por dia se salvou várias vezes, 
+                            # mas a lógica do daily_save agora atualiza)
+                            linha = {"nome": emp.username, "seg": 0, "ter": 0, "qua": 0, "qui": 0, "sex": 0, "total": 0}
+                            for r in records:
+                                linha["seg"] = max(linha["seg"], r.segunda)
+                                linha["ter"] = max(linha["ter"], r.terca)
+                                linha["qua"] = max(linha["qua"], r.quarta)
+                                linha["qui"] = max(linha["qui"], r.quinta)
+                                linha["sex"] = max(linha["sex"], r.sexta)
+                            
+                            linha["total"] = linha["seg"] + linha["ter"] + linha["qua"] + linha["qui"] + linha["sex"]
+                            history_dados.append(linha)
+                        return history_dados
+
+                    dados_port = get_history_data('portabilidade')
+                    dados_novo = get_history_data('novo')
+                except Exception as e:
+                    print(f"Erro ao processar data histórica: {e}")
+                    week_start_str = None # Fallback para atual
+
+            if not week_start_str:
+                # Lógica original para semana atual (dados em tempo real)
+                dados_port = []
+                for emp in employees:
+                    nome = emp.username
+                    sales = Sale.query.filter_by(employee_name=nome, sheet_type='portabilidade').all()
+                    day_values = {s.day: s.value for s in sales}
+                    linha = {
+                        "nome": nome,
+                        "seg": day_values.get("monday", 0),
+                        "ter": day_values.get("tuesday", 0),
+                        "qua": day_values.get("wednesday", 0),
+                        "qui": day_values.get("thursday", 0),
+                        "sex": day_values.get("friday", 0),
+                        "total": sum(day_values.get(d, 0) for d in ["monday", "tuesday", "wednesday", "thursday", "friday"])
+                    }
+                    dados_port.append(linha)
+
+                dados_novo = []
+                for emp in employees:
+                    nome = emp.username
+                    sales = Sale.query.filter_by(employee_name=nome, sheet_type='novo').all()
+                    day_values = {s.day: s.value for s in sales}
+                    linha = {
+                        "nome": nome,
+                        "seg": day_values.get("monday", 0),
+                        "ter": day_values.get("tuesday", 0),
+                        "qua": day_values.get("wednesday", 0),
+                        "qui": day_values.get("thursday", 0),
+                        "sex": day_values.get("friday", 0),
+                        "total": sum(day_values.get(d, 0) for d in ["monday", "tuesday", "wednesday", "thursday", "friday"])
+                    }
+                    dados_novo.append(linha)
 
             totais_port = {d: sum(l[d] for l in dados_port) for d in ["seg", "ter", "qua", "qui", "sex"]}
-
-            dados_novo = []
-            for emp in employees:
-                nome = emp.username
-                sales = Sale.query.filter_by(employee_name=nome, sheet_type='novo').all()
-                day_values = {s.day: s.value for s in sales}
-                linha = {
-                    "nome": nome,
-                    "seg": day_values.get("monday", 0),
-                    "ter": day_values.get("tuesday", 0),
-                    "qua": day_values.get("wednesday", 0),
-                    "qui": day_values.get("thursday", 0),
-                    "sex": day_values.get("friday", 0),
-                    "total": sum(day_values.get(d, 0) for d in ["monday", "tuesday", "wednesday", "thursday", "friday"])
-                }
-                dados_novo.append(linha)
-
             totais_novo = {d: sum(l[d] for l in dados_novo) for d in ["seg", "ter", "qua", "qui", "sex"]}
 
             return render_template(
@@ -312,7 +378,11 @@ def create_app():
                 dados_port=dados_port,
                 totais_port=totais_port,
                 dados_novo=dados_novo,
-                totais_novo=totais_novo
+                totais_novo=totais_novo,
+                available_weeks=available_weeks,
+                current_week=week_start_str,
+                is_history=is_history,
+                selected_week_label=selected_week_label
             )
         except Exception as e:
             print(f"Erro ao carregar dados para /export_table: {e}")

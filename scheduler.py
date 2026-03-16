@@ -25,8 +25,8 @@ def format_brl(value):
 def salvar_resumo_diario(app):
     with app.app_context():
         try:
-            data = load_data()
-            spreadsheet = data.get("spreadsheetData", {})
+            from routes.data import load_data_from_db
+            from models.archive import DailySales
 
             dias_semana = ["monday", "tuesday", "wednesday", "thursday", "friday"]
             nomes_dias = ["segunda", "terca", "quarta", "quinta", "sexta"]
@@ -44,31 +44,33 @@ def salvar_resumo_diario(app):
             print(f"[INFO] Salvando resumo diário para {nome_dia} ({hoje.date()})")
 
             today = hoje.date()
-            total_dia = 0
-            breakdown = {}
+            total_geral = 0
 
-            for nome, valores in spreadsheet.items():
-                valor_dia = float(valores.get(campo_dia, 0) or 0)
-                breakdown[nome] = valor_dia
-                total_dia += valor_dia
+            for sheet_type in ['portabilidade', 'novo']:
+                data = load_data_from_db(sheet_type)
+                spreadsheet = data.get("spreadsheetData", {})
 
-            try:
-                from models.archive import DailySales
                 for nome, valores in spreadsheet.items():
                     valor_dia = float(valores.get(campo_dia, 0) or 0)
+                    total_geral += valor_dia
                     
-                    # Tenta encontrar um registro existente para o vendedor e o dia
-                    record = DailySales.query.filter_by(vendedor=nome, dia=today).first()
+                    # Tenta encontrar um registro existente para o vendedor, dia e tipo
+                    record = DailySales.query.filter_by(vendedor=nome, dia=today, sheet_type=sheet_type).first()
                     
                     if record:
                         # Atualiza o registro existente
-                        setattr(record, nome_dia, valor_dia)
+                        if nome_dia == "segunda": record.segunda = valor_dia
+                        elif nome_dia == "terca": record.terca = valor_dia
+                        elif nome_dia == "quarta": record.quarta = valor_dia
+                        elif nome_dia == "quinta": record.quinta = valor_dia
+                        elif nome_dia == "sexta": record.sexta = valor_dia
                         record.total = valor_dia
                     else:
                         # Cria um novo registro se não existir
                         record = DailySales(
                             vendedor=nome,
                             dia=today,
+                            sheet_type=sheet_type,
                             segunda=valor_dia if nome_dia == "segunda" else 0,
                             terca=valor_dia if nome_dia == "terca" else 0,
                             quarta=valor_dia if nome_dia == "quarta" else 0,
@@ -77,21 +79,9 @@ def salvar_resumo_diario(app):
                             total=valor_dia
                         )
                         db.session.add(record)
-            except Exception as e:
-                print(f"[FALLBACK] Erro ao usar DailySales: {e}")
-                from models.archive import ResumoHistory
-                registro = ResumoHistory(
-                    week_label=f"Auto {today} - {nome_dia}",
-                    started_at=hoje,
-                    ended_at=hoje,
-                    total=total_dia,
-                    breakdown=breakdown,
-                    created_at=hoje
-                )
-                db.session.add(registro)
 
             db.session.commit()
-            print(f"[OK] Resumo diário salvo em {hoje} — Total: R$ {format_brl(total_dia)}")
+            print(f"[OK] Resumo diário salvo em {hoje} — Total Geral: R$ {format_brl(total_geral)}")
 
         except Exception as e:
             print(f"[ERRO] salvar_resumo_diario: {e}")
