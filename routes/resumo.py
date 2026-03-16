@@ -131,9 +131,12 @@ def resumo_page():
 
     # --- Histórico mensal completo para o <select> ---
     historico_mensal = defaultdict(float)
-    for r in DailySales.query.all():
-        chave = f"{r.dia.year}-{r.dia.month:02d}"
-        historico_mensal[chave] += r.total
+    try:
+        for r in DailySales.query.all():
+            chave = f"{r.dia.year}-{r.dia.month:02d}"
+            historico_mensal[chave] += r.total
+    except Exception as e:
+        print(f"Erro ao carregar histórico mensal: {e}")
     historico_mensal = dict(sorted(historico_mensal.items()))
 
     # --- Lista de anos e meses ---
